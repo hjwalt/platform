@@ -1,60 +1,83 @@
 package main
 
 import (
-	"bufio"
-	"errors"
-	"os"
+	"net/http"
+	"time"
 
+	"github.com/go-chi/chi/middleware"
+	"github.com/hjwalt/platform/domain"
 	"github.com/hjwalt/platform/model"
 	"github.com/hjwalt/platform/store"
-	"github.com/hjwalt/platform/write"
-	"github.com/hjwalt/runway/configuration"
-	"github.com/hjwalt/runway/format"
-	"github.com/hjwalt/runway/logger"
-	"go.uber.org/zap"
+	"github.com/hjwalt/platform/web"
+	"github.com/hjwalt/platform/web/component/component_home"
+	"github.com/hjwalt/platform/web/component/component_navbar"
+	"github.com/hjwalt/platform/web/component/component_sidebar"
+	"github.com/hjwalt/platform/web/page/page_base"
+	"github.com/hjwalt/platform/web/page/page_error_500"
+	"github.com/hjwalt/routes/runtime_chi"
+	"github.com/hjwalt/runway/runtime"
 )
 
 func main() {
 	storageFormat := store.Protojson[*model.ProtobufSchema]()
 
-	// storageFile := OpenFile(name, O_RDWR|O_CREATE|O_TRUNC, 0666)
-
-	conf, err := configuration.Read("model/protobuf.json", storageFormat)
+	conf, err := store.Read("model/protobuf.json", storageFormat)
 	if err != nil {
 		panic(err)
 	}
+	typeMap := domain.Parse(conf)
 
-	logger.Info("conf", zap.Any("conf", conf))
-
-	typeMap := Parse(conf)
-
-	Flatten(conf, typeMap)
-
-	Write("model/protobuf.json", storageFormat, conf)
-
-	protoFile, _ := os.Create("model/protobuf.proto")
-	defer protoFile.Close()
-
-	w := bufio.NewWriter(protoFile)
-	defer w.Flush()
-
-	write.WriteProtobufSchema(w, conf)
-
-}
-
-func Write[T any](file string, f format.Format[T], val T) error {
-	bytes, marshalErr := f.Marshal(val)
-	if marshalErr != nil {
-		return errors.Join(ErrWriteMarshal, marshalErr)
+	runtimeDecorator := web.DecoratorContext{
+		Schema:  conf,
+		TypeMap: typeMap,
 	}
 
-	writeErr := os.WriteFile(file, bytes, os.ModeExclusive)
-	if writeErr != nil {
-		return errors.Join(ErrWriteFail, writeErr)
+	httpRuntime := runtime_chi.New(
+		runtime_chi.WithPort[web.Context](3000),
+
+		runtime_chi.WithMiddleware[web.Context](middleware.RequestID),
+		runtime_chi.WithMiddleware[web.Context](middleware.RealIP),
+		// runtime_chi.WithMiddleware[web.Context](middleware.CleanPath),
+		runtime_chi.WithMiddleware[web.Context](middleware.Recoverer),
+
+		runtime_chi.WithDecorator[web.Context](runtimeDecorator.Decorate),
+		runtime_chi.WithDecorator[web.Context](web.DecoratorHtmx),
+
+		runtime_chi.WithStatic[web.Context]("/static/", "./web/static"),
+
+		domain.Page("/", http.MethodGet, page_base.Page, page_error_500.Error),
+
+		component_home.Get(),
+		component_sidebar.Get(),
+		component_navbar.Get(),
+	)
+
+	startErr := runtime.Start(
+		[]runtime.Runtime{
+			httpRuntime,
+		},
+		time.Second,
+	)
+
+	if startErr != nil {
+		panic(startErr)
 	}
 
-	return nil
-}
+	runtime.Wait()
 
-var ErrWriteMarshal = errors.New("cannot marshal value")
-var ErrWriteFail = errors.New("cannot write file")
+	// logger.Info("conf", zap.Any("conf", conf))
+
+	// logger.Info("test", zap.Bool("test", domain.InUse("Test", conf)))
+	// logger.Info("test", zap.Bool("test", domain.InUse("ProtobufMessage", conf)))
+
+	// domain.Flatten(conf, typeMap)
+	// store.Write("model/protobuf.json", storageFormat, conf)
+
+	// protoFile, _ := os.Create("model/protobuf.proto")
+	// defer protoFile.Close()
+
+	// w := bufio.NewWriter(protoFile)
+	// defer w.Flush()
+
+	// write.WriteProtobufSchema(w, conf)
+}
