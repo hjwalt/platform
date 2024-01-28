@@ -1,6 +1,11 @@
 package main
 
-import model "github.com/hjwalt/platform/model"
+import (
+	"cmp"
+	"slices"
+
+	model "github.com/hjwalt/platform/model"
+)
 
 func Parse(s *model.ProtobufSchema) map[string]*model.ProtobufType {
 	typeMap := map[string]*model.ProtobufType{}
@@ -20,4 +25,25 @@ func Flatten(s *model.ProtobufSchema, typeMap map[string]*model.ProtobufType) {
 	for _, t := range typeMap {
 		s.Types = append(s.Types, t)
 	}
+
+	slices.SortFunc(s.Types, func(a, b *model.ProtobufType) int {
+		an := ""
+		bn := ""
+
+		switch ac := a.Type.(type) {
+		case *model.ProtobufType_Message:
+			an = ac.Message.GetName()
+		case *model.ProtobufType_Enum:
+			an = ac.Enum.GetName()
+		}
+
+		switch bc := b.Type.(type) {
+		case *model.ProtobufType_Message:
+			bn = bc.Message.GetName()
+		case *model.ProtobufType_Enum:
+			bn = bc.Enum.GetName()
+		}
+
+		return cmp.Compare(an, bn)
+	})
 }

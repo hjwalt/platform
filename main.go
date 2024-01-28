@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/hjwalt/platform/model"
+	"github.com/hjwalt/platform/store"
 	"github.com/hjwalt/platform/write"
 	"github.com/hjwalt/runway/configuration"
 	"github.com/hjwalt/runway/format"
@@ -14,7 +15,9 @@ import (
 )
 
 func main() {
-	storageFormat := format.Protojson[*model.ProtobufSchema]()
+	storageFormat := store.Protojson[*model.ProtobufSchema]()
+
+	// storageFile := OpenFile(name, O_RDWR|O_CREATE|O_TRUNC, 0666)
 
 	conf, err := configuration.Read("model/protobuf.json", storageFormat)
 	if err != nil {
@@ -24,21 +27,6 @@ func main() {
 	logger.Info("conf", zap.Any("conf", conf))
 
 	typeMap := Parse(conf)
-
-	typeMap["ProtobufMessageField"] = ProtobufMessage(
-		"ProtobufMessageField",
-		[]*model.ProtobufMessageField{
-			ProtobufMessageOneofField(
-				"field",
-				[]*model.ProtobufMessageField{
-					ProtobufMessageBasicField("ProtobufMessageBasicField", "basic_field", 1),
-					ProtobufMessageBasicField("ProtobufMessageRepeatedField", "repeated_field", 2),
-					ProtobufMessageBasicField("ProtobufMessageMapField", "map_field", 3),
-					ProtobufMessageBasicField("ProtobufMessageOneofField", "oneof_field", 4),
-				},
-			),
-		},
-	)
 
 	Flatten(conf, typeMap)
 

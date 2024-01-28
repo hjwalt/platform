@@ -1,1 +1,279 @@
-{"package":"model","types":[{"message":{"name":"ProtobufMessageRepeatedField","fields":[{"basicField":{"index":"1","name":"index","typeName":"int64"}},{"basicField":{"index":"2","name":"name","typeName":"string"}},{"basicField":{"index":"3","name":"type_name","typeName":"string"}}]}},{"message":{"name":"ProtobufSchema","fields":[{"basicField":{"index":"1","name":"package","typeName":"string"}},{"repeatedField":{"index":"2","name":"types","typeName":"ProtobufType"}},{"basicField":{"index":"3","name":"go_package","typeName":"string"}}]}},{"message":{"name":"ProtobufMessageMapField","fields":[{"basicField":{"index":"1","name":"index","typeName":"int64"}},{"basicField":{"index":"2","name":"name","typeName":"string"}},{"basicField":{"index":"3","name":"key_type_name","typeName":"string"}},{"basicField":{"index":"4","name":"value_type_name","typeName":"string"}}]}},{"message":{"name":"ProtobufMessageOneofField","fields":[{"basicField":{"index":"1","name":"name","typeName":"string"}},{"repeatedField":{"index":"2","name":"fields","typeName":"ProtobufMessageField"}}]}},{"message":{"name":"ProtobufMessageField","fields":[{"oneofField":{"name":"field","fields":[{"basicField":{"index":"1","name":"basic_field","typeName":"ProtobufMessageBasicField"}},{"basicField":{"index":"2","name":"repeated_field","typeName":"ProtobufMessageRepeatedField"}},{"basicField":{"index":"3","name":"map_field","typeName":"ProtobufMessageMapField"}},{"basicField":{"index":"4","name":"oneof_field","typeName":"ProtobufMessageOneofField"}}]}}]}},{"message":{"name":"ProtobufMessageBasicField","fields":[{"basicField":{"index":"1","name":"index","typeName":"int64"}},{"basicField":{"index":"2","name":"name","typeName":"string"}},{"basicField":{"index":"3","name":"type_name","typeName":"string"}}]}},{"message":{"name":"ProtobufEnum","fields":[{"basicField":{"index":"1","name":"name","typeName":"string"}},{"repeatedField":{"index":"2","name":"fields","typeName":"ProtobufEnumItem"}}]}},{"message":{"name":"ProtobufEnumItem","fields":[{"basicField":{"index":"1","name":"index","typeName":"int64"}},{"basicField":{"index":"2","name":"name","typeName":"string"}}]}},{"message":{"name":"ProtobufType","fields":[{"oneofField":{"name":"type","fields":[{"basicField":{"index":"1","name":"message","typeName":"ProtobufMessage"}},{"basicField":{"index":"2","name":"enum","typeName":"ProtobufEnum"}}]}}]}},{"message":{"name":"ProtobufMessage","fields":[{"basicField":{"index":"1","name":"name","typeName":"string"}},{"repeatedField":{"index":"2","name":"fields","typeName":"ProtobufMessageField"}}]}}],"goPackage":"github.com/hjwalt/platform/model"}
+{
+  "package": "model",
+  "types": [
+    {
+      "message": {
+        "name": "ProtobufEnum",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "name",
+              "typeName": "string"
+            }
+          },
+          {
+            "repeatedField": {
+              "index": "2",
+              "name": "fields",
+              "typeName": "ProtobufEnumItem"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufEnumItem",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "index",
+              "typeName": "int64"
+            }
+          },
+          {
+            "basicField": {
+              "index": "2",
+              "name": "name",
+              "typeName": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufMessage",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "name",
+              "typeName": "string"
+            }
+          },
+          {
+            "repeatedField": {
+              "index": "2",
+              "name": "fields",
+              "typeName": "ProtobufMessageField"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufMessageBasicField",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "index",
+              "typeName": "int64"
+            }
+          },
+          {
+            "basicField": {
+              "index": "2",
+              "name": "name",
+              "typeName": "string"
+            }
+          },
+          {
+            "basicField": {
+              "index": "3",
+              "name": "type_name",
+              "typeName": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufMessageField",
+        "fields": [
+          {
+            "oneofField": {
+              "name": "field",
+              "fields": [
+                {
+                  "basicField": {
+                    "index": "1",
+                    "name": "basic_field",
+                    "typeName": "ProtobufMessageBasicField"
+                  }
+                },
+                {
+                  "basicField": {
+                    "index": "2",
+                    "name": "repeated_field",
+                    "typeName": "ProtobufMessageRepeatedField"
+                  }
+                },
+                {
+                  "basicField": {
+                    "index": "3",
+                    "name": "map_field",
+                    "typeName": "ProtobufMessageMapField"
+                  }
+                },
+                {
+                  "basicField": {
+                    "index": "4",
+                    "name": "oneof_field",
+                    "typeName": "ProtobufMessageOneofField"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufMessageMapField",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "index",
+              "typeName": "int64"
+            }
+          },
+          {
+            "basicField": {
+              "index": "2",
+              "name": "name",
+              "typeName": "string"
+            }
+          },
+          {
+            "basicField": {
+              "index": "3",
+              "name": "key_type_name",
+              "typeName": "string"
+            }
+          },
+          {
+            "basicField": {
+              "index": "4",
+              "name": "value_type_name",
+              "typeName": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufMessageOneofField",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "name",
+              "typeName": "string"
+            }
+          },
+          {
+            "repeatedField": {
+              "index": "2",
+              "name": "fields",
+              "typeName": "ProtobufMessageField"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufMessageRepeatedField",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "index",
+              "typeName": "int64"
+            }
+          },
+          {
+            "basicField": {
+              "index": "2",
+              "name": "name",
+              "typeName": "string"
+            }
+          },
+          {
+            "basicField": {
+              "index": "3",
+              "name": "type_name",
+              "typeName": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufSchema",
+        "fields": [
+          {
+            "basicField": {
+              "index": "1",
+              "name": "package",
+              "typeName": "string"
+            }
+          },
+          {
+            "repeatedField": {
+              "index": "2",
+              "name": "types",
+              "typeName": "ProtobufType"
+            }
+          },
+          {
+            "basicField": {
+              "index": "3",
+              "name": "go_package",
+              "typeName": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "message": {
+        "name": "ProtobufType",
+        "fields": [
+          {
+            "oneofField": {
+              "name": "type",
+              "fields": [
+                {
+                  "basicField": {
+                    "index": "1",
+                    "name": "message",
+                    "typeName": "ProtobufMessage"
+                  }
+                },
+                {
+                  "basicField": {
+                    "index": "2",
+                    "name": "enum",
+                    "typeName": "ProtobufEnum"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "goPackage": "github.com/hjwalt/platform/model"
+}

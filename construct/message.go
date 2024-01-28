@@ -1,4 +1,4 @@
-package main
+package construct
 
 import "github.com/hjwalt/platform/model"
 
