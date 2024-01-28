@@ -1,0 +1,4 @@
+<wa-button href="{{ .Model.Link }}" class="justify-start w-full gap-s" {{if .Model.Active}} disabled {{end}} appearance="plain">
+  <wa-icon slot="start" name="{{ .Model.Icon }}"></wa-icon>
+  {{ .Model.Label }}
+</wa-button>

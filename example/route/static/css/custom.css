@@ -1,0 +1,87 @@
+wa-button.items-start::part(base) {
+    align-items: flex-start;
+}
+
+wa-button.items-start::part(base):hover {
+    align-items: flex-start;
+}
+
+wa-button.items-start::part(base):active {
+    align-items: flex-start;
+}
+
+wa-button.items-start::part(base):focus-visible {
+    align-items: flex-start;
+}
+
+wa-button.content-start::part(base) {
+    align-content: flex-start;
+}
+
+wa-button.content-start::part(base):hover {
+    align-content: flex-start;
+}
+
+wa-button.content-start::part(base):active {
+    align-content: flex-start;
+}
+
+wa-button.content-start::part(base):focus-visible {
+    align-content: flex-start;
+}
+
+wa-button.justify-start::part(base) {
+    justify-content: flex-start;
+}
+
+wa-button.justify-start::part(base):hover {
+    justify-content: flex-start;
+}
+
+wa-button.justify-start::part(base):active {
+    justify-content: flex-start;
+}
+
+wa-button.justify-start::part(base):focus-visible {
+    justify-content: flex-start;
+}
+
+wa-button.gap-s::part(base) {
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+}
+
+wa-button.gap-s::part(base):hover {
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+}
+
+wa-button.gap-s::part(base):active {
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+}
+
+wa-button.gap-s::part(base):focus-visible {
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+}
+
+wa-button.gap-m::part(base) {
+    column-gap: 1rem;
+    row-gap: 1rem;
+}
+
+wa-button.gap-m::part(base):hover {
+    column-gap: 1rem;
+    row-gap: 1rem;
+}
+
+wa-button.gap-m::part(base):active {
+    column-gap: 1rem;
+    row-gap: 1rem;
+}
+
+wa-button.gap-m::part(base):focus-visible {
+    column-gap: 1rem;
+    row-gap: 1rem;
+}

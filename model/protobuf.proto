@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package model ; 
+option go_package = "github.com/hjwalt/platform/model" ; 
+
+message ProtobufEnum { 
+string name = 1 ;
+repeated ProtobufEnumItem fields = 2 ;
+} 
+
+message ProtobufEnumItem { 
+int64 index = 1 ;
+string name = 2 ;
+} 
+
+message ProtobufMessage { 
+string name = 1 ;
+repeated ProtobufMessageField fields = 2 ;
+} 
+
+message ProtobufMessageBasicField { 
+int64 index = 1 ;
+string name = 2 ;
+string type_name = 3 ;
+} 
+
+message ProtobufMessageField { 
+oneof field { 
+ProtobufMessageBasicField basic_field = 1 ;
+ProtobufMessageRepeatedField repeated_field = 2 ;
+ProtobufMessageMapField map_field = 3 ;
+ProtobufMessageOneofField oneof_field = 4 ;
+} 
+} 
+
+message ProtobufMessageMapField { 
+int64 index = 1 ;
+string name = 2 ;
+string key_type_name = 3 ;
+string value_type_name = 4 ;
+} 
+
+message ProtobufMessageOneofField { 
+string name = 1 ;
+repeated ProtobufMessageField fields = 2 ;
+} 
+
+message ProtobufMessageRepeatedField { 
+int64 index = 1 ;
+string name = 2 ;
+string type_name = 3 ;
+} 
+
+message ProtobufSchema { 
+string package = 1 ;
+repeated ProtobufType types = 2 ;
+string go_package = 3 ;
+} 
+
+message ProtobufType { 
+oneof type { 
+ProtobufMessage message = 1 ;
+ProtobufEnum enum = 2 ;
+} 
+} 
+
