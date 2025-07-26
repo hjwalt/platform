@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/model"
-	"github.com/hjwalt/routes/htmx"
-	"github.com/hjwalt/routes/mvc"
+	"github.com/hjwalt/platform/routes/htmx"
+	"github.com/hjwalt/platform/routes/mvc"
 )
 
 type Context struct {

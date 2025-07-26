@@ -3,11 +3,11 @@ package domain
 import (
 	"strings"
 
+	"github.com/hjwalt/platform/routes/mvc"
+	"github.com/hjwalt/platform/routes/page"
+	"github.com/hjwalt/platform/routes/runtime_chi"
+	"github.com/hjwalt/platform/runway/runtime"
 	"github.com/hjwalt/platform/web"
-	"github.com/hjwalt/routes/mvc"
-	"github.com/hjwalt/routes/page"
-	"github.com/hjwalt/routes/runtime_chi"
-	"github.com/hjwalt/runway/runtime"
 )
 
 func Page[M any](path string, method string, pageHandler page.Handler[web.Context, M], errorHandler page.Error[web.Context]) runtime.Configuration[*runtime_chi.Runtime[web.Context]] {

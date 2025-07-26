@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/model"
+	"github.com/hjwalt/platform/routes/mvc"
+	"github.com/hjwalt/platform/routes/runtime_chi"
+	"github.com/hjwalt/platform/runway/runtime"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/page/page_error_500"
 	"github.com/hjwalt/platform/web/view/view_protobuf_message"
-	"github.com/hjwalt/routes/mvc"
-	"github.com/hjwalt/routes/runtime_chi"
-	"github.com/hjwalt/runway/runtime"
 )
 
 const (

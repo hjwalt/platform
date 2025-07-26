@@ -7,6 +7,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/hjwalt/platform/domain"
 	"github.com/hjwalt/platform/model"
+	"github.com/hjwalt/platform/routes/runtime_chi"
+	"github.com/hjwalt/platform/runway/runtime"
 	"github.com/hjwalt/platform/store"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/component/component_home"
@@ -14,8 +16,6 @@ import (
 	"github.com/hjwalt/platform/web/component/component_sidebar"
 	"github.com/hjwalt/platform/web/page/page_base"
 	"github.com/hjwalt/platform/web/page/page_error_500"
-	"github.com/hjwalt/routes/runtime_chi"
-	"github.com/hjwalt/runway/runtime"
 )
 
 func main() {
@@ -40,8 +40,8 @@ func main() {
 		// runtime_chi.WithMiddleware[web.Context](middleware.CleanPath),
 		runtime_chi.WithMiddleware[web.Context](middleware.Recoverer),
 
-		runtime_chi.WithDecorator[web.Context](runtimeDecorator.Decorate),
-		runtime_chi.WithDecorator[web.Context](web.DecoratorHtmx),
+		runtime_chi.WithDecorator(runtimeDecorator.Decorate),
+		runtime_chi.WithDecorator(web.DecoratorHtmx),
 
 		runtime_chi.WithStatic[web.Context]("/static/", "./web/static"),
 

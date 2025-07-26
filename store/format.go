@@ -1,8 +1,8 @@
 package store
 
 import (
-	"github.com/hjwalt/runway/format"
-	"github.com/hjwalt/runway/reflect"
+	"github.com/hjwalt/platform/runway/format"
+	"github.com/hjwalt/platform/runway/reflect"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )

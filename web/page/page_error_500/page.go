@@ -4,9 +4,9 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/hjwalt/platform/routes/mvc"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/page"
-	"github.com/hjwalt/routes/mvc"
 )
 
 const (

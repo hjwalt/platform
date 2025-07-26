@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/model"
+	"github.com/hjwalt/platform/routes/mvc"
 	"github.com/hjwalt/platform/web"
-	"github.com/hjwalt/routes/mvc"
 )
 
 //go:embed *

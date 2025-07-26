@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/model"
+	"github.com/hjwalt/platform/routes/mvc"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/view/view_protobuf_message_basic_field"
 	"github.com/hjwalt/platform/web/view/view_protobuf_message_oneof_field"
 	"github.com/hjwalt/platform/web/view/view_protobuf_message_repeated_field"
-	"github.com/hjwalt/routes/mvc"
 )
 
 //go:embed *
