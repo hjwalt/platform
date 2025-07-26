@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/reflect"
 	"github.com/hjwalt/platform/routes/route"
-	"github.com/hjwalt/platform/runway/reflect"
 )
 
 func Add[C context.Context](c *route.Configuration[C], r string, m string, p Controller[C], e Error[C]) {

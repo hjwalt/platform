@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/runtime"
+	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/routes/mvc"
 	"github.com/hjwalt/platform/routes/page"
 	"github.com/hjwalt/platform/routes/route"
-	"github.com/hjwalt/platform/runway/runtime"
-	"github.com/hjwalt/platform/runway/structure"
 )
 
 var ports = structure.NewSet[int]()

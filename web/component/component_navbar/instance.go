@@ -5,9 +5,9 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/runtime"
 	"github.com/hjwalt/platform/routes/mvc"
 	"github.com/hjwalt/platform/routes/runtime_chi"
-	"github.com/hjwalt/platform/runway/runtime"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/page/page_error_500"
 )

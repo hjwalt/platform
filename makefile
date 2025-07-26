@@ -43,12 +43,22 @@ group-delete:
 # --------------------
 
 mocks: RUN
-	mockgen -source=mock/interfaces.go -destination=mock/implementations.go -package=mock ;\
-	mockgen -source=stateful_bun/connection.go -destination=mock/stateful_bun_connection.go -package=mock ;\
+	mockgen -source=flows/test_helper/interfaces.go -destination=flows/test_helper/implementations.go -package=test_helper ;\
+	mockgen -source=flows/runtime_bun/connection.go -destination=flows/test_helper/stateful_bun_connection.go -package=test_helper ;\
 
 proto: RUN
 	clang-format -style=file:.clang-format -i **/*.proto
 	protoc  --proto_path=. --go_opt=paths=source_relative --go_out=. ./**/*.proto
+
+
+# --------------------
+
+up: RUN
+	podman-compose up -d
+
+down: RUN
+	podman-compose down
+
 
 # --------------------
 

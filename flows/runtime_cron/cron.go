@@ -1,0 +1,68 @@
+package runtime_cron
+
+import (
+	"time"
+
+	"github.com/hjwalt/platform/commons/logger"
+	"github.com/hjwalt/platform/commons/runtime"
+	"github.com/hjwalt/platform/flows/task"
+	"github.com/robfig/cron/v3"
+)
+
+// constructor
+func NewCron(configurations ...runtime.Configuration[*Cron]) runtime.Runtime {
+	r := &Cron{
+		cron: cron.New(
+			cron.WithLocation(time.UTC),
+			cron.WithSeconds(),
+		),
+	}
+	for _, configuration := range configurations {
+		r = configuration(r)
+	}
+	return r
+}
+
+// configuration
+
+func WithTaskProducer(taskProducer task.Producer) runtime.Configuration[*Cron] {
+	return func(c *Cron) *Cron {
+		c.taskProducer = taskProducer
+		return c
+	}
+}
+
+func WithCronJob[T any](
+	schedule string,
+	scheduler task.Scheduler[T],
+	channel task.Channel[T],
+) runtime.Configuration[*Cron] {
+	return func(c *Cron) *Cron {
+		c.cron.AddJob(
+			schedule,
+			&Job[T]{
+				taskProducer: c.taskProducer,
+				scheduler:    scheduler,
+				channel:      channel,
+			},
+		)
+		return c
+	}
+}
+
+// implementation
+type Cron struct {
+	taskProducer task.Producer
+	cron         *cron.Cron
+}
+
+func (c *Cron) Start() error {
+	logger.Debug("cron starting")
+	c.cron.Start()
+	return nil
+}
+
+func (c *Cron) Stop() {
+	logger.Debug("cron stopping")
+	c.cron.Stop()
+}

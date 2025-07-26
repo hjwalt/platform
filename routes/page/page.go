@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/reflect"
 	"github.com/hjwalt/platform/routes/route"
-	"github.com/hjwalt/platform/runway/reflect"
 )
 
 type Handler[C context.Context, M any] func(c C, w http.ResponseWriter, r *http.Request) (*template.Template, M, error)

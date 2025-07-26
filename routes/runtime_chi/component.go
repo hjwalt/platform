@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/inverse"
+	"github.com/hjwalt/platform/commons/managed"
 	"github.com/hjwalt/platform/routes/route"
-	"github.com/hjwalt/platform/runway/inverse"
-	"github.com/hjwalt/platform/runway/managed"
 )
 
 const (

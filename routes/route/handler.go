@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/hjwalt/platform/runway/reflect"
+	"github.com/hjwalt/platform/commons/reflect"
 )
 
 type Custom[C context.Context] struct {

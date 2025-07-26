@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/hjwalt/platform/runway/reflect"
+	"github.com/hjwalt/platform/commons/reflect"
 )
 
 var (

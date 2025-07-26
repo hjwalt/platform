@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/hjwalt/platform/runway/format"
+	"github.com/hjwalt/platform/commons/format"
 )
 
 func Write[T any](file string, f format.Format[T], val T) error {

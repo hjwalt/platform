@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/inverse"
 	"github.com/hjwalt/platform/routes/mvc"
 	"github.com/hjwalt/platform/routes/page"
 	"github.com/hjwalt/platform/routes/route"
-	"github.com/hjwalt/platform/runway/inverse"
 )
 
 func AddMiddleware[C context.Context](ic inverse.Container, middleware ...route.Middleware) {

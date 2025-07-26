@@ -5,10 +5,11 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/middleware"
+	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/commons/runtime"
 	"github.com/hjwalt/platform/domain"
 	"github.com/hjwalt/platform/model"
 	"github.com/hjwalt/platform/routes/runtime_chi"
-	"github.com/hjwalt/platform/runway/runtime"
 	"github.com/hjwalt/platform/store"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/component/component_home"
@@ -19,7 +20,7 @@ import (
 )
 
 func main() {
-	storageFormat := store.Protojson[*model.ProtobufSchema]()
+	storageFormat := format.Protojson[*model.ProtobufSchema]()
 
 	conf, err := store.Read("model/protobuf.json", storageFormat)
 	if err != nil {

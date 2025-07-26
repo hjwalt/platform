@@ -1,0 +1,73 @@
+package stateless
+
+import (
+	"context"
+	"errors"
+
+	"github.com/hjwalt/platform/commons/logger"
+	"github.com/hjwalt/platform/commons/runtime"
+	"github.com/hjwalt/platform/commons/structure"
+	"github.com/hjwalt/platform/flows/flow"
+	"github.com/hjwalt/platform/flows/metric"
+	"go.uber.org/zap"
+)
+
+// constructor
+func NewSingleRetry(configurations ...runtime.Configuration[*SingleRetry]) SingleFunction {
+	singleFunction := &SingleRetry{}
+	for _, configuration := range configurations {
+		singleFunction = configuration(singleFunction)
+	}
+	return singleFunction.Apply
+}
+
+// configurations
+func WithSingleRetryRuntime(retry *runtime.Retry) runtime.Configuration[*SingleRetry] {
+	return func(psf *SingleRetry) *SingleRetry {
+		psf.retry = retry
+		return psf
+	}
+}
+
+func WithSingleRetryNextFunction(next SingleFunction) runtime.Configuration[*SingleRetry] {
+	return func(psf *SingleRetry) *SingleRetry {
+		psf.next = next
+		return psf
+	}
+}
+
+func WithSingleRetryPrometheus() runtime.Configuration[*SingleRetry] {
+	return func(sr *SingleRetry) *SingleRetry {
+		sr.metric = metric.PrometheusRetry()
+		return sr
+	}
+}
+
+// implementation
+type SingleRetry struct {
+	retry  *runtime.Retry
+	next   SingleFunction
+	metric metric.Retry
+}
+
+func (r *SingleRetry) Apply(c context.Context, m flow.Message[structure.Bytes, structure.Bytes]) ([]flow.Message[structure.Bytes, structure.Bytes], error) {
+	msgs := make([]flow.Message[structure.Bytes, structure.Bytes], 0)
+	retryErr := r.retry.Do(func(tryCount int64) error {
+		if r.metric != nil {
+			r.metric.RetryCount(m.Topic, m.Partition, tryCount)
+		}
+		res, err := r.next(runtime.SetRetryCount(c, tryCount), m)
+		if err != nil {
+			logger.Warn("retrying", zap.Int64("try", tryCount), zap.Error(err))
+			return err
+		}
+		msgs = append(msgs, res...)
+		return nil
+	})
+
+	if retryErr != nil {
+		return msgs, errors.Join(ErrorRetryAttempt, retryErr)
+	} else {
+		return msgs, nil
+	}
+}

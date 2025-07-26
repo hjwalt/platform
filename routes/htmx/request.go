@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/hjwalt/platform/runway/reflect"
+	"github.com/hjwalt/platform/commons/reflect"
 )
 
 var (

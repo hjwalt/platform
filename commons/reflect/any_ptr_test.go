@@ -1,0 +1,34 @@
+package reflect_test
+
+import (
+	"testing"
+
+	"github.com/hjwalt/platform/commons/reflect"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestIsPointer(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.False(reflect.IsPointer("test"))
+
+	pointerVal := "test"
+	assert.True(reflect.IsPointer(&pointerVal))
+
+	var testNil *string
+	assert.True(reflect.IsPointer(testNil))
+	assert.True(reflect.IsPointer(nil))
+}
+
+func TestIsNil(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.False(reflect.IsNil("test"))
+
+	pointerVal := "test"
+	assert.False(reflect.IsNil(&pointerVal))
+
+	var testNil *string
+	assert.True(reflect.IsNil(testNil))
+	assert.True(reflect.IsNil(nil))
+}

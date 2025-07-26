@@ -4,11 +4,11 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/hjwalt/platform/commons/inverse"
+	"github.com/hjwalt/platform/commons/runtime"
 	"github.com/hjwalt/platform/routes/example"
 	"github.com/hjwalt/platform/routes/example/page_error_500"
 	"github.com/hjwalt/platform/routes/runtime_chi"
-	"github.com/hjwalt/platform/runway/inverse"
-	"github.com/hjwalt/platform/runway/runtime"
 )
 
 const (
