@@ -3,15 +3,15 @@ package format_test
 import (
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMaskedEncryption(t *testing.T) {
 	assert := assert.New(t)
 
-	mask := format.Ogerpon()
-	actual := format.Gengar()
+	mask := format.Cracked()
+	actual := format.Broken()
 
 	masked := format.Masked(mask, actual)
 
@@ -33,40 +33,40 @@ func TestMaskedEncryption(t *testing.T) {
 func TestMaskedEncryptionMarshalErr(t *testing.T) {
 	assert := assert.New(t)
 
-	mask := format.Ogerpon()
-	actual := format.Gengar()
+	mask := format.Cracked()
+	actual := format.Broken()
 
 	masked := format.Masked(mask, actual)
 
-	_, marshalErr := masked.Marshal("haunter")
+	_, marshalErr := masked.Marshal("marshal")
 
-	assert.ErrorIs(marshalErr, format.ErrHaunter)
+	assert.ErrorIs(marshalErr, format.ErrMarshal)
 	assert.ErrorIs(marshalErr, format.ErrMaskActualMarshal)
 
-	_, maskErr := masked.Marshal("wellspring")
+	_, maskErr := masked.Marshal("mask")
 
-	assert.ErrorIs(maskErr, format.ErrWellspringMask)
+	assert.ErrorIs(maskErr, format.ErrMask)
 	assert.ErrorIs(maskErr, format.ErrMaskMarshal)
 }
 
 func TestMaskedEncryptionUnmarshalErr(t *testing.T) {
 	assert := assert.New(t)
 
-	mask := format.Ogerpon()
-	actual := format.Gengar()
+	mask := format.Cracked()
+	actual := format.Broken()
 
 	masked := format.Masked(mask, actual)
 
-	errInducingInput1, _ := mask.Mask([]byte("gengar"))
-	errInducingInput2, _ := mask.Mask([]byte("hearthflame"))
+	errInducingInput1, _ := mask.Mask([]byte("unmarshal"))
+	errInducingInput2, _ := mask.Mask([]byte("unmask"))
 
 	_, marshalErr := masked.Unmarshal(errInducingInput1)
 
-	assert.ErrorIs(marshalErr, format.ErrGengar)
+	assert.ErrorIs(marshalErr, format.ErrUnmarshal)
 	assert.ErrorIs(marshalErr, format.ErrMaskActualUnmarshal)
 
 	_, maskErr := masked.Unmarshal(errInducingInput2)
 
-	assert.ErrorIs(maskErr, format.ErrHearthflameMask)
+	assert.ErrorIs(maskErr, format.ErrUnmask)
 	assert.ErrorIs(maskErr, format.ErrMaskUnmarshal)
 }

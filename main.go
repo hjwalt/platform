@@ -1,16 +1,18 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/runtime"
 	"github.com/hjwalt/platform/domain"
+	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/model"
 	"github.com/hjwalt/platform/routes/runtime_chi"
-	"github.com/hjwalt/platform/store"
+	"github.com/hjwalt/platform/state"
+	"github.com/hjwalt/platform/state/file"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/component/component_home"
 	"github.com/hjwalt/platform/web/component/component_navbar"
@@ -22,14 +24,23 @@ import (
 func main() {
 	storageFormat := format.Protojson[*model.ProtobufSchema]()
 
-	conf, err := store.Read("model/protobuf.json", storageFormat)
+	fileStore := &file.FileStore{
+		Path: "/home/hjwalt/Projects/platform/tmp",
+	}
+
+	formattedStore := &state.FormattedStore[*model.ProtobufSchema]{
+		Format: storageFormat,
+		Store:  fileStore,
+	}
+
+	conf, err := formattedStore.Read(context.Background(), "protobuf.json")
 	if err != nil {
 		panic(err)
 	}
-	typeMap := domain.Parse(conf)
+	typeMap := domain.Parse(conf.Value)
 
 	runtimeDecorator := web.DecoratorContext{
-		Schema:  conf,
+		Schema:  conf.Value,
 		TypeMap: typeMap,
 	}
 

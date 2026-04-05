@@ -3,10 +3,10 @@ package stateless_one_to_one
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateless"
+	"github.com/hjwalt/platform/format"
 )
 
 func New[IK any, IV any, OK any, OV any](

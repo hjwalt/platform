@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateless/stateless_error_handler"
 	"github.com/hjwalt/platform/flows/stateless/stateless_error_handler_skip_list"
 	"github.com/hjwalt/platform/flows/stateless/stateless_mock"
 	"github.com/hjwalt/platform/flows/stateless/stateless_one_to_one"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,8 +25,8 @@ func TestHandler(t *testing.T) {
 	}{
 		{
 			name:        "basic conversion",
-			inputTopic:  flow.GenericTopic("input", format.Gengar(), format.Gengar()),
-			outputTopic: flow.GenericTopic("output", format.Gengar(), format.Gengar()),
+			inputTopic:  flow.GenericTopic("input", format.Broken(), format.Broken()),
+			outputTopic: flow.GenericTopic("output", format.Broken(), format.Broken()),
 			input: flow.Message[[]byte, []byte]{
 				Key:   []byte("k"),
 				Value: []byte("v"),
@@ -41,8 +41,8 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			name:        "empty result",
-			inputTopic:  flow.GenericTopic("input", format.Gengar(), format.Gengar()),
-			outputTopic: flow.GenericTopic("output", format.Gengar(), format.Gengar()),
+			inputTopic:  flow.GenericTopic("input", format.Broken(), format.Broken()),
+			outputTopic: flow.GenericTopic("output", format.Broken(), format.Broken()),
 			input: flow.Message[[]byte, []byte]{
 				Key:   []byte("empty"),
 				Value: []byte("v"),
@@ -52,8 +52,8 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			name:        "error input conversion",
-			inputTopic:  flow.GenericTopic("input", format.Gengar(), format.Gengar()),
-			outputTopic: flow.GenericTopic("output", format.Gengar(), format.Gengar()),
+			inputTopic:  flow.GenericTopic("input", format.Broken(), format.Broken()),
+			outputTopic: flow.GenericTopic("output", format.Broken(), format.Broken()),
 			input: flow.Message[[]byte, []byte]{
 				Key:   []byte("ghastly"),
 				Value: []byte("v"),
@@ -63,8 +63,8 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			name:        "error output conversion",
-			inputTopic:  flow.GenericTopic("input", format.Gengar(), format.Gengar()),
-			outputTopic: flow.GenericTopic("output", format.Gengar(), format.Gengar()),
+			inputTopic:  flow.GenericTopic("input", format.Broken(), format.Broken()),
+			outputTopic: flow.GenericTopic("output", format.Broken(), format.Broken()),
 			input: flow.Message[[]byte, []byte]{
 				Key:   []byte("haunter"),
 				Value: []byte("v"),
@@ -74,8 +74,8 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			name:        "error execute",
-			inputTopic:  flow.GenericTopic("input", format.Gengar(), format.Gengar()),
-			outputTopic: flow.GenericTopic("output", format.Gengar(), format.Gengar()),
+			inputTopic:  flow.GenericTopic("input", format.Broken(), format.Broken()),
+			outputTopic: flow.GenericTopic("output", format.Broken(), format.Broken()),
 			input: flow.Message[[]byte, []byte]{
 				Key:   []byte("mock_error"),
 				Value: []byte("v"),
@@ -85,8 +85,8 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			name:        "empty topic output",
-			inputTopic:  flow.GenericTopic("input", format.Gengar(), format.Gengar()),
-			outputTopic: flow.GenericTopic("", format.Gengar(), format.Gengar()),
+			inputTopic:  flow.GenericTopic("input", format.Broken(), format.Broken()),
+			outputTopic: flow.GenericTopic("", format.Broken(), format.Broken()),
 			input: flow.Message[[]byte, []byte]{
 				Key:   []byte("mock_topic"),
 				Value: []byte("v"),

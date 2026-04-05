@@ -1,9 +1,9 @@
 package flow
 
 import (
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/logger"
 	"github.com/hjwalt/platform/commons/structure"
+	"github.com/hjwalt/platform/format"
 )
 
 var (

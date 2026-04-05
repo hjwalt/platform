@@ -1,6 +1,6 @@
 package flow
 
-import "github.com/hjwalt/platform/commons/format"
+import "github.com/hjwalt/platform/format"
 
 type genericTopic[K any, V any] struct {
 	topic       string

@@ -1,7 +1,7 @@
 package task
 
 import (
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 )
 
 func JsonChannel[V any](channel string) Channel[V] {

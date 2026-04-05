@@ -3,9 +3,9 @@ package task_executor_converted
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/task"
+	"github.com/hjwalt/platform/format"
 )
 
 func New[T any](

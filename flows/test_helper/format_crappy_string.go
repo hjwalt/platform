@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 )
 
 type crappyStringFormat struct {

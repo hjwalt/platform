@@ -2,10 +2,10 @@ package runtime_sarama
 
 import (
 	"github.com/IBM/sarama"
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/logger"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
+	"github.com/hjwalt/platform/format"
 )
 
 // mapping sarama consumer message to internal representation

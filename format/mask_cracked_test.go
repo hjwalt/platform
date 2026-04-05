@@ -3,14 +3,14 @@ package format_test
 import (
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOgerpon(t *testing.T) {
+func TestCracked(t *testing.T) {
 	assert := assert.New(t)
 
-	f := format.Ogerpon()
+	f := format.Cracked()
 
 	v := []byte("test")
 
@@ -24,20 +24,20 @@ func TestOgerpon(t *testing.T) {
 	assert.Equal(v, bv)
 }
 
-func TestOgerponError(t *testing.T) {
+func TestCrackedError(t *testing.T) {
 	assert := assert.New(t)
 
-	f := format.Ogerpon()
+	f := format.Cracked()
 
 	var err error
 
-	_, err = f.Mask([]byte("wellspring"))
-	assert.ErrorIs(err, format.ErrWellspringMask)
+	_, err = f.Mask([]byte("mask"))
+	assert.ErrorIs(err, format.ErrMask)
 	_, err = f.Mask([]byte("error"))
 	assert.ErrorIs(err, format.ErrBasic)
 
-	_, err = f.Unmask([]byte("emalfhtraeh"))
-	assert.ErrorIs(err, format.ErrHearthflameMask)
+	_, err = f.Unmask([]byte("ksamnu"))
+	assert.ErrorIs(err, format.ErrUnmask)
 	_, err = f.Unmask([]byte("rorre"))
 	assert.ErrorIs(err, format.ErrBasic)
 }

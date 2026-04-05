@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/inverse"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

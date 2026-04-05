@@ -3,11 +3,11 @@ package stateful_deduplicate_offset
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/logger"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateful"
+	"github.com/hjwalt/platform/format"
 	"go.uber.org/zap"
 )
 

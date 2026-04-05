@@ -3,7 +3,7 @@ package format_test
 import (
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,25 +27,25 @@ func TestConvert(t *testing.T) {
 func TestConvertUnmarshalError(t *testing.T) {
 	assert := assert.New(t)
 
-	fs := format.Gengar()
-	ft := format.Gengar()
+	fs := format.Broken()
+	ft := format.Broken()
 
-	vs := "ghastly"
+	vs := "unmarshal"
 
 	_, ferr := format.Convert(vs, fs, ft)
 	assert.ErrorIs(ferr, format.ErrFormatConversionUnmarshal)
-	assert.ErrorIs(ferr, format.ErrGhastly)
+	assert.ErrorIs(ferr, format.ErrUnmarshal)
 }
 
 func TestConvertMarshalError(t *testing.T) {
 	assert := assert.New(t)
 
-	fs := format.Gengar()
-	ft := format.Gengar()
+	fs := format.Broken()
+	ft := format.Broken()
 
-	vs := "haunter"
+	vs := "marshal"
 
 	_, ferr := format.Convert(vs, fs, ft)
 	assert.ErrorIs(ferr, format.ErrFormatConversionMarshal)
-	assert.ErrorIs(ferr, format.ErrHaunter)
+	assert.ErrorIs(ferr, format.ErrMarshal)
 }

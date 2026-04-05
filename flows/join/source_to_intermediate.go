@@ -3,7 +3,6 @@ package join
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/logger"
 	"github.com/hjwalt/platform/commons/runtime"
 	"github.com/hjwalt/platform/commons/structure"
@@ -11,6 +10,7 @@ import (
 	"github.com/hjwalt/platform/flows/protobuf"
 	"github.com/hjwalt/platform/flows/stateful"
 	"github.com/hjwalt/platform/flows/stateless"
+	"github.com/hjwalt/platform/format"
 	"go.uber.org/zap"
 )
 

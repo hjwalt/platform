@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 )
 
 func WriteJson[R any](w http.ResponseWriter, httpStatus int, r R, f format.Format[R]) error {

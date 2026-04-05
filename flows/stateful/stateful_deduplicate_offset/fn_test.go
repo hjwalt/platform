@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/protobuf"
 	"github.com/hjwalt/platform/flows/stateful"
 	"github.com/hjwalt/platform/flows/stateful/stateful_deduplicate_offset"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,26 +3,24 @@ package format_test
 import (
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 
-type TestYamlStruct struct {
-	Name  string `yaml:"name"`
-	Value int64  `yaml:"value"`
+type TestJsonStruct struct {
+	Name  string
+	Value int64
 }
 
-func TestYamlFormat(t *testing.T) {
+func TestJsonFormat(t *testing.T) {
 	assert := assert.New(t)
 
-	f := format.Yaml[TestYamlStruct]()
-	v := TestYamlStruct{
+	f := format.Json[TestJsonStruct]()
+	v := TestJsonStruct{
 		Name:  "test",
 		Value: 1234567890,
 	}
-	b := []byte(`name: test
-value: 1234567890
-`)
+	b := []byte(`{"Name":"test","Value":1234567890}`)
 
 	vb, em := f.Marshal(v)
 	assert.NoError(em)
@@ -34,17 +32,15 @@ value: 1234567890
 	assert.Equal(v, bv)
 }
 
-func TestYamlFormatPointer(t *testing.T) {
+func TestJsonFormatPointer(t *testing.T) {
 	assert := assert.New(t)
 
-	f := format.Yaml[*TestYamlStruct]()
-	v := &TestYamlStruct{
+	f := format.Json[*TestJsonStruct]()
+	v := &TestJsonStruct{
 		Name:  "test",
 		Value: 1234567890,
 	}
-	b := []byte(`name: test
-value: 1234567890
-`)
+	b := []byte(`{"Name":"test","Value":1234567890}`)
 
 	vb, em := f.Marshal(v)
 	assert.NoError(em)
@@ -56,10 +52,10 @@ value: 1234567890
 	assert.Equal(v, bv)
 }
 
-func TestYamlFormatEmptyValue(t *testing.T) {
+func TestJsonFormatEmptyValue(t *testing.T) {
 	assert := assert.New(t)
 
-	f := format.Yaml[*TestYamlStruct]()
+	f := format.Json[*TestJsonStruct]()
 
 	vb, em := f.Marshal(nil)
 	assert.NoError(em)
@@ -67,5 +63,5 @@ func TestYamlFormatEmptyValue(t *testing.T) {
 
 	bv, eu := f.Unmarshal(nil)
 	assert.NoError(eu)
-	assert.Equal(&TestYamlStruct{}, bv)
+	assert.Equal(&TestJsonStruct{}, bv)
 }

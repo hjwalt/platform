@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateless/stateless_mock"
 	"github.com/hjwalt/platform/flows/stateless/stateless_one_to_one"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,7 +56,7 @@ func TestConversionTopic(t *testing.T) {
 				Key:   []byte("ghastly"),
 				Value: []byte("v"),
 			},
-			err:   []error{format.ErrFormatConversionUnmarshal, format.ErrGhastly},
+			err:   []error{format.ErrFormatConversionUnmarshal, format.ErrUnmarshal},
 			empty: true,
 		},
 		{
@@ -67,7 +67,7 @@ func TestConversionTopic(t *testing.T) {
 				Key:   []byte("haunter"),
 				Value: []byte("v"),
 			},
-			err:   []error{format.ErrFormatConversionMarshal, format.ErrHaunter},
+			err:   []error{format.ErrFormatConversionMarshal, format.ErrMarshal},
 			empty: true,
 		},
 		{

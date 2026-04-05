@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateful"
 	"github.com/hjwalt/platform/flows/stateful/stateful_error_handler"
 	"github.com/hjwalt/platform/flows/stateful/stateful_error_handler_skip_list"
 	"github.com/hjwalt/platform/flows/stateful/stateful_mock"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 

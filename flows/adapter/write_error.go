@@ -3,7 +3,7 @@ package adapter
 import (
 	"net/http"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 )
 
 func WriteError(w http.ResponseWriter, httpStatus int, err error) error {

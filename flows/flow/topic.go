@@ -1,6 +1,6 @@
 package flow
 
-import "github.com/hjwalt/platform/commons/format"
+import "github.com/hjwalt/platform/format"
 
 type Topic[K any, V any] interface {
 	Name() string

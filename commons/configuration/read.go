@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 )
 
 func Read[T any](file string, f format.Format[T]) (T, error) {

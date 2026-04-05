@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateful"
+	"github.com/hjwalt/platform/format"
 )
 
 func MockOneToOne(ctx context.Context, m flow.Message[string, string], ss stateful.State[string]) (*flow.Message[string, string], stateful.State[string], error) {
@@ -48,9 +48,9 @@ func MockOneToOne(ctx context.Context, m flow.Message[string, string], ss statef
 }
 
 var (
-	InputTopic       = flow.GenericTopic("input", format.Gengar(), format.Gengar())
-	OutputTopic      = flow.GenericTopic("output", format.Gengar(), format.Gengar())
-	EmptyTopic       = flow.GenericTopic("", format.Gengar(), format.Gengar())
+	InputTopic       = flow.GenericTopic("input", format.Broken(), format.Broken())
+	OutputTopic      = flow.GenericTopic("output", format.Broken(), format.Broken())
+	EmptyTopic       = flow.GenericTopic("", format.Broken(), format.Broken())
 	ErrMock          = errors.New("mock")
 	ErrRecoverable   = errors.New("recoverable")
 	ErrIrrecoverable = errors.New("irrrecoverable")

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/hjwalt/platform/commons/format"
 	reflect "github.com/hjwalt/platform/commons/reflect"
+	"github.com/hjwalt/platform/format"
 )
 
 type CrappyJsonFormat[T CrappyShouldError] struct{}

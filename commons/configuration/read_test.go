@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hjwalt/platform/commons/configuration"
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 	"github.com/stretchr/testify/assert"
 )
 

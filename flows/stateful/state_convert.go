@@ -1,8 +1,8 @@
 package stateful
 
 import (
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/logger"
+	"github.com/hjwalt/platform/format"
 )
 
 // assuming byte compatibility, i.e. bytes <-> proto, string <-> json

@@ -3,7 +3,6 @@ package flows
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/inverse"
 	"github.com/hjwalt/platform/commons/runtime"
 	"github.com/hjwalt/platform/commons/structure"
@@ -11,6 +10,7 @@ import (
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/runtime_sarama"
 	"github.com/hjwalt/platform/flows/stateless"
+	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/routes/runtime_chi"
 )
 

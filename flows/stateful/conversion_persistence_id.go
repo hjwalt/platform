@@ -3,8 +3,8 @@ package stateful
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/flows/flow"
+	"github.com/hjwalt/platform/format"
 )
 
 func ConvertPersistenceId[IK any, IV any](

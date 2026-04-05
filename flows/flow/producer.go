@@ -3,8 +3,8 @@ package flow
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
+	"github.com/hjwalt/platform/format"
 )
 
 type Producer interface {

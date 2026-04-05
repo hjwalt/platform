@@ -1,7 +1,7 @@
 package task
 
 import (
-	"github.com/hjwalt/platform/commons/format"
+	"github.com/hjwalt/platform/format"
 	"google.golang.org/protobuf/proto"
 )
 

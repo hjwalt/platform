@@ -3,9 +3,9 @@ package stateless
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
+	"github.com/hjwalt/platform/format"
 )
 
 func ConvertOneToOneExplode[IK any, IV any, OK any, OV any](

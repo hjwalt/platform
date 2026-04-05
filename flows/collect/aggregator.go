@@ -3,10 +3,10 @@ package collect
 import (
 	"context"
 
-	"github.com/hjwalt/platform/commons/format"
 	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/flows/flow"
 	"github.com/hjwalt/platform/flows/stateful"
+	"github.com/hjwalt/platform/format"
 )
 
 func ConvertAggregator[S any, IK any, IV any](

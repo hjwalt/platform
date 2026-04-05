@@ -1,6 +1,6 @@
 package task
 
-import "github.com/hjwalt/platform/commons/format"
+import "github.com/hjwalt/platform/format"
 
 type Channel[V any] interface {
 	Name() string

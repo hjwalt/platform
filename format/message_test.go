@@ -23,7 +23,7 @@ const (
 syntax = "proto3";
 package format;
 
-option go_package = "github.com/hjwalt/platform/commons/format";
+option go_package = "github.com/hjwalt/platform/format";
 
 message Message {
   string topic = 1;
