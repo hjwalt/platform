@@ -37,8 +37,7 @@ func main() {
 	// Chat
 
 	model := llm.OpenAi(llm.OpenAiModelConfig{
-		// Model: "Gemma-4-26B-A4B-it-GGUF",
-		Model:    "gpt-oss-20b-FLM",
+		Model:    "gemma4-it-e4b-FLM",
 		Endpoint: "http://localhost:13305/api/v1",
 		Secret:   "nothing",
 		Tools: []openai.ChatCompletionToolUnionParam{
