@@ -42,13 +42,15 @@ func main() {
 		Value: initialMessage,
 	}
 
+	weatherTool := WeatherTool{}
+
 	model := llm.OpenAi(llm.OpenAiModelConfig{
 		Model: "Gemma-4-26B-A4B-it-GGUF",
 		// Model:    "Gemma-4-E4B-it-GGUF",
 		Endpoint: "http://localhost:13305/api/v1",
 		Secret:   "nothing",
 		Tools: []openai.ChatCompletionToolUnionParam{
-			llm.OpenAiToolSchema[ToolRequest]("get_weather", "Get weather at the given location"),
+			weatherTool.Schema(),
 		},
 	})
 
@@ -58,7 +60,7 @@ func main() {
 
 	agentFlow := harness.OpenAiFlow[context.Context]{
 		Tools: map[string]agent.Tool{
-			"get_weather": WeatherTool{},
+			weatherTool.Name(): weatherTool,
 		},
 		Model: ragModel,
 	}
@@ -103,6 +105,18 @@ func main() {
 }
 
 type WeatherTool struct {
+}
+
+func (t WeatherTool) Name() string {
+	return "get_weather"
+}
+
+func (t WeatherTool) Description() string {
+	return "Get weather at the given location"
+}
+
+func (t WeatherTool) Schema() openai.ChatCompletionToolUnionParam {
+	return llm.OpenAiToolSchema[ToolRequest](t.Name(), t.Description())
 }
 
 func (t WeatherTool) Execute(input string) (string, error) {

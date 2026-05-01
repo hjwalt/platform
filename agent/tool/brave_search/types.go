@@ -72,7 +72,7 @@ type Thumbnail struct {
 
 type VideoData struct {
 	Duration  string     `json:"duration"`
-	Views     string     `json:"views"`
+	Views     int64      `json:"views"`
 	Creator   string     `json:"creator"`
 	Publisher string     `json:"publisher"`
 	Thumbnail *Thumbnail `json:"thumbnail"`

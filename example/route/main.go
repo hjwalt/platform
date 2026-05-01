@@ -34,6 +34,10 @@ func main() {
 	logger.Default()
 	godotenv.Load()
 
+	// Tools
+
+	webSearchTool := mcp_brave_search_web.Instance()
+
 	// Chat
 
 	model := llm.OpenAi(llm.OpenAiModelConfig{
@@ -41,7 +45,7 @@ func main() {
 		Endpoint: "http://localhost:13305/api/v1",
 		Secret:   "nothing",
 		Tools: []openai.ChatCompletionToolUnionParam{
-			llm.OpenAiToolSchema[mcp_brave_search_web.Request]("web_search", "search the internet with the terms for the more information"),
+			webSearchTool.Schema(),
 		},
 	})
 
@@ -51,7 +55,7 @@ func main() {
 
 	agentFlow := harness.OpenAiFlow[context.Context]{
 		Tools: map[string]agent.Tool{
-			"web_search": mcp_brave_search_web.Instance(),
+			webSearchTool.Name(): webSearchTool,
 		},
 		Model: ragModel,
 	}

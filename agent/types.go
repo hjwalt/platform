@@ -5,6 +5,7 @@ import (
 
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/runtime"
+	"github.com/openai/openai-go/v3"
 )
 
 const (
@@ -22,6 +23,9 @@ type Message struct {
 }
 
 type Tool interface {
+	Name() string
+	Description() string
+	Schema() openai.ChatCompletionToolUnionParam
 	Execute(string) (string, error)
 }
 

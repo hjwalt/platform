@@ -4,13 +4,17 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
+	"github.com/hjwalt/platform/agent/llm"
 	"github.com/hjwalt/platform/agent/tool/brave_search"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/format"
+	"github.com/hjwalt/platform/reflect"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/openai/openai-go/v3"
 )
 
 var global *Tool
@@ -113,6 +117,18 @@ func (t *Tool) internal(params *Request) (*Response, error) {
 	return &Response{Results: results}, err
 }
 
+func (t *Tool) Name() string {
+	return "web search"
+}
+
+func (t *Tool) Description() string {
+	return "Search the internet with the terms to gather more information. Use the URL in the search results to fetch the page for more information."
+}
+
+func (t *Tool) Schema() openai.ChatCompletionToolUnionParam {
+	return llm.OpenAiToolSchema[Request](t.Name(), t.Description())
+}
+
 func (t *Tool) Execute(input string) (string, error) {
 	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
 	if requestParseErr != nil {
@@ -124,12 +140,40 @@ func (t *Tool) Execute(input string) (string, error) {
 		return "", internalErr
 	}
 
-	output, marshalErr := ResponseFormat.Marshal(*response)
-	if marshalErr != nil {
-		return "", marshalErr
+	outputBuilder := strings.Builder{}
+
+	for i, result := range response.Results {
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("result ")
+		outputBuilder.WriteString(reflect.GetString(i + 1))
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("title: ")
+		outputBuilder.WriteString(result.Title)
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("url: ")
+		outputBuilder.WriteString(result.URL)
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("description: ")
+		outputBuilder.WriteString(result.Description)
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("language: ")
+		outputBuilder.WriteString(result.Language)
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("content_type: ")
+		outputBuilder.WriteString(result.ContentType)
+		outputBuilder.WriteString("\n\n")
+		outputBuilder.WriteString("extra_snippets: ")
+		outputBuilder.WriteString("\n\n")
+		for _, snippet := range result.ExtraSnippets {
+			outputBuilder.WriteString("- ")
+			outputBuilder.WriteString(snippet)
+			outputBuilder.WriteString("\n\n")
+		}
+		outputBuilder.WriteString("---------------------")
+		outputBuilder.WriteString("\n\n")
 	}
 
-	return string(output), nil
+	return outputBuilder.String(), nil
 }
 
 func Add(server *mcp.Server) {
@@ -143,9 +187,9 @@ func Add(server *mcp.Server) {
 	mcp.AddTool(
 		server,
 		&mcp.Tool{
-			Name:         "Search",
-			Title:        "Search",
-			Description:  "Search the internet with the terms to gather more information. Use the URL in the search results to fetch the page for more information.",
+			Name:         global.Name(),
+			Title:        global.Name(),
+			Description:  global.Description(),
 			InputSchema:  in,
 			OutputSchema: out,
 		},
