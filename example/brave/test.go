@@ -5,27 +5,26 @@ import (
 	"log/slog"
 	"net/http"
 
-	brave "github.com/hjwalt/platform/agent/tool/brave_search"
-	"github.com/hjwalt/platform/agent/tool/brave_search_web"
+	"github.com/hjwalt/platform/agent/tool/brave_search"
 	"github.com/hjwalt/platform/environment"
 )
 
 func main() {
 	apiKey := environment.GetString("BRAVE_TOKEN", "")
 
-	braveClient := brave.BraveClient{
+	braveClient := brave_search.BraveClient{
 		Client:  http.DefaultClient,
 		BaseUrl: "https://api.search.brave.com/res/v1/",
 	}
 
-	success, err := brave_search_web.WebSearch(
+	success, err := brave_search.WebSearch(
 		context.Background(),
 		&braveClient,
-		[]brave.Param{
-			brave_search_web.WithTerm("the latest samsung phone"),
+		[]brave_search.Param{
+			brave_search.WithTerm("the latest samsung phone"),
 		},
-		[]brave.Header{
-			brave_search_web.WithSubscriptionToken(apiKey),
+		[]brave_search.Header{
+			brave_search.WithSubscriptionToken(apiKey),
 		},
 	)
 	if err != nil {

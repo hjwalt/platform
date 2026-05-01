@@ -7,8 +7,7 @@ import (
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
-	brave "github.com/hjwalt/platform/agent/tool/brave_search"
-	"github.com/hjwalt/platform/agent/tool/brave_search_web"
+	"github.com/hjwalt/platform/agent/tool/brave_search"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/format"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -18,7 +17,7 @@ var global *Tool
 
 func defaultTool() {
 	global = &Tool{
-		Brave: &brave.BraveClient{
+		Brave: &brave_search.BraveClient{
 			Client:  http.DefaultClient,
 			BaseUrl: "https://api.search.brave.com/res/v1/",
 		},
@@ -44,19 +43,19 @@ type SearchResult struct {
 }
 
 type Tool struct {
-	Brave  *brave.BraveClient
+	Brave  *brave_search.BraveClient
 	ApiKey string
 }
 
 func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params *Request) (*mcp.CallToolResult, *Response, error) {
-	success, err := brave_search_web.WebSearch(
+	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
-		[]brave.Param{
-			brave_search_web.WithTerm(params.Term),
+		[]brave_search.Param{
+			brave_search.WithTerm(params.Term),
 		},
-		[]brave.Header{
-			brave_search_web.WithSubscriptionToken(t.ApiKey),
+		[]brave_search.Header{
+			brave_search.WithSubscriptionToken(t.ApiKey),
 		},
 	)
 
@@ -82,14 +81,14 @@ func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params *
 }
 
 func (t *Tool) internal(params *Request) (*Response, error) {
-	success, err := brave_search_web.WebSearch(
+	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
-		[]brave.Param{
-			brave_search_web.WithTerm(params.Term),
+		[]brave_search.Param{
+			brave_search.WithTerm(params.Term),
 		},
-		[]brave.Header{
-			brave_search_web.WithSubscriptionToken(t.ApiKey),
+		[]brave_search.Header{
+			brave_search.WithSubscriptionToken(t.ApiKey),
 		},
 	)
 

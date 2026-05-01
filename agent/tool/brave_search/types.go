@@ -1,12 +1,41 @@
-package brave
+package brave_search
 
 import (
-	"fmt"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
+	"net/http"
+
+	"github.com/hjwalt/platform/format"
 )
+
+var (
+	FailureResponseFormat = format.Json[FailureResponse]()
+	SuccessResponseFormat = format.Json[WebSearchResult]()
+)
+
+type FailureResponse struct {
+	ErrorResponse ErrorResponse `json:"error"`
+	Time          string        `json:"time"`
+}
+
+func (er FailureResponse) Error() string {
+	return er.ErrorResponse.Detail
+}
+
+type BraveClient struct {
+	Client  *http.Client
+	BaseUrl string
+}
+
+type Header struct {
+	Key   string
+	Value string
+}
+
+type Param struct {
+	Key   string
+	Value string
+}
+
+// OBJECT COMPONENTS
 
 type ResultContainer[T any] struct {
 	Type             string `json:"type"`
@@ -14,120 +43,11 @@ type ResultContainer[T any] struct {
 	MutatedByGoggles bool   `json:"mutated_by_goggles"`
 }
 
-type Query struct {
-	Original             string    `json:"original"`
-	ShowStrictWarning    bool      `json:"show_strict_warning"`
-	Altered              string    `json:"altered"`
-	Safesearch           bool      `json:"safesearch"`
-	IsNavigational       bool      `json:"is_navigational"`
-	IsGeolocal           bool      `json:"is_geolocal"`
-	LocalDecision        string    `json:"local_decision"`
-	LocalLocationsIdx    int       `json:"local_locations_idx"`
-	IsTrending           bool      `json:"is_trending"`
-	IsNewsBreaking       bool      `json:"is_news_breaking"`
-	AskForLocation       bool      `json:"ask_for_location"`
-	Language             *Language `json:"language"`
-	SpellcheckOff        bool      `json:"spellcheck_off"`
-	Country              string    `json:"country"`
-	BadResults           bool      `json:"bad_results"`
-	ShouldFallback       bool      `json:"should_fallback"`
-	Lat                  string    `json:"lat"`
-	Long                 string    `json:"long"`
-	PostalCode           string    `json:"postal_code"`
-	City                 string    `json:"city"`
-	State                string    `json:"state"`
-	HeaderCountry        string    `json:"header_country"`
-	MoreResultsAvailable bool      `json:"more_results_available"`
-	CustomLocationLabel  string    `json:"custom_location_label"`
-	RedditCluster        string    `json:"reddit_cluster"`
-	SummaryKey           string    `json:"summary_key"`
-}
-
-type Language struct {
-	Main string `json:"main"`
-}
-
-type Mixed struct {
-	Type string `json:"type"`
-	Main []ResultReference
-	Top  []ResultReference
-	Side []ResultReference
-}
-
-type ResultReference struct {
-	Type  string `json:"type"`
-	Index int    `json:"index"`
-	All   bool   `json:"all"`
-}
-
-type Result struct {
-	Title          string   `json:"title"`
-	URL            string   `json:"url"`
-	IsSourceLocal  bool     `json:"is_source_local"`
-	IsSourceBoth   bool     `json:"is_source_both"`
-	Description    string   `json:"description"`
-	PageAge        string   `json:"page_age"`
-	PageFetched    string   `json:"page_fetched"`
-	Profile        *Profile `json:"profile"`
-	Language       string   `json:"language"`
-	FamilyFriendly bool     `json:"family_friendly"`
-}
-
 type Profile struct {
 	Name     string `json:"name"`
 	LongName string `json:"long_name"`
 	URL      string `json:"url"`
 	Image    string `json:"img"`
-}
-
-type NewsResult struct {
-	Result
-	MetaURL   MetaURL    `json:"meta_url"`
-	Source    string     `json:"source"`
-	Breaking  bool       `json:"breaking"`
-	Thumbnail *Thumbnail `json:"thumbnail"`
-	Age       string     `json:"age"`
-}
-
-type VideoResult struct {
-	Result
-	Type      string     `json:"type"`
-	Data      *VideoData `json:"video"`
-	MetaURL   MetaURL    `json:"meta_url"`
-	Thumbnail *Thumbnail `json:"thumbnail"`
-	Age       string     `json:"age"`
-}
-
-type VideoData struct {
-	Duration  *Duration  `json:"duration"`
-	Views     VideoViews `json:"views"`
-	Creator   string     `json:"creator"`
-	Publisher string     `json:"publisher"`
-	Thumbnail *Thumbnail `json:"thumbnail"`
-}
-
-type VideoViews int
-
-func (v *VideoViews) UnmarshalJSON(in []byte) error {
-	str := string(in)
-	if strings.Contains(str, `"`) {
-		str = strings.ToLower(strings.Trim(str, `"`))
-	}
-
-	// this is so stupid.
-	if strings.HasSuffix(str, "k") {
-		str = strings.TrimSuffix(str, "k") + "000"
-	} else if strings.HasSuffix(str, "m") {
-		str = strings.TrimSuffix(str, "m") + "000000"
-	}
-
-	vv, err := strconv.Atoi(str)
-	if err != nil {
-		return err
-	}
-
-	*v = VideoViews(vv)
-	return nil
 }
 
 type MetaURL struct {
@@ -150,70 +70,15 @@ type Thumbnail struct {
 	Alt             string `json:"alt"`
 }
 
-type SearchResult struct {
-	Result
-	Type          string      `json:"type"`
-	DeepResults   *DeepResult `json:"deep_results"`
-	Schemas       any         `json:"schemas"`
-	MetaURL       MetaURL     `json:"meta_url"`
-	Thumbnail     *Thumbnail  `json:"thumbnail"`
-	Age           string      `json:"age"`
-	Language      string      `json:"language"`
-	ContentType   string      `json:"content_type"`
-	ExtraSnippets []string    `json:"extra_snippets"`
-
-	Subtype        string          `json:"subtype"`
-	Article        *Article        `json:"article"`
-	Book           *Book           `json:"book"`
-	Cluster        []Result        `json:"cluster"`
-	ClusterType    string          `json:"cluster_type"`
-	CreativeWork   *CreativeWork   `json:"creative_work"`
-	FAQ            *FAQ            `json:"faq"`
-	Location       *LocationResult `json:"location"`
-	Movie          *MovieData      `json:"movie"`
-	MusicRecording *MusicRecording `json:"music_recording"`
-	ProductCluster []Product       `json:"product_cluster"`
-	QA             *QAPage         `json:"qa"`
-	Rating         *Rating         `json:"rating"`
-	Recipe         *Recipe         `json:"recipe"`
-	Review         *Review         `json:"review"`
-	Software       *Software       `json:"software"`
-	Video          *VideoData      `json:"video"`
-}
-
-type ImageResult struct {
-	Type        string           `json:"type"`
-	Title       string           `json:"title"`
-	URL         string           `json:"url"`
-	Source      string           `json:"source"`
-	PageFetched string           `json:"page_fetched"`
-	Thumbnail   *Thumbnail       `json:"thumbnail"`
-	Properties  *ImageProperties `json:"properties"`
-	MetaURL     *MetaURL         `json:"meta_url"`
-}
-
-type DeepResult struct {
-	News    []NewsResult            `json:"news"`
-	Buttons []ButtonResult          `json:"buttons"`
-	Social  []KnowledgeGraphProfile `json:"social"`
-	Videos  []VideoResult           `json:"videos"`
-	Images  []Image                 `json:"images"`
-}
-
-type ButtonResult struct {
-	Type  string `json:"type"`
-	Title string `json:"title"`
-	URL   string `json:"url"`
+type VideoData struct {
+	Duration  string     `json:"duration"`
+	Views     string     `json:"views"`
+	Creator   string     `json:"creator"`
+	Publisher string     `json:"publisher"`
+	Thumbnail *Thumbnail `json:"thumbnail"`
 }
 
 type KnowledgeGraphProfile struct {
-	KnowledgeGraphEntity
-
-	URL         string `json:"url"`
-	Description string `json:"description"`
-}
-
-type KnowledgeGraphEntity struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	URL         *URL   `json:"url"`
@@ -252,28 +117,49 @@ type ImageProperties struct {
 	Placeholder string `json:"placeholder"`
 }
 
-type LocationResult struct {
-	Result
+type Article struct {
+	Author              []Person      `json:"author"`
+	Date                string        `json:"date"`
+	Publisher           *Organization `json:"publisher"`
+	Thumbnail           *Thumbnail    `json:"thumbnail"`
+	IsAccessibleForFree bool          `json:"isAccessibleForFree"`
+}
 
-	Type           string          `json:"type"`
-	ProviderURL    string          `json:"provider_url"`
-	Coordinates    []float32       `json:"coordinates"`
-	ZoomLevel      int             `json:"zoom_level"`
-	Thumbnail      *Thumbnail      `json:"thumbnail"`
-	PostalAddress  *PostalAddress  `json:"postal_address"`
-	OpeningHours   *OpeningHours   `json:"opening_hours"`
-	Contact        *Contact        `json:"contact"`
-	PriceRange     string          `json:"price_range"`
-	Rating         *Rating         `json:"rating"`
-	Distance       *Unit           `json:"distance"`
-	Profiles       []DataProvider  `json:"profiles"`
-	Reviews        *Reviews        `json:"reviews"`
-	Pictures       *PictureResults `json:"pictures"`
-	ServesCuisine  []string        `json:"serves_cuisine"`
-	Timezone       string          `json:"timezone"`
-	TimezoneOffset float32         `json:"timezone_offset"`
-	Categories     []string        `json:"categories"`
-	IconCategory   string          `json:"icon_category"`
+type Organization struct {
+	Type      string     `json:"type"`
+	Name      string     `json:"name"`
+	Thumbnail *Thumbnail `json:"thumbnail"`
+}
+
+type CreativeWork struct {
+	Name      string     `json:"name"`
+	Thumbnail *Thumbnail `json:"thumbnail"`
+	Rating    *Rating    `json:"rating"`
+}
+
+type MusicRecording struct {
+	Name      string     `json:"name"`
+	Thumbnail *Thumbnail `json:"thumbnail"`
+	Rating    *Rating    `json:"rating"`
+}
+
+type Review struct {
+	Type        string     `json:"type"`
+	Name        string     `json:"name"`
+	Thumbnail   *Thumbnail `json:"thumbnail"`
+	Description string     `json:"description"`
+	Rating      *Rating    `json:"rating"`
+}
+
+type Software struct {
+	Name           string `json:"name"`
+	Author         string `json:"author"`
+	Version        string `json:"version"`
+	CodeRepository string `json:"codeRepository"`
+	Homepage       string `json:"homepage"`
+	DatePublished  string `json:"datePublisher"`
+	IsNPM          bool   `json:"is_npm"`
+	IsPyPi         bool   `json:"is_pypi"`
 }
 
 type PostalAddress struct {
@@ -318,9 +204,9 @@ type Recipe struct {
 	URL            string     `json:"url"`
 	Domain         string     `json:"domain"`
 	Favicon        string     `json:"favicon"`
-	Time           *Duration  `json:"time"`
-	PrepTime       *Duration  `json:"prep_time"`
-	CookTime       *Duration  `json:"cook_time"`
+	Time           string     `json:"time"`
+	PrepTime       string     `json:"prep_time"`
+	CookTime       string     `json:"cook_time"`
 	Ingredients    string     `json:"ingredients"`
 	Instructions   []HowTo    `json:"instructions"`
 	Servings       int        `json:"servings"`
@@ -374,11 +260,6 @@ type Person struct {
 	Thumbnail *Thumbnail `json:"thumbnail"`
 }
 
-type PictureResults struct {
-	Results     []Thumbnail `json:"results"`
-	ViewMoreURL string      `json:"viewMoreUrl"`
-}
-
 type MovieData struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
@@ -422,7 +303,7 @@ type Book struct {
 	Author    []Person `json:"author"`
 	Date      string   `json:"date"`
 	Price     *Price   `json:"price"`
-	Pages     Number   `json:"pages"`
+	Pages     int      `json:"pages"`
 	Publisher *Person  `json:"publisher"`
 	Rating    *Rating  `json:"rating"`
 }
@@ -432,112 +313,20 @@ type Price struct {
 	PriceCurrency string `json:"price_currency"`
 }
 
-type Article struct {
-	Author              []Person      `json:"author"`
-	Date                string        `json:"date"`
-	Publisher           *Organization `json:"publisher"`
-	Thumbnail           *Thumbnail    `json:"thumbnail"`
-	IsAccessibleForFree bool          `json:"isAccessibleForFree"`
-}
-
-type Organization struct {
-	Type      string     `json:"type"`
-	Name      string     `json:"name"`
-	Thumbnail *Thumbnail `json:"thumbnail"`
-}
-
-type CreativeWork struct {
-	Name      string     `json:"name"`
-	Thumbnail *Thumbnail `json:"thumbnail"`
-	Rating    *Rating    `json:"rating"`
-}
-
-type MusicRecording struct {
-	Name      string     `json:"name"`
-	Thumbnail *Thumbnail `json:"thumbnail"`
-	Rating    *Rating    `json:"rating"`
-}
-
-type Review struct {
+type Product struct {
 	Type        string     `json:"type"`
 	Name        string     `json:"name"`
+	Price       string     `json:"price"`
 	Thumbnail   *Thumbnail `json:"thumbnail"`
 	Description string     `json:"description"`
+	Offers      []Offer    `json:"offers"`
 	Rating      *Rating    `json:"rating"`
 }
 
-type Software struct {
-	Name           string `json:"name"`
-	Author         string `json:"author"`
-	Version        string `json:"version"`
-	CodeRepository string `json:"codeRepository"`
-	Homepage       string `json:"homepage"`
-	DatePublished  string `json:"datePublisher"`
-	IsNPM          bool   `json:"is_npm"`
-	IsPyPi         bool   `json:"is_pypi"`
-}
-
-type Summarizer struct {
-	Type string `json:"type"`
-	Key  string `json:"key"`
-}
-
-type SummaryMessage struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
-}
-
-type SummaryEnrichments struct {
-	Raw      string           `json:"raw"`
-	Images   []Image          `json:"images"`
-	QA       []SummaryAnswer  `json:"qa"`
-	Entities []SummaryEntity  `json:"entities"`
-	Context  []SummaryContext `json:"context"`
-}
-
-type SummaryAnswer struct {
-	Answer    string        `json:"answer"`
-	Score     float32       `json:"score"`
-	Highlight *TextLocation `json:"highlight"`
-}
-
-type SummaryEntity struct {
-	UUID      string         `json:"uuid"`
-	Name      string         `json:"name"`
-	URL       string         `json:"url"`
-	Text      string         `json:"text"`
-	Images    []Image        `json:"images"`
-	Highlight []TextLocation `json:"highlight"`
-}
-
-type SummaryContext struct {
-	Title   string   `json:"title"`
-	URL     string   `json:"url"`
-	MetaURL *MetaURL `json:"meta_url"`
-}
-
-type TextLocation struct {
-	Start Number `json:"start"`
-	End   Number `json:"end"`
-}
-
-type SuggestResult struct {
-	Query       string `json:"string"`
-	IsEntity    bool   `json:"is_entity"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Image       string `json:"img"`
-}
-
-type SpellcheckResultItem struct {
-	Query string `json:"query"`
-}
-
-type DiscussionResult struct {
-	SearchResult
-
-	Type string    `json:"type"`
-	Data ForumData `json:"data"`
+type Offer struct {
+	URL           string `json:"url"`
+	Price         string `json:"price"`
+	PriceCurrency string `json:"priceCurrency"`
 }
 
 type ForumData struct {
@@ -546,6 +335,187 @@ type ForumData struct {
 	Score      string `json:"score"`
 	Question   string `json:"question"`
 	TopComment string `json:"top_comment"`
+}
+
+type Mixed struct {
+	Type string `json:"type"`
+	Main []ResultReference
+	Top  []ResultReference
+	Side []ResultReference
+}
+
+type ResultReference struct {
+	Type  string `json:"type"`
+	Index int    `json:"index"`
+	All   bool   `json:"all"`
+}
+
+type Query struct {
+	Original             string    `json:"original"`
+	ShowStrictWarning    bool      `json:"show_strict_warning"`
+	Altered              string    `json:"altered"`
+	Safesearch           bool      `json:"safesearch"`
+	IsNavigational       bool      `json:"is_navigational"`
+	IsGeolocal           bool      `json:"is_geolocal"`
+	LocalDecision        string    `json:"local_decision"`
+	LocalLocationsIdx    int       `json:"local_locations_idx"`
+	IsTrending           bool      `json:"is_trending"`
+	IsNewsBreaking       bool      `json:"is_news_breaking"`
+	AskForLocation       bool      `json:"ask_for_location"`
+	Language             *Language `json:"language"`
+	SpellcheckOff        bool      `json:"spellcheck_off"`
+	Country              string    `json:"country"`
+	BadResults           bool      `json:"bad_results"`
+	ShouldFallback       bool      `json:"should_fallback"`
+	Lat                  string    `json:"lat"`
+	Long                 string    `json:"long"`
+	PostalCode           string    `json:"postal_code"`
+	City                 string    `json:"city"`
+	State                string    `json:"state"`
+	HeaderCountry        string    `json:"header_country"`
+	MoreResultsAvailable bool      `json:"more_results_available"`
+	CustomLocationLabel  string    `json:"custom_location_label"`
+	RedditCluster        string    `json:"reddit_cluster"`
+	SummaryKey           string    `json:"summary_key"`
+}
+
+type Language struct {
+	Main string `json:"main"`
+}
+
+type Summarizer struct {
+	Type string `json:"type"`
+	Key  string `json:"key"`
+}
+
+type ErrorMeta struct {
+	Component string           `json:"component"`
+	Errors    []ErrorMetaError `json:"errors"`
+}
+
+type ErrorMetaError struct {
+	Loc     []string     `json:"loc"`
+	Message string       `json:"msg"`
+	Type    string       `json:"type"`
+	Context ErrorContext `json:"ctx"`
+	Input   string       `json:"input"`
+}
+
+type ErrorContext struct {
+	EnumValues []string `json:"enum_values"`
+}
+
+type SpellcheckResultItem struct {
+	Query string `json:"query"`
+}
+
+// RESULTS
+
+type Result struct {
+	Title          string   `json:"title"`
+	URL            string   `json:"url"`
+	IsSourceLocal  bool     `json:"is_source_local"`
+	IsSourceBoth   bool     `json:"is_source_both"`
+	Description    string   `json:"description"`
+	PageAge        string   `json:"page_age"`
+	PageFetched    string   `json:"page_fetched"`
+	Profile        *Profile `json:"profile"`
+	Language       string   `json:"language"`
+	FamilyFriendly bool     `json:"family_friendly"`
+}
+
+type NewsResult struct {
+	Result
+	MetaURL   MetaURL    `json:"meta_url"`
+	Source    string     `json:"source"`
+	Breaking  bool       `json:"breaking"`
+	Thumbnail *Thumbnail `json:"thumbnail"`
+	Age       string     `json:"age"`
+}
+
+type VideoResult struct {
+	Result
+	Type      string     `json:"type"`
+	Data      *VideoData `json:"video"`
+	MetaURL   MetaURL    `json:"meta_url"`
+	Thumbnail *Thumbnail `json:"thumbnail"`
+	Age       string     `json:"age"`
+}
+
+type SearchResult struct {
+	Result
+	Type          string      `json:"type"`
+	DeepResults   *DeepResult `json:"deep_results"`
+	Schemas       any         `json:"schemas"`
+	MetaURL       MetaURL     `json:"meta_url"`
+	Thumbnail     *Thumbnail  `json:"thumbnail"`
+	Age           string      `json:"age"`
+	Language      string      `json:"language"`
+	ContentType   string      `json:"content_type"`
+	ExtraSnippets []string    `json:"extra_snippets"`
+
+	Subtype        string          `json:"subtype"`
+	Article        *Article        `json:"article"`
+	Book           *Book           `json:"book"`
+	Cluster        []Result        `json:"cluster"`
+	ClusterType    string          `json:"cluster_type"`
+	CreativeWork   *CreativeWork   `json:"creative_work"`
+	FAQ            *FAQ            `json:"faq"`
+	Location       *LocationResult `json:"location"`
+	Movie          *MovieData      `json:"movie"`
+	MusicRecording *MusicRecording `json:"music_recording"`
+	ProductCluster []Product       `json:"product_cluster"`
+	QA             *QAPage         `json:"qa"`
+	Rating         *Rating         `json:"rating"`
+	Recipe         *Recipe         `json:"recipe"`
+	Review         *Review         `json:"review"`
+	Software       *Software       `json:"software"`
+	Video          *VideoData      `json:"video"`
+}
+
+type DeepResult struct {
+	News    []NewsResult            `json:"news"`
+	Buttons []ButtonResult          `json:"buttons"`
+	Social  []KnowledgeGraphProfile `json:"social"`
+	Videos  []VideoResult           `json:"videos"`
+	Images  []Image                 `json:"images"`
+}
+
+type ButtonResult struct {
+	Type  string `json:"type"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
+
+type LocationResult struct {
+	Result
+
+	Type           string          `json:"type"`
+	ProviderURL    string          `json:"provider_url"`
+	Coordinates    []float32       `json:"coordinates"`
+	ZoomLevel      int             `json:"zoom_level"`
+	Thumbnail      *Thumbnail      `json:"thumbnail"`
+	PostalAddress  *PostalAddress  `json:"postal_address"`
+	OpeningHours   *OpeningHours   `json:"opening_hours"`
+	Contact        *Contact        `json:"contact"`
+	PriceRange     string          `json:"price_range"`
+	Rating         *Rating         `json:"rating"`
+	Distance       *Unit           `json:"distance"`
+	Profiles       []DataProvider  `json:"profiles"`
+	Reviews        *Reviews        `json:"reviews"`
+	Pictures       *PictureResults `json:"pictures"`
+	ServesCuisine  []string        `json:"serves_cuisine"`
+	Timezone       string          `json:"timezone"`
+	TimezoneOffset float32         `json:"timezone_offset"`
+	Categories     []string        `json:"categories"`
+	IconCategory   string          `json:"icon_category"`
+}
+
+type DiscussionResult struct {
+	SearchResult
+
+	Type string    `json:"type"`
+	Data ForumData `json:"data"`
 }
 
 type GraphInfoBox struct {
@@ -573,21 +543,23 @@ type GraphInfoBox struct {
 	Coordinates     []float32       `json:"coordinates"`
 }
 
-type Product struct {
-	Type        string     `json:"type"`
-	Name        string     `json:"name"`
-	Price       string     `json:"price"`
-	Thumbnail   *Thumbnail `json:"thumbnail"`
-	Description string     `json:"description"`
-	Offers      []Offer    `json:"offers"`
-	Rating      *Rating    `json:"rating"`
+type PictureResults struct {
+	Results     []Thumbnail `json:"results"`
+	ViewMoreURL string      `json:"viewMoreUrl"`
 }
 
-type Offer struct {
-	URL           string `json:"url"`
-	Price         string `json:"price"`
-	PriceCurrency string `json:"priceCurrency"`
+type ImageResult struct {
+	Type        string           `json:"type"`
+	Title       string           `json:"title"`
+	URL         string           `json:"url"`
+	Source      string           `json:"source"`
+	PageFetched string           `json:"page_fetched"`
+	Thumbnail   *Thumbnail       `json:"thumbnail"`
+	Properties  *ImageProperties `json:"properties"`
+	MetaURL     *MetaURL         `json:"meta_url"`
 }
+
+// AGGREGATE
 
 type ErrorResponse struct {
 	ID       string    `json:"id"`
@@ -603,104 +575,32 @@ func (er ErrorResponse) Error() string {
 	return er.Detail
 }
 
-func (er ErrorResponse) Format(f fmt.State, c rune) {
-	switch c {
-	case 'v':
-		if f.Flag('+') {
-			meta := make([]string, 0, len(er.Meta.Errors))
-			for _, e := range er.Meta.Errors {
-				meta = append(meta,
-					fmt.Sprintf(
-						"(type [%s]; loc [%s]; input [%s]; msg [%s])",
-						e.Type, strings.Join(e.Loc, "."), e.Input, e.Message))
-			}
-
-			fmt.Fprintf(f, "error: %s (ID: %s; Status: %d; Code: %s RawQuery: %s); details: %s",
-				er.Detail, er.ID, er.Status, er.Code, strings.Join(meta, ", "), er.RawQuery)
-		} else {
-			fmt.Fprint(f, er.Detail)
-		}
-	case 's':
-		fmt.Fprint(f, er.Detail)
-	case 'q':
-		fmt.Fprintf(f, "%q", er.Detail)
-	default:
-		fmt.Fprint(f, er.Detail)
-	}
+type WebSearchResult struct {
+	Type        string                             `json:"type"`
+	Discussions *ResultContainer[DiscussionResult] `json:"discussions"`
+	FAQ         *ResultContainer[QA]               `json:"faq"`
+	InfoBox     *ResultContainer[GraphInfoBox]     `json:"infobox"`
+	Locations   *ResultContainer[LocationResult]   `json:"locations"`
+	Mixed       *Mixed                             `json:"mixed"`
+	News        *ResultContainer[NewsResult]       `json:"news"`
+	Query       *Query                             `json:"query"`
+	Videos      *ResultContainer[VideoResult]      `json:"videos"`
+	Web         *ResultContainer[SearchResult]     `json:"web"`
+	Summarizer  *Summarizer                        `json:"summarizer"`
 }
 
-type ErrorMeta struct {
-	Component string           `json:"component"`
-	Errors    []ErrorMetaError `json:"errors"`
+type ImageSearchResult struct {
+	ResultContainer[ImageResult]
+	Query *Query `json:"query"`
 }
 
-type ErrorMetaError struct {
-	Loc     []string     `json:"loc"`
-	Message string       `json:"msg"`
-	Type    string       `json:"type"`
-	Context ErrorContext `json:"ctx"`
-	Input   string       `json:"input"`
+type VideoSearchResult struct {
+	ResultContainer[VideoResult]
+	Query *Query `json:"query"`
 }
 
-type ErrorContext struct {
-	EnumValues []string `json:"enum_values"`
+type SpellcheckResult struct {
+	Type    string                 `json:"type"`
+	Query   *Query                 `json:"query"`
+	Results []SpellcheckResultItem `json:"results"`
 }
-
-type Duration time.Duration
-
-func (d *Duration) Duration() *time.Duration {
-	if d == nil {
-		return nil
-	}
-
-	tt := time.Duration(*d)
-	return &tt
-}
-
-func (d *Duration) UnmarshalJSON(in []byte) error {
-	str := string(in)
-	if !strings.Contains(str, `"`) {
-		return nil
-	}
-
-	str = strings.Trim(string(in), `"`)
-	matches := durationRegex.FindAllString(str, -1)
-	if l := len(matches); l < 3 {
-		for l < 3 {
-			matches = append([]string{"00"}, matches...)
-			l++
-		}
-	}
-
-	dur, err := time.ParseDuration(fmt.Sprintf("%sh%sm%ss", matches[0], matches[1], matches[2]))
-	if err != nil {
-		return err
-	}
-
-	*d = Duration(dur)
-	return nil
-}
-
-type Number int
-
-func (n *Number) UnmarshalJSON(b []byte) error {
-	str := string(b)
-	str = strings.Trim(str, `"`)
-	num, err := strconv.Atoi(str)
-	if err != nil {
-		return nil
-	}
-
-	*n = Number(num)
-	return nil
-}
-
-var (
-	timeFormats = []string{
-		time.RFC3339,
-		"2006-01-02T15:04:05",
-		"January 2, 2006",
-	}
-
-	durationRegex = regexp.MustCompile(`(\d{1,2})`)
-)
