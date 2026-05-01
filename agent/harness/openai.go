@@ -51,6 +51,7 @@ func (r *OpenAiFlow[C]) runModel(ctx C, in agent.Message) (optional.Optional[[]a
 	result, err := r.Model.Chat(context.Background(), []agent.Message{in})
 	if err != nil {
 		return optional.Empty[[]agent.Message](), optional.Of(agent.Message{
+			Context: in.Context,
 			Type:    agent.MessageType_Error,
 			Message: err.Error(),
 			Raw:     "",
@@ -77,6 +78,7 @@ func (r *OpenAiFlow[C]) toolRequest(ctx C, in agent.Message) (optional.Optional[
 			result, err := tool.Execute(toolCall.Function.Arguments)
 			if err != nil {
 				return optional.Empty[[]agent.Message](), optional.Of(agent.Message{
+					Context: in.Context,
 					Type:    agent.MessageType_Error,
 					Message: err.Error(),
 					Raw:     "",
@@ -86,6 +88,7 @@ func (r *OpenAiFlow[C]) toolRequest(ctx C, in agent.Message) (optional.Optional[
 			toolDataRaw, toolMarshallErr := agent.ToolDataFormat.Marshal(toolData)
 			if toolMarshallErr != nil {
 				return optional.Empty[[]agent.Message](), optional.Of(agent.Message{
+					Context: in.Context,
 					Type:    agent.MessageType_Error,
 					Message: toolMarshallErr.Error(),
 					Raw:     "",
@@ -93,6 +96,7 @@ func (r *OpenAiFlow[C]) toolRequest(ctx C, in agent.Message) (optional.Optional[
 			}
 
 			messages = append(messages, agent.Message{
+				Context: in.Context,
 				Type:    agent.MessageType_ToolResult,
 				Message: result,
 				Raw:     string(toolDataRaw),

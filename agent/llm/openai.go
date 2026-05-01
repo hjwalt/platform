@@ -54,14 +54,15 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 			{
 				modelMessage = append(modelMessage, openai.UserMessage(message.Message))
 			}
-		case agent.MessageType_ToolRequest, agent.MessageType_Agent:
-			{
-				rawMessage, unmarshallErr := OpenAiMessageFormat.Unmarshal([]byte(message.Raw))
-				if unmarshallErr != nil {
-					return []agent.Message{}, unmarshallErr
-				}
-				modelMessage = append(modelMessage, rawMessage.ToParam())
-			}
+		// having tool request in the history chain seems to throw the model in a pickle generating broken tool requests
+		// case agent.MessageType_ToolRequest, agent.MessageType_Agent:
+		// 	{
+		// 		rawMessage, unmarshallErr := OpenAiMessageFormat.Unmarshal([]byte(message.Raw))
+		// 		if unmarshallErr != nil {
+		// 			return []agent.Message{}, unmarshallErr
+		// 		}
+		// 		modelMessage = append(modelMessage, rawMessage.ToParam())
+		// 	}
 		case agent.MessageType_ToolResult:
 			{
 				toolData, unmarshallErr := agent.ToolDataFormat.Unmarshal([]byte(message.Raw))
@@ -83,6 +84,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 	completion, err := r.client.Chat.Completions.New(ctx, params)
 	if err != nil {
 		return []agent.Message{{
+			Context: messages[0].Context,
 			Type:    agent.MessageType_Error,
 			Message: err.Error(),
 			Raw:     "",
@@ -97,6 +99,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 		case "stop":
 			{
 				outputMessages = append(outputMessages, agent.Message{
+					Context: messages[0].Context,
 					Type:    agent.MessageType_Agent,
 					Message: choice.Message.Content,
 					Raw:     string(raw),
@@ -105,6 +108,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 		case "tool_calls":
 			{
 				outputMessages = append(outputMessages, agent.Message{
+					Context: messages[0].Context,
 					Type:    agent.MessageType_ToolRequest,
 					Message: choice.Message.Content,
 					Raw:     string(raw),

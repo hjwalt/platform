@@ -4,11 +4,6 @@ import (
 	"context"
 
 	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/reflect"
-)
-
-const (
-	IdContextKey = "RAG_ID_KEY"
 )
 
 func Rag(model agent.LanguageModel, store Store) agent.LanguageModel {
@@ -31,7 +26,7 @@ func (r *RagModel) Stop() {
 }
 
 func (r *RagModel) Chat(ctx context.Context, messages []agent.Message) ([]agent.Message, error) {
-	id := reflect.GetString(ctx.Value(IdContextKey))
+	id := messages[0].Context
 	if id == "" {
 		id = "DEFAULT"
 	}

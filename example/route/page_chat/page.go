@@ -30,7 +30,7 @@ type model struct {
 }
 
 func get(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
-	messages, _ := c.RagStore.GetAll("DEFAULT")
+	messages, _ := c.RagStore.GetAll("web")
 
 	messageViews := make([]render.View, 0)
 	for _, message := range messages {
@@ -62,6 +62,7 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
 			{
 				Value: agent.Message{
+					Context: "web",
 					Type:    agent.MessageType_User,
 					Message: message[0],
 				},
@@ -72,6 +73,7 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	} else {
 		return chat_list.View([]render.View{
 			chat_item.View(agent.Message{
+				Context: "web",
 				Type:    agent.MessageType_User,
 				Message: "no message received",
 				Raw:     "",

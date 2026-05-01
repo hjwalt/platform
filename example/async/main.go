@@ -33,6 +33,7 @@ func main() {
 	messageFormat := format.Json[agent.Message]()
 
 	initialMessage, _ := messageFormat.Marshal(agent.Message{
+		Context: "local",
 		Type:    agent.MessageType_User,
 		Message: "what is the weather in Jakarta right now",
 		Raw:     "",

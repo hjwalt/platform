@@ -17,6 +17,7 @@ const (
 )
 
 type Message struct {
+	Context string
 	Type    string
 	Message string
 	Raw     string
