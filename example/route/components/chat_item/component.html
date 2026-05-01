@@ -1,3 +1,8 @@
 <wa-card>
-  {{ .Model.Message }}
+
+  <wa-markdown>
+    <script type="text/markdown">
+{{ .Model.Message }}
+    </script>
+  </wa-markdown>
 </wa-card>

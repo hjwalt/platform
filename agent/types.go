@@ -1,6 +1,11 @@
 package agent
 
-import "github.com/hjwalt/platform/format"
+import (
+	"context"
+
+	"github.com/hjwalt/platform/format"
+	"github.com/hjwalt/platform/runtime"
+)
 
 const (
 	MessageType_User        = "USER"
@@ -16,8 +21,18 @@ type Message struct {
 	Raw     string
 }
 
+type Tool interface {
+	Execute(string) (string, error)
+}
+
 type ToolData struct {
-	Id string
+	Id   string
+	Name string
+}
+
+type LanguageModel interface {
+	runtime.Runtime
+	Chat(context.Context, []Message) ([]Message, error)
 }
 
 var (

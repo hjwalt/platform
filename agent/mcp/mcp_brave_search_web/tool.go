@@ -6,9 +6,11 @@ import (
 	"net/http"
 
 	"github.com/google/jsonschema-go/jsonschema"
+	"github.com/hjwalt/platform/agent"
 	brave "github.com/hjwalt/platform/agent/tool/brave_search"
 	"github.com/hjwalt/platform/agent/tool/brave_search_web"
 	"github.com/hjwalt/platform/environment"
+	"github.com/hjwalt/platform/format"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -79,6 +81,58 @@ func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params *
 	return nil, &Response{Results: results}, err
 }
 
+func (t *Tool) internal(params *Request) (*Response, error) {
+	success, err := brave_search_web.WebSearch(
+		context.Background(),
+		t.Brave,
+		[]brave.Param{
+			brave_search_web.WithTerm(params.Term),
+		},
+		[]brave.Header{
+			brave_search_web.WithSubscriptionToken(t.ApiKey),
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]SearchResult, len(success.Web.Results))
+	for i, braveResults := range success.Web.Results {
+		results[i] = SearchResult{
+			Title:         braveResults.Title,
+			URL:           braveResults.URL,
+			Description:   braveResults.Description,
+			Language:      braveResults.Language,
+			ContentType:   braveResults.ContentType,
+			ExtraSnippets: braveResults.ExtraSnippets,
+		}
+	}
+
+	slog.Info("search", "request", params, "response", len(results))
+
+	return &Response{Results: results}, err
+}
+
+func (t *Tool) Execute(input string) (string, error) {
+	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
+	if requestParseErr != nil {
+		return "", requestParseErr
+	}
+
+	response, internalErr := t.internal(&request)
+	if internalErr != nil {
+		return "", internalErr
+	}
+
+	output, marshalErr := ResponseFormat.Marshal(*response)
+	if marshalErr != nil {
+		return "", marshalErr
+	}
+
+	return string(output), nil
+}
+
 func Add(server *mcp.Server) {
 	defaultTool()
 
@@ -99,3 +153,14 @@ func Add(server *mcp.Server) {
 		global.Behaviour,
 	)
 }
+
+func Instance() agent.Tool {
+	defaultTool()
+
+	return global
+}
+
+var (
+	RequestFormat  = format.Json[Request]()
+	ResponseFormat = format.Json[Response]()
+)

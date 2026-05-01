@@ -1,7 +1,6 @@
 package page_chat
 
 import (
-	"context"
 	"embed"
 	"log/slog"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"github.com/hjwalt/platform/example/route/components/chat_list"
 	"github.com/hjwalt/platform/example/route/layout"
 	"github.com/hjwalt/platform/example/route/page_error_500"
+	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/web/render"
 	"github.com/hjwalt/platform/web/route"
 )
@@ -27,46 +27,23 @@ const (
 )
 
 type model struct {
-	Messages []agent.Message
 }
 
 func get(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	messages, _ := c.RagStore.GetAll("DEFAULT")
+
+	messageViews := make([]render.View, 0)
+	for _, message := range messages {
+		messageViews = append(messageViews, chat_item.View(message))
+	}
+
 	return layout.Dashboard(
 		component_sidebar.View(),
 		render.Component(
 			html,
-			model{
-				Messages: []agent.Message{
-					{
-						Type:    agent.MessageType_User,
-						Message: "hello world",
-						Raw:     "",
-					},
-					{
-						Type:    agent.MessageType_Agent,
-						Message: "hello world back",
-						Raw:     "",
-					},
-					{
-						Type:    agent.MessageType_ToolRequest,
-						Message: "hello world back",
-						Raw:     "",
-					},
-				},
-			},
+			model{},
 			map[string]render.View{
-				"chats": chat_list.View([]render.View{
-					chat_item.View(agent.Message{
-						Type:    agent.MessageType_User,
-						Message: "hello world",
-						Raw:     "",
-					}),
-					chat_item.View(agent.Message{
-						Type:    agent.MessageType_User,
-						Message: "hello world",
-						Raw:     "",
-					}),
-				}),
+				"chats": chat_list.View(messageViews),
 			},
 			[]render.View{},
 		)), nil
@@ -82,31 +59,16 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	slog.Info("", "form", r.PostForm)
 	if message, exists := r.PostForm["message"]; exists && len(message) > 0 {
 
-		agentMessage := []agent.Message{
+		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
 			{
-				Type:    agent.MessageType_User,
-				Message: message[0],
+				Value: agent.Message{
+					Type:    agent.MessageType_User,
+					Message: message[0],
+				},
 			},
-		}
+		})
 
-		chatResult, err := c.Chat.Chat(context.Background(), agentMessage)
-		if err != nil {
-			return nil, err
-		}
-
-		results := []render.View{
-			chat_item.View(agent.Message{
-				Type:    agent.MessageType_User,
-				Message: message[0],
-				Raw:     "",
-			}),
-		}
-
-		for _, agentMessage := range chatResult {
-			results = append(results, chat_item.View(agentMessage))
-		}
-
-		return chat_list.View(results), nil
+		return chat_list.View([]render.View{}), nil
 	} else {
 		return chat_list.View([]render.View{
 			chat_item.View(agent.Message{

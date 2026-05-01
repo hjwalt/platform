@@ -2,7 +2,6 @@ package memory
 
 import (
 	"context"
-	"log/slog"
 	"time"
 
 	"github.com/hjwalt/platform/message"
@@ -33,8 +32,8 @@ func (r *MemoryConsumer) Loop(ctx context.Context, cancel context.CancelFunc) er
 	select {
 	case msg := <-r.Channel:
 		r.Handler.Handle(ctx, msg)
-	case <-time.After(10 * time.Second):
-		slog.Info("memory consumer timeout, iterate")
+	case <-time.After(1 * time.Second):
+		// slog.Info("memory consumer timeout, iterate")
 	}
 	return nil
 }

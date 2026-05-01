@@ -8,6 +8,10 @@ import (
 	"github.com/hjwalt/platform/message/memory"
 )
 
+func New() flow.MessageRuntime[memory.MemoryMetadata] {
+	return &MemoryRuntime{}
+}
+
 type MemoryRuntime struct {
 }
 

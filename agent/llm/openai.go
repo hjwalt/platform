@@ -3,13 +3,14 @@ package llm
 import (
 	"context"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/format"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 )
 
-func OpenAi(config OpenAiModelConfig) LanguageModel {
+func OpenAi(config OpenAiModelConfig) agent.LanguageModel {
 	return &OpenAiModel{
 		Model:    config.Model,
 		Endpoint: config.Endpoint,
@@ -53,7 +54,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 			{
 				modelMessage = append(modelMessage, openai.UserMessage(message.Message))
 			}
-		case agent.MessageType_ToolRequest:
+		case agent.MessageType_ToolRequest, agent.MessageType_Agent:
 			{
 				rawMessage, unmarshallErr := OpenAiMessageFormat.Unmarshal([]byte(message.Raw))
 				if unmarshallErr != nil {
@@ -115,6 +116,19 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 	return outputMessages, nil
 }
 
+func OpenAiToolSchema[M any](name string, description string) openai.ChatCompletionToolUnionParam {
+	opts := &jsonschema.ForOptions{}
+	toolSchema, _ := jsonschema.For[M](opts)
+	unmarshalled, _ := format.Convert(toolSchema, schemaFormat, openAiFormat)
+	return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
+		Name:        name,
+		Description: openai.String(description),
+		Parameters:  unmarshalled,
+	})
+}
+
 var (
 	OpenAiMessageFormat = format.Json[openai.ChatCompletionMessage]()
+	schemaFormat        = format.Json[*jsonschema.Schema]()
+	openAiFormat        = format.Json[openai.FunctionParameters]()
 )
