@@ -17,7 +17,7 @@ func (p *RouteHandler[C]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var ctxErr error
 	for _, decorator := range p.Decorators {
-		ctx, ctxErr = decorator(ctx, w, r)
+		ctx, ctxErr = decorator.Decorate(ctx, w, r)
 		if ctxErr != nil {
 			p.Handler.Error(ctx, w, r, ctxErr)
 			return

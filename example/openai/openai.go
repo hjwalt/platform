@@ -13,7 +13,7 @@ import (
 func main() {
 	ctx := context.Background()
 	client := openai.NewClient(
-		option.WithBaseURL("http://localhost:8000/api/v1"),
+		option.WithBaseURL("http://localhost:13305/api/v1"),
 		option.WithAPIKey("My API Key"), // defaults to os.LookupEnv("OPENAI_API_KEY")
 	)
 

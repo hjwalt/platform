@@ -1,0 +1,120 @@
+package llm
+
+import (
+	"context"
+
+	"github.com/hjwalt/platform/agent"
+	"github.com/hjwalt/platform/format"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
+)
+
+func OpenAi(config OpenAiModelConfig) LanguageModel {
+	return &OpenAiModel{
+		Model:    config.Model,
+		Endpoint: config.Endpoint,
+		Secret:   config.Secret,
+		Tools:    config.Tools,
+	}
+}
+
+type OpenAiModelConfig struct {
+	Model    string
+	Endpoint string
+	Secret   string
+	Tools    []openai.ChatCompletionToolUnionParam
+}
+
+type OpenAiModel struct {
+	Model    string
+	Endpoint string
+	Secret   string
+	Tools    []openai.ChatCompletionToolUnionParam
+	client   openai.Client
+}
+
+func (r *OpenAiModel) Start() error {
+	r.client = openai.NewClient(
+		option.WithBaseURL(r.Endpoint),
+		option.WithAPIKey(r.Secret), // defaults to os.LookupEnv("OPENAI_API_KEY")
+	)
+
+	return nil
+}
+
+func (r *OpenAiModel) Stop() {
+}
+
+func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]agent.Message, error) {
+	modelMessage := make([]openai.ChatCompletionMessageParamUnion, 0)
+	for _, message := range messages {
+		switch message.Type {
+		case agent.MessageType_User:
+			{
+				modelMessage = append(modelMessage, openai.UserMessage(message.Message))
+			}
+		case agent.MessageType_ToolRequest:
+			{
+				rawMessage, unmarshallErr := OpenAiMessageFormat.Unmarshal([]byte(message.Raw))
+				if unmarshallErr != nil {
+					return []agent.Message{}, unmarshallErr
+				}
+				modelMessage = append(modelMessage, rawMessage.ToParam())
+			}
+		case agent.MessageType_ToolResult:
+			{
+				toolData, unmarshallErr := agent.ToolDataFormat.Unmarshal([]byte(message.Raw))
+				if unmarshallErr != nil {
+					return []agent.Message{}, unmarshallErr
+				}
+				modelMessage = append(modelMessage, openai.ToolMessage(message.Message, toolData.Id))
+			}
+		}
+	}
+
+	params := openai.ChatCompletionNewParams{
+		Messages: modelMessage,
+		Seed:     openai.Int(0),
+		Model:    r.Model,
+		Tools:    r.Tools,
+	}
+
+	completion, err := r.client.Chat.Completions.New(ctx, params)
+	if err != nil {
+		return []agent.Message{{
+			Type:    agent.MessageType_Error,
+			Message: err.Error(),
+			Raw:     "",
+		}}, err
+	}
+
+	outputMessages := make([]agent.Message, 0)
+	for _, choice := range completion.Choices {
+		raw, _ := OpenAiMessageFormat.Marshal(choice.Message)
+
+		switch choice.FinishReason {
+		case "stop":
+			{
+				outputMessages = append(outputMessages, agent.Message{
+					Type:    agent.MessageType_Agent,
+					Message: choice.Message.Content,
+					Raw:     string(raw),
+				})
+			}
+		case "tool_calls":
+			{
+				outputMessages = append(outputMessages, agent.Message{
+					Type:    agent.MessageType_ToolRequest,
+					Message: choice.Message.Content,
+					Raw:     string(raw),
+				})
+			}
+		}
+	}
+
+	return outputMessages, nil
+}
+
+var (
+	OpenAiMessageFormat = format.Json[openai.ChatCompletionMessage]()
+)

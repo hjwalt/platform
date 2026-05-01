@@ -1,0 +1,45 @@
+<div class="h-full w-full flex-column flex-align-items-stretch">
+  <div class="flex-grow flex-fix">
+    <div class="h-full w-full flex-column flex-align-items-stretch">
+      <div class="w-full p-r-s">
+        <div class="wa-heading-l">
+          Chat
+        </div>
+        <wa-divider></wa-divider>
+      </div>
+      <div class="flex-grow flex-fix">
+        <div class="w-full wa-stack p-r-s">
+          {{index .Components "chats"}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="w-full wa-stack p-r-s">
+      <wa-divider></wa-divider>
+      <form method="POST"
+            data-hx-post="/chat"
+            data-hx-target="#chat-result"
+            data-hx-swap="outerHTML"
+            hx-on::after-request="if(event.detail.successful) this.reset()">
+        <div class="wa-flank:end">
+          <div>
+            <wa-input name="message"
+                      placeholder="Chat"
+                      with-clear>
+            </wa-input>
+          </div>
+          <div>
+            <wa-button variant="neutral"
+                       appearance="accent"
+                       type="submit">
+              <wa-icon name="comment"
+                       label="Home">
+              </wa-icon>
+            </wa-button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
