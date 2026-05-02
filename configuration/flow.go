@@ -1,64 +1,55 @@
 package configuration
 
 import (
-	"context"
-
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/agent/harness"
-	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/flow/converter"
-	"github.com/hjwalt/platform/flow/flow_runtime_memory"
+	"github.com/hjwalt/platform/flow/flow_runtime_kafka"
 	"github.com/hjwalt/platform/flow/metadata"
 	"github.com/hjwalt/platform/flow/stateless"
 	"github.com/hjwalt/platform/format"
-	"github.com/hjwalt/platform/message/memory"
-	"github.com/hjwalt/platform/runtime"
+	"github.com/hjwalt/platform/message/kafka"
 )
 
-func RegisterInMemoryAgentMessageProducer(
-	holder runtime.Holder,
-	conf Configuration,
-	agentMessageChannel memory.MemoryConfiguration,
-) flow.Producer[agent.Message] {
+func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
+	// Producer
+
+	kafkaProducer := kafka.NewProducer(conf.Flow.Agent.Producer)
+	holder.Add(kafkaProducer)
+
 	messageProducer := converter.RuntimeToFlowProducer(
-		memory.NewProducer(agentMessageChannel),
+		kafkaProducer,
 		converter.NewConverter(
-			flow_runtime_memory.New(),
+			flow_runtime_kafka.New(conf.Flow.Agent.Topic),
 			format.Json[agent.Message](),
 		),
 	)
 	holder.Add(messageProducer)
-	return messageProducer
-}
+	holder.SetAgentMessageProducer(messageProducer)
 
-func RegisterInMemoryAgentMessageConsumer(
-	holder runtime.Holder,
-	conf Configuration,
-	agentMessageChannel memory.MemoryConfiguration,
-	messageProducer flow.Producer[agent.Message],
-	model agent.LanguageModel,
-	tools []agent.Tool,
-) {
+	// Consumer
+
 	toolMap := map[string]agent.Tool{}
-	for _, tool := range tools {
+	for _, tool := range holder.GetTool() {
 		toolMap[tool.Name()] = tool
 	}
-	agentFlow := harness.OpenAiFlow[context.Context]{
+	agentFlow := harness.OpenAiFlow{
+		Store: holder.GetRagStore(),
 		Tools: toolMap,
-		Model: model,
+		Model: holder.GetLanguageModel(),
 	}
-	chatConsumer := memory.NewConsumer(
-		agentMessageChannel,
+	chatConsumer := kafka.NewConsumer(
+		conf.Flow.Agent.Consumer,
 		converter.FlowToRuntimeHandler(
 			stateless.NewExploder(
 				"agent_handle",
 				agentFlow.Handle,
 				metadata.MessageUpdate(),
-				messageProducer,
-				messageProducer,
+				holder.GetAgentMessageProducer(),
+				holder.GetAgentMessageProducer(),
 			),
 			converter.NewConverter(
-				flow_runtime_memory.New(),
+				flow_runtime_kafka.New(conf.Flow.Agent.Topic),
 				format.Json[agent.Message](),
 			),
 		),

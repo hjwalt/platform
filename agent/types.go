@@ -8,19 +8,22 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
+type MessageType string
+
 const (
-	MessageType_User        = "USER"
-	MessageType_ToolRequest = "TOOL_REQUEST"
-	MessageType_ToolResult  = "TOOL_RESULT"
-	MessageType_Agent       = "AGENT"
-	MessageType_Error       = "ERROR"
+	MessageType_System      MessageType = "SYSTEM"
+	MessageType_User        MessageType = "USER"
+	MessageType_ToolRequest MessageType = "TOOL_REQUEST"
+	MessageType_ToolResult  MessageType = "TOOL_RESULT"
+	MessageType_Agent       MessageType = "AGENT"
+	MessageType_Error       MessageType = "ERROR"
 )
 
 type Message struct {
 	Context string
-	Type    string
+	Type    MessageType
 	Message string
-	Raw     string
+	Tool    ToolCall
 }
 
 type Tool interface {
@@ -30,9 +33,10 @@ type Tool interface {
 	Execute(string) (string, error)
 }
 
-type ToolData struct {
-	Id   string
-	Name string
+type ToolCall struct {
+	Id        string
+	Name      string
+	Arguments string
 }
 
 type LanguageModel interface {
@@ -41,5 +45,5 @@ type LanguageModel interface {
 }
 
 var (
-	ToolDataFormat = format.Json[ToolData]()
+	ToolDataFormat = format.Json[ToolCall]()
 )

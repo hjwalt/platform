@@ -37,13 +37,11 @@ func main() {
 		),
 	)
 	consumer := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "test_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"test"},
-				GroupId: "test",
-			},
+			Topic:    "test",
+			GroupId:  "test",
 		},
 		handler,
 	)

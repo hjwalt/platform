@@ -9,7 +9,7 @@ import (
 	"github.com/hjwalt/platform/message"
 )
 
-func NewProducer(configuration KafkaConfiguration) message.Producer[KafkaMetadata] {
+func NewProducer(configuration KafkaProducerConfiguration) message.Producer[KafkaMetadata] {
 	return &KafkaProducer{
 		Brokers:  configuration.Brokers,
 		ClientId: configuration.ClientId,
@@ -45,14 +45,14 @@ func (r *KafkaProducer) Start() error {
 }
 
 func (r *KafkaProducer) Stop() {
-	slog.Debug("stopping sarama producer")
+	slog.Debug("stopping kafka producer")
 
 	if remaining := r.producer.Flush(60000); remaining > 0 {
 		slog.Error("producer flush timed out")
 	}
 	r.producer.Close()
 
-	slog.Debug("stopped sarama producer")
+	slog.Debug("stopped kafka producer")
 }
 
 func (r *KafkaProducer) Produce(c context.Context, sources []message.Message[KafkaMetadata]) error {

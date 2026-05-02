@@ -10,15 +10,16 @@ type KafkaMetadata struct {
 	Headers   map[string]string
 }
 
-type KafkaConfiguration struct {
+type KafkaProducerConfiguration struct {
 	Brokers  string
 	ClientId string
-	Consumer KafkaConsumerConfiguration
 }
 
 type KafkaConsumerConfiguration struct {
-	Topics  []string
-	GroupId string
+	Brokers  string
+	ClientId string
+	GroupId  string
+	Topic    string
 }
 
 var (

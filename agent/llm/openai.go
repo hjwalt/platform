@@ -50,26 +50,21 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 	modelMessage := make([]openai.ChatCompletionMessageParamUnion, 0)
 	for _, message := range messages {
 		switch message.Type {
+		case agent.MessageType_System:
+			{
+				modelMessage = append(modelMessage, openai.SystemMessage(message.Message))
+			}
 		case agent.MessageType_User:
 			{
 				modelMessage = append(modelMessage, openai.UserMessage(message.Message))
 			}
-		// having tool request in the history chain seems to throw the model in a pickle generating broken tool requests
-		// case agent.MessageType_ToolRequest, agent.MessageType_Agent:
-		// 	{
-		// 		rawMessage, unmarshallErr := OpenAiMessageFormat.Unmarshal([]byte(message.Raw))
-		// 		if unmarshallErr != nil {
-		// 			return []agent.Message{}, unmarshallErr
-		// 		}
-		// 		modelMessage = append(modelMessage, rawMessage.ToParam())
-		// 	}
+		case agent.MessageType_ToolRequest:
+			{
+				modelMessage = append(modelMessage, openai.AssistantMessage(message.Message))
+			}
 		case agent.MessageType_ToolResult:
 			{
-				toolData, unmarshallErr := agent.ToolDataFormat.Unmarshal([]byte(message.Raw))
-				if unmarshallErr != nil {
-					return []agent.Message{}, unmarshallErr
-				}
-				modelMessage = append(modelMessage, openai.ToolMessage(message.Message, toolData.Id))
+				modelMessage = append(modelMessage, openai.ToolMessage(message.Message, message.Tool.Id))
 			}
 		}
 	}
@@ -87,14 +82,11 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 			Context: messages[0].Context,
 			Type:    agent.MessageType_Error,
 			Message: err.Error(),
-			Raw:     "",
 		}}, err
 	}
 
 	outputMessages := make([]agent.Message, 0)
 	for _, choice := range completion.Choices {
-		raw, _ := OpenAiMessageFormat.Marshal(choice.Message)
-
 		switch choice.FinishReason {
 		case "stop":
 			{
@@ -102,17 +94,24 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 					Context: messages[0].Context,
 					Type:    agent.MessageType_Agent,
 					Message: choice.Message.Content,
-					Raw:     string(raw),
 				})
 			}
 		case "tool_calls":
 			{
-				outputMessages = append(outputMessages, agent.Message{
-					Context: messages[0].Context,
-					Type:    agent.MessageType_ToolRequest,
-					Message: choice.Message.Content,
-					Raw:     string(raw),
-				})
+				for _, toolCall := range choice.Message.ToolCalls {
+					toolData := agent.ToolCall{
+						Id:        toolCall.ID,
+						Name:      toolCall.Function.Name,
+						Arguments: toolCall.Function.Arguments,
+					}
+					outputMessages = append(outputMessages, agent.Message{
+						Context: messages[0].Context,
+						Type:    agent.MessageType_ToolRequest,
+						// Message: choice.Message.Content,
+						Message: "calling tool " + toolData.Name + " with id " + toolData.Id,
+						Tool:    toolData,
+					})
+				}
 			}
 		}
 	}

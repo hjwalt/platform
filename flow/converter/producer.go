@@ -32,9 +32,8 @@ func (r *FlowProducer[M, V]) Produce(ctx context.Context, msgs []flow.Message[V]
 }
 
 func (r *FlowProducer[M, V]) Start() error {
-	return r.Producer.Start()
+	return nil
 }
 
 func (r *FlowProducer[M, V]) Stop() {
-	r.Producer.Stop()
 }

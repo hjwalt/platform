@@ -76,7 +76,6 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 				Context: "web",
 				Type:    agent.MessageType_User,
 				Message: "no message received",
-				Raw:     "",
 			}),
 		}), nil
 	}

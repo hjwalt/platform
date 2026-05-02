@@ -101,13 +101,15 @@ func LogMetric(ctx context.Context, in Metric) optional.Optional[TestError] {
 }
 
 func main() {
+	kafkaProducer := kafka.NewProducer(
+		kafka.KafkaProducerConfiguration{
+			Brokers:  "localhost:9092",
+			ClientId: "output_producer",
+		},
+	)
+
 	outputProducer := converter.RuntimeToFlowProducer(
-		kafka.NewProducer(
-			kafka.KafkaConfiguration{
-				Brokers:  "localhost:9092",
-				ClientId: "output_producer",
-			},
-		),
+		kafkaProducer,
 		converter.NewConverter(
 			flow_runtime_kafka.New("test"),
 			format.Json[TestMessage](),
@@ -115,12 +117,7 @@ func main() {
 	)
 
 	completedProducer := converter.RuntimeToFlowProducer(
-		kafka.NewProducer(
-			kafka.KafkaConfiguration{
-				Brokers:  "localhost:9092",
-				ClientId: "completed_producer",
-			},
-		),
+		kafkaProducer,
 		converter.NewConverter(
 			flow_runtime_kafka.New("completed"),
 			format.Json[Completed](),
@@ -128,12 +125,7 @@ func main() {
 	)
 
 	metricProducer := converter.RuntimeToFlowProducer(
-		kafka.NewProducer(
-			kafka.KafkaConfiguration{
-				Brokers:  "localhost:9092",
-				ClientId: "metric_producer",
-			},
-		),
+		kafkaProducer,
 		converter.NewConverter(
 			flow_runtime_kafka.New("metric"),
 			format.Json[Metric](),
@@ -141,12 +133,7 @@ func main() {
 	)
 
 	errorProducer := converter.RuntimeToFlowProducer(
-		kafka.NewProducer(
-			kafka.KafkaConfiguration{
-				Brokers:  "localhost:9092",
-				ClientId: "error_producer",
-			},
-		),
+		kafkaProducer,
 		converter.NewConverter(
 			flow_runtime_kafka.New("error"),
 			format.Json[TestError](),
@@ -154,13 +141,11 @@ func main() {
 	)
 
 	incrementConsumer := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "increment_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"test"},
-				GroupId: "increment_consumer",
-			},
+			Topic:    "test",
+			GroupId:  "increment_consumer",
 		},
 		converter.FlowToRuntimeHandler(
 			stateless.NewOperator(
@@ -178,13 +163,11 @@ func main() {
 	)
 
 	completeNextConsumer := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "complete_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"test"},
-				GroupId: "complete_consumer",
-			},
+			Topic:    "test",
+			GroupId:  "complete_consumer",
 		},
 		converter.FlowToRuntimeHandler(
 			stateless.NewOperator(
@@ -202,13 +185,11 @@ func main() {
 	)
 
 	completedConsumer := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "completed_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"completed"},
-				GroupId: "completed_consumer",
-			},
+			Topic:    "completed",
+			GroupId:  "completed_consumer",
 		},
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
@@ -224,13 +205,11 @@ func main() {
 	)
 
 	errorConsumer := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "error_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"error"},
-				GroupId: "error_consumer",
-			},
+			Topic:    "error",
+			GroupId:  "error_consumer",
 		},
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
@@ -246,13 +225,11 @@ func main() {
 	)
 
 	metricConsumer := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "metric_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"metric"},
-				GroupId: "metric_consumer",
-			},
+			Topic:    "metric",
+			GroupId:  "metric_consumer",
 		},
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
@@ -275,13 +252,11 @@ func main() {
 	)
 
 	accumulator := kafka.NewConsumer(
-		kafka.KafkaConfiguration{
+		kafka.KafkaConsumerConfiguration{
 			Brokers:  "localhost:9092",
 			ClientId: "accumulate_consumer",
-			Consumer: kafka.KafkaConsumerConfiguration{
-				Topics:  []string{"test"},
-				GroupId: "accumulate_consumer",
-			},
+			Topic:    "test",
+			GroupId:  "accumulate_consumer",
 		},
 		converter.FlowToRuntimeHandler(
 			stateful.NewOperator(
@@ -303,6 +278,7 @@ func main() {
 
 	runtime.Start(
 		[]runtime.Runtime{
+			kafkaProducer,
 			fileStore,
 			metricProducer,
 			outputProducer,

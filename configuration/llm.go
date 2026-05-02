@@ -1,16 +1,14 @@
 package configuration
 
 import (
-	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/agent/llm"
 	"github.com/hjwalt/platform/agent/rag"
-	"github.com/hjwalt/platform/runtime"
 	"github.com/openai/openai-go/v3"
 )
 
-func RegisterOpenAi(holder runtime.Holder, conf Configuration, tools []agent.Tool) agent.LanguageModel {
+func RegisterOpenAi(holder Context, conf Configuration) {
 	schemas := make([]openai.ChatCompletionToolUnionParam, 0)
-	for _, tool := range tools {
+	for _, tool := range holder.GetTool() {
 		schemas = append(schemas, tool.Schema())
 	}
 	model := llm.OpenAi(llm.OpenAiModelConfig{
@@ -20,17 +18,12 @@ func RegisterOpenAi(holder runtime.Holder, conf Configuration, tools []agent.Too
 		Tools:    schemas,
 	})
 	holder.Add(model)
-	return model
+
+	holder.SetLanguageModel(model)
 }
 
-func RegisterInMemoryRagMemory(holder runtime.Holder, conf Configuration) rag.Store {
+func RegisterInMemoryRagMemory(holder Context, conf Configuration) {
 	store := rag.Memory()
 	holder.Add(store)
-	return store
-}
-
-func RegisterRagModel(holder runtime.Holder, conf Configuration, model agent.LanguageModel, store rag.Store) agent.LanguageModel {
-	ragModel := rag.Rag(model, store)
-	holder.Add(ragModel)
-	return ragModel
+	holder.SetRagStore(store)
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/hjwalt/platform/agent"
+	"github.com/google/uuid"
 	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
@@ -12,8 +12,7 @@ import (
 	"github.com/hjwalt/platform/example/route/page_chat"
 	"github.com/hjwalt/platform/example/route/page_home"
 	"github.com/hjwalt/platform/logger"
-	"github.com/hjwalt/platform/message"
-	"github.com/hjwalt/platform/message/memory"
+	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
 	"github.com/hjwalt/platform/web/route"
 	"github.com/joho/godotenv"
@@ -24,6 +23,8 @@ func main() {
 	godotenv.Load()
 
 	// Config building
+
+	instanceId := uuid.New().String()
 
 	config := configuration.Configuration{
 		OpenAi: configuration.OpenAiConfiguration{
@@ -39,29 +40,34 @@ func main() {
 			Port:               3001,
 			StaticResourcePath: "./web/static",
 		},
+		Flow: configuration.FlowConfiguration{
+			Agent: configuration.AgentFlowConfiguration{
+				Topic: "AGENT",
+				Producer: kafka.KafkaProducerConfiguration{
+					Brokers:  "localhost:9092",
+					ClientId: "agent-producer-" + instanceId,
+				},
+				Consumer: kafka.KafkaConsumerConfiguration{
+					Brokers:  "localhost:9092",
+					ClientId: "agent-consumer-" + instanceId,
+					Topic:    "AGENT",
+					GroupId:  "agent-consumer",
+				},
+			},
+		},
 	}
 
-	holder := configuration.Holder()
-
-	// Flow
-
-	agentMessageChannel := memory.MemoryConfiguration{
-		Channel: make(chan message.Message[memory.MemoryMetadata], 100),
-	}
+	holder := configuration.ContextBuilder()
 
 	// AI -- tools
 
-	tools := []agent.Tool{
-		mcp_brave_search_web.Instance(),
-	}
+	holder.AddTool(mcp_brave_search_web.Instance())
 
 	// Runtimes
 
-	model := configuration.RegisterOpenAi(holder, config, tools)
-	store := configuration.RegisterInMemoryRagMemory(holder, config)
-	ragModel := configuration.RegisterRagModel(holder, config, model, store)
-	messageProducer := configuration.RegisterInMemoryAgentMessageProducer(holder, config, agentMessageChannel)
-	configuration.RegisterInMemoryAgentMessageConsumer(holder, config, agentMessageChannel, messageProducer, ragModel, tools)
+	configuration.RegisterInMemoryRagMemory(holder, config)
+	configuration.RegisterOpenAi(holder, config)
+	configuration.RegisterKafkaAgentFlow(holder, config)
 
 	// HTTP
 
@@ -76,9 +82,9 @@ func main() {
 
 	httpBuilder.AddDecorators(
 		&decorators.RuntimeDecorator{
-			Chat:                 ragModel,
-			RagStore:             store,
-			AgentMessageProducer: messageProducer,
+			Chat:                 holder.GetLanguageModel(),
+			RagStore:             holder.GetRagStore(),
+			AgentMessageProducer: holder.GetAgentMessageProducer(),
 		},
 	)
 

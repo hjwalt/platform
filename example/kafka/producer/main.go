@@ -18,20 +18,22 @@ type TestMessage struct {
 }
 
 func main() {
+	kafkaProducer := kafka.NewProducer(
+		kafka.KafkaProducerConfiguration{
+			Brokers:  "localhost:9092",
+			ClientId: "test_consumer",
+		},
+	)
+
 	producer := converter.RuntimeToFlowProducer(
-		kafka.NewProducer(
-			kafka.KafkaConfiguration{
-				Brokers:  "localhost:9092",
-				ClientId: "test_consumer",
-			},
-		),
+		kafkaProducer,
 		converter.NewConverter(
 			flow_runtime_kafka.New("test"),
 			format.Json[TestMessage](),
 		),
 	)
 
-	producer.Start()
+	kafkaProducer.Start()
 
 	producer.Produce(context.Background(), []flow.Message[TestMessage]{
 		{
@@ -48,5 +50,5 @@ func main() {
 		},
 	})
 
-	producer.Stop()
+	kafkaProducer.Stop()
 }

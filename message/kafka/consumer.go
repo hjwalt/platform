@@ -12,12 +12,12 @@ import (
 	"github.com/hjwalt/platform/runtime"
 )
 
-func NewConsumer(configuration KafkaConfiguration, handler message.Handler[KafkaMetadata]) message.Consumer[KafkaMetadata] {
+func NewConsumer(configuration KafkaConsumerConfiguration, handler message.Handler[KafkaMetadata]) message.Consumer[KafkaMetadata] {
 	return runtime.NewLoop(&KafkaConsumer{
 		Brokers:  configuration.Brokers,
-		Topics:   configuration.Consumer.Topics,
+		Topic:    configuration.Topic,
 		ClientId: configuration.ClientId,
-		GroupId:  configuration.Consumer.GroupId,
+		GroupId:  configuration.GroupId,
 		Handler:  handler,
 	})
 }
@@ -27,7 +27,7 @@ type KafkaConsumer struct {
 	Brokers  string
 	ClientId string
 	GroupId  string
-	Topics   []string
+	Topic    string
 	Handler  message.Handler[KafkaMetadata]
 
 	consumer *kafka.Consumer
@@ -59,7 +59,7 @@ func (r *KafkaConsumer) Start() error {
 		r.consumer = consumer
 	}
 
-	if err := r.consumer.SubscribeTopics(r.Topics, nil); err != nil {
+	if err := r.consumer.SubscribeTopics([]string{r.Topic}, nil); err != nil {
 		return errors.Join(err, ErrKafkaConsumerSubscribeFail)
 	}
 

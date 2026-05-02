@@ -6,7 +6,6 @@ require (
 	github.com/avast/retry-go/v4 v4.7.0
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/go-chi/chi/v5 v5.2.5
-	github.com/google/go-querystring v1.2.0
 	github.com/google/jsonschema-go v0.4.2
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1

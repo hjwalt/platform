@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"time"
@@ -36,7 +35,6 @@ func main() {
 		Context: "local",
 		Type:    agent.MessageType_User,
 		Message: "what is the weather in Jakarta right now",
-		Raw:     "",
 	})
 
 	agentMessageChannel.Channel <- message.Message[memory.MemoryMetadata]{
@@ -46,8 +44,7 @@ func main() {
 	weatherTool := WeatherTool{}
 
 	model := llm.OpenAi(llm.OpenAiModelConfig{
-		Model: "Gemma-4-26B-A4B-it-GGUF",
-		// Model:    "Gemma-4-E4B-it-GGUF",
+		Model:    "gemma4-it-e4b-FLM",
 		Endpoint: "http://localhost:13305/api/v1",
 		Secret:   "nothing",
 		Tools: []openai.ChatCompletionToolUnionParam{
@@ -57,13 +54,12 @@ func main() {
 
 	store := rag.Memory()
 
-	ragModel := rag.Rag(model, store)
-
-	agentFlow := harness.OpenAiFlow[context.Context]{
+	agentFlow := harness.OpenAiFlow{
+		Store: store,
 		Tools: map[string]agent.Tool{
 			weatherTool.Name(): weatherTool,
 		},
-		Model: ragModel,
+		Model: model,
 	}
 
 	messageProducer := converter.RuntimeToFlowProducer(
@@ -95,7 +91,6 @@ func main() {
 		[]runtime.Runtime{
 			model,
 			store,
-			ragModel,
 			messageProducer,
 			chatConsumer,
 		},
