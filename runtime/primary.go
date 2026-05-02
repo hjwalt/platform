@@ -14,11 +14,6 @@ import (
 
 var primary atomic.Pointer[Primary]
 
-type Runtime interface {
-	Start() error
-	Stop()
-}
-
 func Start(runtimes []Runtime, sleepTime time.Duration) error {
 	c := &Primary{
 		runtimes:         runtimes,
