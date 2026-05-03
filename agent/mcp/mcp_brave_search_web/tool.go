@@ -2,6 +2,8 @@ package mcp_brave_search_web
 
 import (
 	"context"
+	"embed"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -13,9 +15,15 @@ import (
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/reflect"
+	"github.com/hjwalt/platform/web/render"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/openai/openai-go/v3"
 )
+
+//go:embed *
+var files embed.FS
+
+var requestViewHtml = template.Must(template.ParseFS(files, "request_view.html"))
 
 var global *Tool
 
@@ -27,6 +35,11 @@ func defaultTool() {
 		},
 		ApiKey: environment.GetString("BRAVE_TOKEN", ""),
 	}
+}
+
+type BraveSearchConfiguration struct {
+	BaseUrl string
+	Secret  string
 }
 
 type Request struct {
@@ -176,6 +189,19 @@ func (t *Tool) Execute(input string) (string, error) {
 	return outputBuilder.String(), nil
 }
 
+func (t *Tool) RequestView(message agent.Message) (render.View, error) {
+	request, requestParseErr := RequestFormat.Unmarshal([]byte(message.Tool.Arguments))
+	if requestParseErr != nil {
+		return nil, requestParseErr
+	}
+	return render.Component(
+		requestViewHtml,
+		request,
+		make(map[string]render.View),
+		[]render.View{},
+	), nil
+}
+
 func Add(server *mcp.Server) {
 	defaultTool()
 
@@ -197,10 +223,14 @@ func Add(server *mcp.Server) {
 	)
 }
 
-func Instance() agent.Tool {
-	defaultTool()
-
-	return global
+func Instance(config BraveSearchConfiguration) agent.Tool {
+	return &Tool{
+		Brave: &brave_search.BraveClient{
+			Client:  http.DefaultClient,
+			BaseUrl: config.BaseUrl,
+		},
+		ApiKey: config.Secret,
+	}
 }
 
 var (

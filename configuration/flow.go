@@ -29,13 +29,9 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 
 	// Consumer
 
-	toolMap := map[string]agent.Tool{}
-	for _, tool := range holder.GetTool() {
-		toolMap[tool.Name()] = tool
-	}
 	agentFlow := harness.OpenAiFlow{
 		Store: holder.GetRagStore(),
-		Tools: toolMap,
+		Tools: holder.GetTool(),
 		Model: holder.GetLanguageModel(),
 	}
 	chatConsumer := kafka.NewConsumer(

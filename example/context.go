@@ -13,4 +13,5 @@ type Context struct {
 	Chat                 agent.LanguageModel
 	RagStore             rag.Store
 	AgentMessageProducer flow.Producer[agent.Message]
+	Tool                 map[string]agent.Tool
 }

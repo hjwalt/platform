@@ -5,6 +5,7 @@ import (
 
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/runtime"
+	"github.com/hjwalt/platform/web/render"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -31,6 +32,7 @@ type Tool interface {
 	Description() string
 	Schema() openai.ChatCompletionToolUnionParam
 	Execute(string) (string, error)
+	RequestView(Message) (render.View, error)
 }
 
 type ToolCall struct {

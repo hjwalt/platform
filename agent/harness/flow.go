@@ -26,6 +26,9 @@ func (r *OpenAiFlow) Handle(ctx context.Context, in agent.Message) (optional.Opt
 		}
 	case agent.MessageType_ToolRequest:
 		{
+			if storeErr := r.Store.Add(in.Context, []agent.Message{in}); storeErr != nil {
+				slog.Error("failed to store error message", "error", storeErr)
+			}
 			return r.toolRequest(ctx, in)
 		}
 	case agent.MessageType_Error:

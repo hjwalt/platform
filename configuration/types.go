@@ -1,12 +1,13 @@
 package configuration
 
 import (
+	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
 	"github.com/hjwalt/platform/message/kafka"
 )
 
 type Configuration struct {
 	OpenAi      OpenAiConfiguration
-	BraveSearch BraveSearchConfiguration
+	BraveSearch mcp_brave_search_web.BraveSearchConfiguration
 	Server      WebServerConfiguration
 	Flow        FlowConfiguration
 }
@@ -15,11 +16,6 @@ type OpenAiConfiguration struct {
 	Model    string
 	Endpoint string
 	Secret   string
-}
-
-type BraveSearchConfiguration struct {
-	BaseUrl string
-	Secret  string
 }
 
 type WebServerConfiguration struct {

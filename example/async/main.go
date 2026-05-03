@@ -17,6 +17,7 @@ import (
 	"github.com/hjwalt/platform/message"
 	"github.com/hjwalt/platform/message/memory"
 	"github.com/hjwalt/platform/runtime"
+	"github.com/hjwalt/platform/web/render"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -128,4 +129,8 @@ func (t WeatherTool) Execute(input string) (string, error) {
 
 	// In a real implementation, this function would call a weather API
 	return "Sunny, 25°C", nil
+}
+
+func (t WeatherTool) RequestView(msg agent.Message) (render.View, error) {
+	return nil, nil
 }

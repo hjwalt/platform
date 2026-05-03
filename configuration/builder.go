@@ -15,7 +15,7 @@ import (
 type Context interface {
 	Add(runtimes ...runtime.Runtime)
 	AddTool(tools ...agent.Tool)
-	GetTool() []agent.Tool
+	GetTool() map[string]agent.Tool
 	SetLanguageModel(agent.LanguageModel)
 	GetLanguageModel() agent.LanguageModel
 	SetRagStore(rag.Store)
@@ -28,7 +28,7 @@ type Context interface {
 func ContextBuilder() Context {
 	return &holder{
 		Runtimes:             make([]runtime.Runtime, 0),
-		Tools:                make([]agent.Tool, 0),
+		Tools:                make(map[string]agent.Tool, 0),
 		RagModel:             optional.Empty[agent.LanguageModel](),
 		RagStore:             optional.Empty[rag.Store](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
@@ -37,7 +37,7 @@ func ContextBuilder() Context {
 
 type holder struct {
 	Runtimes             []runtime.Runtime
-	Tools                []agent.Tool
+	Tools                map[string]agent.Tool
 	RagModel             optional.Optional[agent.LanguageModel]
 	RagStore             optional.Optional[rag.Store]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
@@ -48,10 +48,12 @@ func (r *holder) Add(runtimes ...runtime.Runtime) {
 }
 
 func (r *holder) AddTool(tools ...agent.Tool) {
-	r.Tools = append(r.Tools, tools...)
+	for _, tool := range tools {
+		r.Tools[tool.Name()] = tool
+	}
 }
 
-func (r *holder) GetTool() []agent.Tool {
+func (r *holder) GetTool() map[string]agent.Tool {
 	return r.Tools
 }
 

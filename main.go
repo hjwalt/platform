@@ -32,9 +32,9 @@ func main() {
 			Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
 			Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
 		},
-		BraveSearch: configuration.BraveSearchConfiguration{
+		BraveSearch: mcp_brave_search_web.BraveSearchConfiguration{
 			BaseUrl: environment.GetString("BRAVE_SEARCH_URL", "https://api.search.brave.com/res/v1/"),
-			Secret:  environment.GetString("BRAVE_SEARCH_TOKEN", ""),
+			Secret:  environment.GetString("BRAVE_TOKEN", ""),
 		},
 		Server: configuration.WebServerConfiguration{
 			Port:               3001,
@@ -61,7 +61,7 @@ func main() {
 
 	// AI -- tools
 
-	holder.AddTool(mcp_brave_search_web.Instance())
+	holder.AddTool(mcp_brave_search_web.Instance(config.BraveSearch))
 
 	// Runtimes
 
@@ -85,6 +85,7 @@ func main() {
 			Chat:                 holder.GetLanguageModel(),
 			RagStore:             holder.GetRagStore(),
 			AgentMessageProducer: holder.GetAgentMessageProducer(),
+			Tool:                 holder.GetTool(),
 		},
 	)
 

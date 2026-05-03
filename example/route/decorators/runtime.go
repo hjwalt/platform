@@ -13,6 +13,7 @@ type RuntimeDecorator struct {
 	Chat                 agent.LanguageModel
 	RagStore             rag.Store
 	AgentMessageProducer flow.Producer[agent.Message]
+	Tool                 map[string]agent.Tool
 }
 
 func (d *RuntimeDecorator) Decorate(c example.Context, w http.ResponseWriter, r *http.Request) (example.Context, error) {
@@ -21,5 +22,6 @@ func (d *RuntimeDecorator) Decorate(c example.Context, w http.ResponseWriter, r 
 		Chat:                 d.Chat,
 		RagStore:             d.RagStore,
 		AgentMessageProducer: d.AgentMessageProducer,
+		Tool:                 d.Tool,
 	}, nil
 }
