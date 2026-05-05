@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/hjwalt/platform/agent"
+	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/type/either"
 	"github.com/hjwalt/platform/type/optional"
 )
@@ -22,13 +23,18 @@ func (r *Flow) Key(ctx context.Context, in agent.Message) (string, error) {
 	return id, nil
 }
 
-func (r *Flow) Update(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
-	// setting defaults
+func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+	ctx := logger.WithContext(inctx, "context", in.Context)
+
+	// setting state defaults
+	if st.Messages == nil {
+		st.Messages = make([]agent.Message, 0)
+	}
 	if st.ToolStates == nil {
 		st.ToolStates = make(map[string]ToolState)
 	}
 
-	slog.Info("updating state", "message", in.Type)
+	slog.InfoContext(ctx, "updating state", "message", in.Type)
 	switch in.Type {
 	case agent.MessageType_User, agent.MessageType_ToolResult:
 		{
@@ -54,6 +60,11 @@ func (r *Flow) Update(ctx context.Context, in agent.Message, st ExecutionState) 
 }
 
 func (r *Flow) Next(ctx context.Context, in agent.Message, st ExecutionState) (optional.Optional[Result], optional.Optional[agent.Message]) {
+	// setting state defaults
+	if st.Next.Messages == nil {
+		st.Next.Messages = make([]agent.Message, 0)
+	}
+
 	return optional.Of(st.Next), optional.Empty[agent.Message]()
 }
 

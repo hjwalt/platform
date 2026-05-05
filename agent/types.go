@@ -21,6 +21,7 @@ const (
 )
 
 type Message struct {
+	Id      string
 	Context string
 	Type    MessageType
 	Message string

@@ -18,5 +18,6 @@ type ExecutionState struct {
 }
 
 type Result struct {
+	Id       string
 	Messages []agent.Message
 }
