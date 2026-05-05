@@ -9,12 +9,12 @@ import (
 	"github.com/hjwalt/platform/type/optional"
 )
 
-type OpenAiFlow struct {
+type Flow struct {
 	Tools map[string]agent.Tool
 	Model agent.LanguageModel
 }
 
-func (r *OpenAiFlow) Key(ctx context.Context, in agent.Message) (string, error) {
+func (r *Flow) Key(ctx context.Context, in agent.Message) (string, error) {
 	id := in.Context
 	if id == "" {
 		id = "DEFAULT"
@@ -22,7 +22,7 @@ func (r *OpenAiFlow) Key(ctx context.Context, in agent.Message) (string, error) 
 	return id, nil
 }
 
-func (r *OpenAiFlow) Update(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+func (r *Flow) Update(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	// setting defaults
 	if st.ToolStates == nil {
 		st.ToolStates = make(map[string]ToolState)
@@ -53,16 +53,16 @@ func (r *OpenAiFlow) Update(ctx context.Context, in agent.Message, st ExecutionS
 	}
 }
 
-func (r *OpenAiFlow) Next(ctx context.Context, in agent.Message, st ExecutionState) (optional.Optional[Result], optional.Optional[agent.Message]) {
+func (r *Flow) Next(ctx context.Context, in agent.Message, st ExecutionState) (optional.Optional[Result], optional.Optional[agent.Message]) {
 	return optional.Of(st.Next), optional.Empty[agent.Message]()
 }
 
-func (r *OpenAiFlow) Explode(ctx context.Context, in Result) (optional.Optional[[]agent.Message], optional.Optional[agent.Message]) {
+func (r *Flow) Explode(ctx context.Context, in Result) (optional.Optional[[]agent.Message], optional.Optional[agent.Message]) {
 	slog.Info("exploding", "len", len(in.Messages))
 	return optional.Of(in.Messages), optional.Empty[agent.Message]()
 }
 
-func (r *OpenAiFlow) modelExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	allmessages := make([]agent.Message, 0)
 	allmessages = append(allmessages, st.Messages...)
 	allmessages = append(allmessages, in)
@@ -79,7 +79,7 @@ func (r *OpenAiFlow) modelExecute(ctx context.Context, in agent.Message, st Exec
 	})
 }
 
-func (r *OpenAiFlow) toolRequest(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	toolData := in.Tool
 	if tool, exists := r.Tools[toolData.Name]; exists {
 		newToolStates := st.ToolStates
@@ -120,7 +120,7 @@ func (r *OpenAiFlow) toolRequest(ctx context.Context, in agent.Message, st Execu
 	}
 }
 
-func (r *OpenAiFlow) toolExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	toolData := in.Tool
 	if tool, exists := r.Tools[toolData.Name]; exists {
 		result, err := tool.Execute(toolData.Arguments)
@@ -158,7 +158,7 @@ func (r *OpenAiFlow) toolExecute(ctx context.Context, in agent.Message, st Execu
 	}
 }
 
-func (r *OpenAiFlow) updateError(ctx context.Context, in agent.Message, err error) either.Either[ExecutionState, agent.Message] {
+func (r *Flow) updateError(ctx context.Context, in agent.Message, err error) either.Either[ExecutionState, agent.Message] {
 	return either.Right[ExecutionState, agent.Message](agent.Message{
 		Context: in.Context,
 		Type:    agent.MessageType_Error,

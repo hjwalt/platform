@@ -38,7 +38,7 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 	holder.Add(resultProducer)
 	// Consumer
 
-	agentFlow := harness.OpenAiFlow{
+	agentFlow := harness.Flow{
 		Tools: holder.GetTool(),
 		Model: holder.GetLanguageModel(),
 	}
