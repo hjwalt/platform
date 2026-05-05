@@ -4,15 +4,15 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/agent/rag"
+	"github.com/hjwalt/platform/agent/harness"
 	"github.com/hjwalt/platform/example"
 	"github.com/hjwalt/platform/flow"
 )
 
 type RuntimeDecorator struct {
 	Chat                 agent.LanguageModel
-	RagStore             rag.Store
 	AgentMessageProducer flow.Producer[agent.Message]
+	AgentHarnessStore    flow.Store[harness.ExecutionState]
 	Tool                 map[string]agent.Tool
 }
 
@@ -20,8 +20,8 @@ func (d *RuntimeDecorator) Decorate(c example.Context, w http.ResponseWriter, r 
 	return example.Context{
 		Context:              c.Context,
 		Chat:                 d.Chat,
-		RagStore:             d.RagStore,
 		AgentMessageProducer: d.AgentMessageProducer,
+		AgentHarnessStore:    d.AgentHarnessStore,
 		Tool:                 d.Tool,
 	}, nil
 }

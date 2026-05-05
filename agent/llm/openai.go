@@ -23,14 +23,15 @@ type OpenAiModelConfig struct {
 	Model    string
 	Endpoint string
 	Secret   string
-	Tools    []openai.ChatCompletionToolUnionParam
+	Tools    map[string]agent.Tool
 }
 
 type OpenAiModel struct {
 	Model    string
 	Endpoint string
 	Secret   string
-	Tools    []openai.ChatCompletionToolUnionParam
+	Tools    map[string]agent.Tool
+	Schemas  []openai.ChatCompletionToolUnionParam
 	client   openai.Client
 }
 
@@ -39,6 +40,13 @@ func (r *OpenAiModel) Start() error {
 		option.WithBaseURL(r.Endpoint),
 		option.WithAPIKey(r.Secret), // defaults to os.LookupEnv("OPENAI_API_KEY")
 	)
+
+	schemas := make([]openai.ChatCompletionToolUnionParam, 0)
+	for _, tool := range r.Tools {
+		schemas = append(schemas, tool.Schema())
+	}
+
+	r.Schemas = schemas
 
 	return nil
 }
@@ -60,7 +68,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 			}
 		case agent.MessageType_ToolRequest:
 			{
-				modelMessage = append(modelMessage, openai.AssistantMessage(message.Message))
+				modelMessage = append(modelMessage, openai.AssistantMessage(message.Message+" with tool call id "+message.Tool.Id))
 			}
 		case agent.MessageType_ToolResult:
 			{
@@ -73,7 +81,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 		Messages: modelMessage,
 		Seed:     openai.Int(0),
 		Model:    r.Model,
-		Tools:    r.Tools,
+		Tools:    r.Schemas,
 	}
 
 	completion, err := r.client.Chat.Completions.New(ctx, params)
@@ -104,13 +112,22 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 						Name:      toolCall.Function.Name,
 						Arguments: toolCall.Function.Arguments,
 					}
-					outputMessages = append(outputMessages, agent.Message{
-						Context: messages[0].Context,
-						Type:    agent.MessageType_ToolRequest,
-						// Message: choice.Message.Content,
-						Message: "calling tool " + toolData.Name + " with id " + toolData.Id,
-						Tool:    toolData,
-					})
+
+					if tool, exists := r.Tools[toolData.Name]; exists {
+						if toolRequestMessage, messageErr := tool.Request(toolData.Arguments); messageErr == nil {
+							outputMessages = append(outputMessages, agent.Message{
+								Context: messages[0].Context,
+								Type:    agent.MessageType_ToolRequest,
+								// Message: choice.Message.Content,
+								Message: toolRequestMessage,
+								Tool:    toolData,
+							})
+						} else {
+							// TODO: do something with error
+						}
+					} else {
+						// TODO: do something with missing tool
+					}
 				}
 			}
 		}

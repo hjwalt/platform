@@ -2,8 +2,6 @@ package mcp_brave_search_web
 
 import (
 	"context"
-	"embed"
-	"html/template"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -15,15 +13,9 @@ import (
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/reflect"
-	"github.com/hjwalt/platform/web/render"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/openai/openai-go/v3"
 )
-
-//go:embed *
-var files embed.FS
-
-var requestViewHtml = template.Must(template.ParseFS(files, "request_view.html"))
 
 var global *Tool
 
@@ -189,17 +181,22 @@ func (t *Tool) Execute(input string) (string, error) {
 	return outputBuilder.String(), nil
 }
 
-func (t *Tool) RequestView(message agent.Message) (render.View, error) {
-	request, requestParseErr := RequestFormat.Unmarshal([]byte(message.Tool.Arguments))
+func (t *Tool) Request(input string) (string, error) {
+	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
 	if requestParseErr != nil {
-		return nil, requestParseErr
+		return "", requestParseErr
 	}
-	return render.Component(
-		requestViewHtml,
-		request,
-		make(map[string]render.View),
-		[]render.View{},
-	), nil
+
+	outputBuilder := strings.Builder{}
+
+	outputBuilder.WriteString("search the web with term ")
+	outputBuilder.WriteString(request.Term)
+
+	return outputBuilder.String(), nil
+}
+
+func (t *Tool) Auto() bool {
+	return true
 }
 
 func Add(server *mcp.Server) {

@@ -24,7 +24,8 @@ type WebServerConfiguration struct {
 }
 
 type FlowConfiguration struct {
-	Agent AgentFlowConfiguration
+	Agent  AgentFlowConfiguration
+	Result AgentFlowConfiguration
 }
 
 type AgentFlowConfiguration struct {

@@ -1,7 +1,17 @@
 <wa-card>
-  <wa-markdown>
-    <script type="text/markdown">
+  <h4 slot="header"
+      class="m-b-0">
+    {{ .Model.Title }}
+    </h3>
+    <wa-markdown>
+      <script type="text/markdown">
 {{ .Model.Message }}
     </script>
-  </wa-markdown>
+    </wa-markdown>
+    {{if .Model.IsToolRequest}}
+    <div slot="footer">
+      <wa-button variant="brand">Submit</wa-button>
+      <wa-button variant="brand">Cancel</wa-button>
+    </div>
+    {{end}}
 </wa-card>

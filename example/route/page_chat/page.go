@@ -23,29 +23,31 @@ var files embed.FS
 var html = render.Embedded(files, "page.html")
 
 const (
-	path = "/chat"
+	path     = "/chat"
+	toolPath = "/chat/tool"
 )
 
 type model struct {
 }
 
 func get(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
-	messages, _ := c.RagStore.GetAll("web")
+	state, _ := c.AgentHarnessStore.Read(c, "web")
 
 	messageViews := make([]render.View, 0)
-	for _, message := range messages {
+	for _, message := range state.Value.Messages {
 		messageViews = append(messageViews, chat_item.View(c, message))
 	}
 
-	messageViews = append(messageViews, chat_item.View(c, agent.Message{
-		Context: "web",
-		Type:    agent.MessageType_ToolRequest,
-		Tool: agent.ToolCall{
-			Id:        "call_12345",
-			Name:      "web search",
-			Arguments: "{\"Term\":\"Hello\"}",
-		},
-	}))
+	// messageViews = append(messageViews, chat_item.View(c, agent.Message{
+	// 	Context: "web",
+	// 	Type:    agent.MessageType_ToolRequest,
+	// 	Message: "tool call",
+	// 	Tool: agent.ToolCall{
+	// 		Id:        "call_12345",
+	// 		Name:      "web search",
+	// 		Arguments: "{\"Term\":\"Hello\"}",
+	// 	},
+	// }))
 	return layout.Dashboard(
 		component_sidebar.View(),
 		render.Component(

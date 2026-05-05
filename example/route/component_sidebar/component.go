@@ -28,10 +28,7 @@ func View() render.View {
 		component_sidebar_item_list.Model{},
 		[]render.View{
 			component_sidebar_item.View(component_sidebar_item.Model{Icon: "chart-bar", Label: "Dashboard", Link: "/", Active: false}),
-			component_sidebar_item.View(component_sidebar_item.Model{Icon: "table", Label: "Chat", Link: "/chat", Active: false}),
-			component_sidebar_item.View(component_sidebar_item.Model{Icon: "receipt", Label: "Billing", Link: "/billing", Active: false}),
-			component_sidebar_item.View(component_sidebar_item.Model{Icon: "vr-cardboard", Label: "Virtual Reality", Link: "/pages/virtual-reality.html", Active: false}),
-			component_sidebar_item.View(component_sidebar_item.Model{Icon: "bell", Label: "Notifications", Link: "/pages/notifications.html", Active: false}),
+			component_sidebar_item.View(component_sidebar_item.Model{Icon: "comment", Label: "Chat", Link: "/chat", Active: false}),
 			component_sidebar_item_header.View(component_sidebar_item_header.Model{Label: "Account pages"}),
 			component_sidebar_item.View(component_sidebar_item.Model{Icon: "person", Label: "Profile", Link: "/pages/profile.html", Active: false}),
 			component_sidebar_item.View(component_sidebar_item.Model{Icon: "right-to-bracket", Label: "Sign In", Link: "/pages/sign-in.html", Active: false}),

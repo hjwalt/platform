@@ -5,7 +5,6 @@ import (
 
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/runtime"
-	"github.com/hjwalt/platform/web/render"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -16,6 +15,7 @@ const (
 	MessageType_User        MessageType = "USER"
 	MessageType_ToolRequest MessageType = "TOOL_REQUEST"
 	MessageType_ToolResult  MessageType = "TOOL_RESULT"
+	MessageType_ToolExecute MessageType = "TOOL_EXECUTE"
 	MessageType_Agent       MessageType = "AGENT"
 	MessageType_Error       MessageType = "ERROR"
 )
@@ -32,7 +32,8 @@ type Tool interface {
 	Description() string
 	Schema() openai.ChatCompletionToolUnionParam
 	Execute(string) (string, error)
-	RequestView(Message) (render.View, error)
+	Request(string) (string, error)
+	Auto() bool
 }
 
 type ToolCall struct {

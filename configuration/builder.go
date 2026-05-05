@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/agent/rag"
 	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/runtime"
+	"github.com/hjwalt/platform/state"
 	"github.com/hjwalt/platform/type/optional"
 )
 
@@ -18,10 +18,10 @@ type Context interface {
 	GetTool() map[string]agent.Tool
 	SetLanguageModel(agent.LanguageModel)
 	GetLanguageModel() agent.LanguageModel
-	SetRagStore(rag.Store)
-	GetRagStore() rag.Store
 	SetAgentMessageProducer(flow.Producer[agent.Message])
 	GetAgentMessageProducer() flow.Producer[agent.Message]
+	SetAgentHarnessStore(state.Store)
+	GetAgentHarnessStore() state.Store
 	Block()
 }
 
@@ -30,8 +30,8 @@ func ContextBuilder() Context {
 		Runtimes:             make([]runtime.Runtime, 0),
 		Tools:                make(map[string]agent.Tool, 0),
 		RagModel:             optional.Empty[agent.LanguageModel](),
-		RagStore:             optional.Empty[rag.Store](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
+		AgentHarnessStore:    optional.Empty[state.Store](),
 	}
 }
 
@@ -39,8 +39,8 @@ type holder struct {
 	Runtimes             []runtime.Runtime
 	Tools                map[string]agent.Tool
 	RagModel             optional.Optional[agent.LanguageModel]
-	RagStore             optional.Optional[rag.Store]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
+	AgentHarnessStore    optional.Optional[state.Store]
 }
 
 func (r *holder) Add(runtimes ...runtime.Runtime) {
@@ -68,17 +68,6 @@ func (r *holder) GetLanguageModel() agent.LanguageModel {
 	return r.RagModel.Get()
 }
 
-func (r *holder) SetRagStore(value rag.Store) {
-	r.RagStore = optional.Of(value)
-}
-
-func (r *holder) GetRagStore() rag.Store {
-	if !r.RagStore.IsPresent() {
-		r.Missing()
-	}
-	return r.RagStore.Get()
-}
-
 func (r *holder) SetAgentMessageProducer(value flow.Producer[agent.Message]) {
 	r.AgentMessageProducer = optional.Of(value)
 }
@@ -88,6 +77,17 @@ func (r *holder) GetAgentMessageProducer() flow.Producer[agent.Message] {
 		r.Missing()
 	}
 	return r.AgentMessageProducer.Get()
+}
+
+func (r *holder) SetAgentHarnessStore(value state.Store) {
+	r.AgentHarnessStore = optional.Of(value)
+}
+
+func (r *holder) GetAgentHarnessStore() state.Store {
+	if !r.AgentHarnessStore.IsPresent() {
+		r.Missing()
+	}
+	return r.AgentHarnessStore.Get()
 }
 
 func (r *holder) Missing() {

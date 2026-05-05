@@ -29,7 +29,7 @@ build:
 	go build -o bin/flows
 
 run:
-	go run .
+	go run ./main.go
 
 reset:
 	./script/reset.sh
@@ -54,10 +54,10 @@ proto: RUN
 # --------------------
 
 up: RUN
-	podman-compose up -d
+	docker compose up -d
 
 down: RUN
-	podman-compose down
+	docker compose down
 
 
 # --------------------

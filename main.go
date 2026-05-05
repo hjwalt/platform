@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
+	"github.com/hjwalt/platform/agent/harness"
 	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
@@ -11,6 +12,8 @@ import (
 	"github.com/hjwalt/platform/example/route/page_billing"
 	"github.com/hjwalt/platform/example/route/page_chat"
 	"github.com/hjwalt/platform/example/route/page_home"
+	"github.com/hjwalt/platform/flow/converter"
+	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
@@ -54,6 +57,19 @@ func main() {
 					GroupId:  "agent-consumer",
 				},
 			},
+			Result: configuration.AgentFlowConfiguration{
+				Topic: "AGENT-RESULT",
+				Producer: kafka.KafkaProducerConfiguration{
+					Brokers:  "localhost:9092",
+					ClientId: "result-producer-" + instanceId,
+				},
+				Consumer: kafka.KafkaConsumerConfiguration{
+					Brokers:  "localhost:9092",
+					ClientId: "result-consumer-" + instanceId,
+					Topic:    "AGENT-RESULT",
+					GroupId:  "result-consumer",
+				},
+			},
 		},
 	}
 
@@ -65,7 +81,7 @@ func main() {
 
 	// Runtimes
 
-	configuration.RegisterInMemoryRagMemory(holder, config)
+	configuration.RegisterAgentHarnessStore(holder, config)
 	configuration.RegisterOpenAi(holder, config)
 	configuration.RegisterKafkaAgentFlow(holder, config)
 
@@ -83,8 +99,8 @@ func main() {
 	httpBuilder.AddDecorators(
 		&decorators.RuntimeDecorator{
 			Chat:                 holder.GetLanguageModel(),
-			RagStore:             holder.GetRagStore(),
 			AgentMessageProducer: holder.GetAgentMessageProducer(),
+			AgentHarnessStore:    converter.RuntimeToFlowStore(holder.GetAgentHarnessStore(), format.Json[harness.ExecutionState]()),
 			Tool:                 holder.GetTool(),
 		},
 	)

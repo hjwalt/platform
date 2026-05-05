@@ -14,32 +14,32 @@ var files embed.FS
 
 var Html = template.Must(template.ParseFS(files, "component.html"))
 
+var titles = map[agent.MessageType]string{
+	agent.MessageType_Agent:       "Response",
+	agent.MessageType_User:        "User",
+	agent.MessageType_ToolRequest: "Tool Request",
+	agent.MessageType_ToolResult:  "Tool Result",
+	agent.MessageType_ToolExecute: "Tool Execute",
+	agent.MessageType_Error:       "Error",
+	agent.MessageType_System:      "System",
+}
+
 type Model struct {
-	Message string
+	Title         string
+	Message       string
+	IsToolRequest bool
 }
 
 func View(c example.Context, message agent.Message) render.View {
 	switch message.Type {
 	case agent.MessageType_ToolRequest:
 		{
-			if tool, exists := c.Tool[message.Tool.Name]; exists {
-				if toolView, err := tool.RequestView(message); err == nil {
-					return toolView
-				} else {
-					return render.Component(
-						Html,
-						Model{
-							Message: "failed to render tool request",
-						},
-						make(map[string]render.View),
-						[]render.View{},
-					)
-				}
-			}
 			return render.Component(
 				Html,
 				Model{
-					Message: "tool missing to render",
+					Title:         titles[message.Type],
+					Message:       message.Message,
+					IsToolRequest: true,
 				},
 				make(map[string]render.View),
 				[]render.View{},
@@ -50,7 +50,9 @@ func View(c example.Context, message agent.Message) render.View {
 			return render.Component(
 				Html,
 				Model{
-					Message: message.Message,
+					Title:         titles[message.Type],
+					Message:       message.Message,
+					IsToolRequest: false,
 				},
 				make(map[string]render.View),
 				[]render.View{},
