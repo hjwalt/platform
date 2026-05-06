@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/runtime"
 	"github.com/openai/openai-go/v3"
@@ -26,6 +27,21 @@ type Message struct {
 	Type    MessageType
 	Message string
 	Tool    ToolCall
+}
+
+func NewMessage(
+	context string,
+	messageType MessageType,
+	message string,
+	tool ToolCall,
+) Message {
+	return Message{
+		Id:      uuid.New().String(),
+		Context: context,
+		Type:    messageType,
+		Message: message,
+		Tool:    tool,
+	}
 }
 
 type Tool interface {

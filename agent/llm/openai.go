@@ -86,11 +86,12 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 
 	completion, err := r.client.Chat.Completions.New(ctx, params)
 	if err != nil {
-		return []agent.Message{{
-			Context: messages[0].Context,
-			Type:    agent.MessageType_Error,
-			Message: err.Error(),
-		}}, err
+		return []agent.Message{agent.NewMessage(
+			messages[0].Context,
+			agent.MessageType_Error,
+			err.Error(),
+			agent.ToolCall{},
+		)}, err
 	}
 
 	outputMessages := make([]agent.Message, 0)
@@ -98,11 +99,12 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 		switch choice.FinishReason {
 		case "stop":
 			{
-				outputMessages = append(outputMessages, agent.Message{
-					Context: messages[0].Context,
-					Type:    agent.MessageType_Agent,
-					Message: choice.Message.Content,
-				})
+				outputMessages = append(outputMessages, agent.NewMessage(
+					messages[0].Context,
+					agent.MessageType_Agent,
+					choice.Message.Content,
+					agent.ToolCall{},
+				))
 			}
 		case "tool_calls":
 			{
@@ -115,13 +117,12 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 
 					if tool, exists := r.Tools[toolData.Name]; exists {
 						if toolRequestMessage, messageErr := tool.Request(toolData.Arguments); messageErr == nil {
-							outputMessages = append(outputMessages, agent.Message{
-								Context: messages[0].Context,
-								Type:    agent.MessageType_ToolRequest,
-								// Message: choice.Message.Content,
-								Message: toolRequestMessage,
-								Tool:    toolData,
-							})
+							outputMessages = append(outputMessages, agent.NewMessage(
+								messages[0].Context,
+								agent.MessageType_ToolRequest,
+								toolRequestMessage,
+								toolData,
+							))
 						} else {
 							// TODO: do something with error
 						}

@@ -100,12 +100,12 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
 				Messages:   append(st.Messages, in),
 				ToolStates: newToolStates,
-				Next: Result{Messages: []agent.Message{{
-					Context: in.Context,
-					Type:    agent.MessageType_ToolExecute,
-					Message: "execution approved to " + in.Message,
-					Tool:    in.Tool,
-				}}},
+				Next: Result{Messages: []agent.Message{agent.NewMessage(
+					in.Context,
+					agent.MessageType_ToolExecute,
+					"execution approved to "+in.Message,
+					in.Tool,
+				)}},
 			})
 		} else {
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
@@ -121,12 +121,12 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: newToolStates,
-			Next: Result{Messages: []agent.Message{{
-				Context: in.Context,
-				Type:    agent.MessageType_Error,
-				Message: "tool " + toolData.Name + " does not exist",
-				Tool:    toolData,
-			}}},
+			Next: Result{Messages: []agent.Message{agent.NewMessage(
+				in.Context,
+				agent.MessageType_Error,
+				"tool "+toolData.Name+" does not exist",
+				toolData,
+			)}},
 		})
 	}
 }
@@ -143,12 +143,12 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: st.ToolStates,
-			Next: Result{Messages: []agent.Message{{
-				Context: in.Context,
-				Type:    agent.MessageType_Error,
-				Message: "tool " + toolData.Name + " already executed",
-				Tool:    toolData,
-			}}},
+			Next: Result{Messages: []agent.Message{agent.NewMessage(
+				in.Context,
+				agent.MessageType_Error,
+				"tool "+toolData.Name+" already executed",
+				toolData,
+			)}},
 		})
 	}
 
@@ -164,12 +164,12 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: newToolStates,
-			Next: Result{Messages: []agent.Message{{
-				Context: in.Context,
-				Type:    agent.MessageType_ToolResult,
-				Message: result,
-				Tool:    toolData,
-			}}},
+			Next: Result{Messages: []agent.Message{agent.NewMessage(
+				in.Context,
+				agent.MessageType_ToolResult,
+				result,
+				toolData,
+			)}},
 		})
 	} else {
 		newToolStates := st.ToolStates
@@ -178,21 +178,21 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: newToolStates,
-			Next: Result{Messages: []agent.Message{{
-				Context: in.Context,
-				Type:    agent.MessageType_Error,
-				Message: "tool " + toolData.Name + " does not exist",
-				Tool:    toolData,
-			}}},
+			Next: Result{Messages: []agent.Message{agent.NewMessage(
+				in.Context,
+				agent.MessageType_Error,
+				"tool "+toolData.Name+" does not exist",
+				toolData,
+			)}},
 		})
 	}
 }
 
 func (r *Flow) updateError(ctx context.Context, in agent.Message, err error) either.Either[ExecutionState, agent.Message] {
-	return either.Right[ExecutionState, agent.Message](agent.Message{
-		Context: in.Context,
-		Type:    agent.MessageType_Error,
-		Message: err.Error(),
-		Tool:    in.Tool,
-	})
+	return either.Right[ExecutionState, agent.Message](agent.NewMessage(
+		in.Context,
+		agent.MessageType_Error,
+		err.Error(),
+		in.Tool,
+	))
 }

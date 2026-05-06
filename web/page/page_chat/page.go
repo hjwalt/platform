@@ -62,22 +62,24 @@ func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, e
 
 		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
 			{
-				Value: agent.Message{
-					Context: "web",
-					Type:    agent.MessageType_User,
-					Message: message[0],
-				},
+				Value: agent.NewMessage(
+					"web",
+					agent.MessageType_User,
+					message[0],
+					agent.ToolCall{},
+				),
 			},
 		})
 
 		return component_chat_list.View([]render.View{}), nil
 	} else {
 		return component_chat_list.View([]render.View{
-			component_chat_item.View(agent.Message{
-				Context: "web",
-				Type:    agent.MessageType_User,
-				Message: "no message received",
-			}),
+			component_chat_item.View(agent.NewMessage(
+				"web",
+				agent.MessageType_User,
+				"no message received",
+				agent.ToolCall{},
+			)),
 		}), nil
 	}
 }
@@ -100,27 +102,28 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	if contextExists && toolIdExists && toolArgumentsExists && toolNameExists && toolMessageExists {
 		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
 			{
-				Value: agent.Message{
-					Context: contextValue[0],
-					Type:    agent.MessageType_ToolExecute,
-					Message: "execution approved to " + toolMessage[0],
-					Tool: agent.ToolCall{
+				Value: agent.NewMessage(
+					contextValue[0],
+					agent.MessageType_ToolExecute,
+					"execution approved to "+toolMessage[0],
+					agent.ToolCall{
 						Id:        toolId[0],
 						Arguments: toolArguments[0],
 						Name:      toolName[0],
 					},
-				},
+				),
 			},
 		})
 
 		return component_chat_list.View([]render.View{}), nil
 	} else {
 		return component_chat_list.View([]render.View{
-			component_chat_item.View(agent.Message{
-				Context: "web",
-				Type:    agent.MessageType_User,
-				Message: "no message received",
-			}),
+			component_chat_item.View(agent.NewMessage(
+				"web",
+				agent.MessageType_User,
+				"no message received",
+				agent.ToolCall{},
+			)),
 		}), nil
 	}
 }

@@ -141,6 +141,10 @@ func (t *Tool) Execute(input string) (string, error) {
 	outputBuilder := strings.Builder{}
 
 	for i, result := range response.Results {
+		if i > 0 {
+			outputBuilder.WriteString("---------------------")
+			outputBuilder.WriteString("\n\n")
+		}
 		outputBuilder.WriteString("\n\n")
 		outputBuilder.WriteString("result ")
 		outputBuilder.WriteString(reflect.GetString(i + 1))
@@ -167,8 +171,6 @@ func (t *Tool) Execute(input string) (string, error) {
 			outputBuilder.WriteString(snippet)
 			outputBuilder.WriteString("\n\n")
 		}
-		outputBuilder.WriteString("---------------------")
-		outputBuilder.WriteString("\n\n")
 	}
 
 	return outputBuilder.String(), nil
