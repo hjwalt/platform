@@ -26,7 +26,7 @@ update:
 # --------------------
 
 build:
-	go build -o bin/flows
+	go build -o bin/platform
 
 run:
 	go run ./main.go
@@ -34,12 +34,6 @@ run:
 reset:
 	./script/reset.sh
 
-listen:
-	./script/listen.sh
-
-group-delete:
-	./script/group-delete.sh
-	
 # --------------------
 
 mocks: RUN
