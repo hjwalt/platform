@@ -1,4 +1,4 @@
-package chat_list
+package component_chat_list
 
 import (
 	"embed"

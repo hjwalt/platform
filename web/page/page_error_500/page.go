@@ -4,7 +4,7 @@ import (
 	"embed"
 	"net/http"
 
-	"github.com/hjwalt/platform/example"
+	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/render"
 )
 
@@ -13,7 +13,7 @@ var files embed.FS
 
 var Html = render.Embedded(files, "page.html")
 
-func Error(c example.Context, w http.ResponseWriter, r *http.Request, err error) render.View {
+func Error(c web.Context, w http.ResponseWriter, r *http.Request, err error) render.View {
 	return render.Component(
 		Html,
 		"",

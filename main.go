@@ -7,16 +7,16 @@ import (
 	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
-	"github.com/hjwalt/platform/example"
-	"github.com/hjwalt/platform/example/route/decorators"
-	"github.com/hjwalt/platform/example/route/page_billing"
-	"github.com/hjwalt/platform/example/route/page_chat"
-	"github.com/hjwalt/platform/example/route/page_home"
 	"github.com/hjwalt/platform/flow/converter"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
+	"github.com/hjwalt/platform/web"
+	"github.com/hjwalt/platform/web/decorator"
+	"github.com/hjwalt/platform/web/page/page_billing"
+	"github.com/hjwalt/platform/web/page/page_chat"
+	"github.com/hjwalt/platform/web/page/page_home"
 	"github.com/hjwalt/platform/web/route"
 	"github.com/joho/godotenv"
 )
@@ -87,7 +87,7 @@ func main() {
 
 	// HTTP
 
-	httpBuilder := route.NewConfiguration[example.Context]()
+	httpBuilder := route.NewConfiguration[web.Context]()
 
 	httpBuilder.AddMiddlewares(
 		middleware.RequestID,
@@ -97,7 +97,7 @@ func main() {
 	)
 
 	httpBuilder.AddDecorators(
-		&decorators.RuntimeDecorator{
+		&decorator.RuntimeDecorator{
 			Chat:                 holder.GetLanguageModel(),
 			AgentMessageProducer: holder.GetAgentMessageProducer(),
 			AgentHarnessStore:    converter.RuntimeToFlowStore(holder.GetAgentHarnessStore(), format.Json[harness.ExecutionState]()),

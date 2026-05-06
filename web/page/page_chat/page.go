@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/example"
-	"github.com/hjwalt/platform/example/route/component_sidebar"
-	"github.com/hjwalt/platform/example/route/components/chat_item"
-	"github.com/hjwalt/platform/example/route/components/chat_list"
-	"github.com/hjwalt/platform/example/route/layout"
-	"github.com/hjwalt/platform/example/route/page_error_500"
 	"github.com/hjwalt/platform/flow"
+	"github.com/hjwalt/platform/web"
+	"github.com/hjwalt/platform/web/component/component_chat_item"
+	"github.com/hjwalt/platform/web/component/component_chat_list"
+	"github.com/hjwalt/platform/web/component/component_sidebar"
+	"github.com/hjwalt/platform/web/layout"
+	"github.com/hjwalt/platform/web/page/page_error_500"
 	"github.com/hjwalt/platform/web/render"
 	"github.com/hjwalt/platform/web/route"
 )
@@ -30,12 +30,12 @@ const (
 type model struct {
 }
 
-func get(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
 	state, _ := c.AgentHarnessStore.Read(c, "web")
 
 	messageViews := make([]render.View, 0)
 	for _, message := range state.Value.Messages {
-		messageViews = append(messageViews, chat_item.View(c, message))
+		messageViews = append(messageViews, component_chat_item.View(message))
 	}
 
 	return layout.Dashboard(
@@ -44,13 +44,13 @@ func get(c example.Context, w http.ResponseWriter, r *http.Request) (render.View
 			html,
 			model{},
 			map[string]render.View{
-				"chats": chat_list.View(messageViews),
+				"chats": component_chat_list.View(messageViews),
 			},
 			[]render.View{},
 		)), nil
 }
 
-func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form data", http.StatusBadRequest)
@@ -70,10 +70,10 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 			},
 		})
 
-		return chat_list.View([]render.View{}), nil
+		return component_chat_list.View([]render.View{}), nil
 	} else {
-		return chat_list.View([]render.View{
-			chat_item.View(c, agent.Message{
+		return component_chat_list.View([]render.View{
+			component_chat_item.View(agent.Message{
 				Context: "web",
 				Type:    agent.MessageType_User,
 				Message: "no message received",
@@ -82,7 +82,7 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	}
 }
 
-func postTool(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form data", http.StatusBadRequest)
@@ -113,10 +113,10 @@ func postTool(c example.Context, w http.ResponseWriter, r *http.Request) (render
 			},
 		})
 
-		return chat_list.View([]render.View{}), nil
+		return component_chat_list.View([]render.View{}), nil
 	} else {
-		return chat_list.View([]render.View{
-			chat_item.View(c, agent.Message{
+		return component_chat_list.View([]render.View{
+			component_chat_item.View(agent.Message{
 				Context: "web",
 				Type:    agent.MessageType_User,
 				Message: "no message received",
@@ -125,7 +125,7 @@ func postTool(c example.Context, w http.ResponseWriter, r *http.Request) (render
 	}
 }
 
-func Add(builder route.Builder[example.Context]) {
+func Add(builder route.Builder[web.Context]) {
 	builder.Handle(path, http.MethodGet, render.Handle(get, page_error_500.Error))
 	builder.Handle(path, http.MethodPost, render.Handle(post, page_error_500.Error))
 	builder.Handle(toolPath, http.MethodPost, render.Handle(postTool, page_error_500.Error))

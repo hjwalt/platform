@@ -4,11 +4,11 @@ import (
 	"embed"
 	"html/template"
 
-	"github.com/hjwalt/platform/example/route/component_sidebar_button"
-	"github.com/hjwalt/platform/example/route/component_sidebar_button_list"
-	"github.com/hjwalt/platform/example/route/component_sidebar_item"
-	"github.com/hjwalt/platform/example/route/component_sidebar_item_header"
-	"github.com/hjwalt/platform/example/route/component_sidebar_item_list"
+	"github.com/hjwalt/platform/web/component/component_sidebar_button"
+	"github.com/hjwalt/platform/web/component/component_sidebar_button_list"
+	"github.com/hjwalt/platform/web/component/component_sidebar_item"
+	"github.com/hjwalt/platform/web/component/component_sidebar_item_header"
+	"github.com/hjwalt/platform/web/component/component_sidebar_item_list"
 	"github.com/hjwalt/platform/web/render"
 )
 

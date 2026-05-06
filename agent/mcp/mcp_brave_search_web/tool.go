@@ -17,21 +17,14 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
-var global *Tool
-
-func defaultTool() {
-	global = &Tool{
-		Brave: &brave_search.BraveClient{
-			Client:  http.DefaultClient,
-			BaseUrl: "https://api.search.brave.com/res/v1/",
-		},
-		ApiKey: environment.GetString("BRAVE_TOKEN", ""),
-	}
-}
-
 type BraveSearchConfiguration struct {
 	BaseUrl string
 	Secret  string
+}
+
+type Mcp interface {
+	agent.Tool
+	Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error)
 }
 
 type Request struct {
@@ -56,7 +49,7 @@ type Tool struct {
 	ApiKey string
 }
 
-func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params *Request) (*mcp.CallToolResult, *Response, error) {
+func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error) {
 	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
@@ -69,7 +62,7 @@ func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params *
 	)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, Response{Results: make([]SearchResult, 0)}, err
 	}
 
 	results := make([]SearchResult, len(success.Web.Results))
@@ -86,10 +79,10 @@ func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params *
 
 	slog.Info("search", "request", req, "response", len(results))
 
-	return nil, &Response{Results: results}, err
+	return nil, Response{Results: results}, err
 }
 
-func (t *Tool) internal(params *Request) (*Response, error) {
+func (t *Tool) internal(params Request) (Response, error) {
 	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
@@ -102,7 +95,7 @@ func (t *Tool) internal(params *Request) (*Response, error) {
 	)
 
 	if err != nil {
-		return nil, err
+		return Response{Results: make([]SearchResult, 0)}, err
 	}
 
 	results := make([]SearchResult, len(success.Web.Results))
@@ -119,7 +112,7 @@ func (t *Tool) internal(params *Request) (*Response, error) {
 
 	slog.Info("search", "request", params, "response", len(results))
 
-	return &Response{Results: results}, err
+	return Response{Results: results}, err
 }
 
 func (t *Tool) Name() string {
@@ -140,7 +133,7 @@ func (t *Tool) Execute(input string) (string, error) {
 		return "", requestParseErr
 	}
 
-	response, internalErr := t.internal(&request)
+	response, internalErr := t.internal(request)
 	if internalErr != nil {
 		return "", internalErr
 	}
@@ -200,27 +193,30 @@ func (t *Tool) Auto() bool {
 }
 
 func Add(server *mcp.Server) {
-	defaultTool()
-
 	opts := &jsonschema.ForOptions{}
 
 	in, _ := jsonschema.For[Request](opts)
 	out, _ := jsonschema.For[Response](opts)
 
+	instance := Instance(BraveSearchConfiguration{
+		BaseUrl: "https://api.search.brave.com/res/v1/",
+		Secret:  environment.GetString("BRAVE_TOKEN", ""),
+	})
+
 	mcp.AddTool(
 		server,
 		&mcp.Tool{
-			Name:         global.Name(),
-			Title:        global.Name(),
-			Description:  global.Description(),
+			Name:         instance.Name(),
+			Title:        instance.Name(),
+			Description:  instance.Description(),
 			InputSchema:  in,
 			OutputSchema: out,
 		},
-		global.Behaviour,
+		instance.Behaviour,
 	)
 }
 
-func Instance(config BraveSearchConfiguration) agent.Tool {
+func Instance(config BraveSearchConfiguration) Mcp {
 	return &Tool{
 		Brave: &brave_search.BraveClient{
 			Client:  http.DefaultClient,

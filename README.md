@@ -1,10 +1,13 @@
 # Platform
 
-Primary packages:
+Async AI platform.
 
-- commons
-- routes - simplifying backend pages and API endpoint development
-- flow - simple declarative and functional dataflow
+Generally a way to avoid synchronous function calls by splitting out tool and model eval into message handlers.
+Some of the packages can be used independently:
+
+- flow: simplifies implementation of async functions
+- reflect: a way to safely convert to and from types
+- web: simplifies the way to register pages, also serves as an example on how to build a good enough backend rendered UI with interactions via HTMX and design via web components
 
 ## Developing
 
@@ -44,11 +47,9 @@ make listen
 make group-delete
 ```
 
-Main func is in `main` folder instead of the project root, as the project root is used for library package.
+### Running
 
-### Running Example
-
-See the source in `example` folder
+See the source in `main.go` or `example` folder
 
 ```
 docker-compose up -d
@@ -59,8 +60,6 @@ make run
 1. `docker-compose up -d` will start zookeeper, kafka, and postgresql with ports exposed to your host network detached from your terminal
 2. `make reset` will clean up the topics on kafka and postgresql table, and add some example events
 3. `make run` will start the example word count application
-
-There are three examples, its manually switched via comments in the `main` folder in `main.go`
 
 ### Test
 
@@ -77,26 +76,24 @@ Switching between different container technology will be done some time in the f
 - Simple format helpers, with bytes as default
 - Idiomatic golang
 
-## Semantics
+### Semantics
 
 At least once publishing with effectively once state update.
 Additional application based deduplication is recommended (request id header deduplication for instance).
 
-## Integrations
+### Integrations
 
-- Kafka using Sarama
+- Kafka using librdkafka via its golang binding
 - Postgresql using Bun
 
-## Patterns
+## Flow
 
 Flows sits at the core of the [Kappa Architecture](https://hazelcast.com/glossary/kappa-architecture/), where it tackles four elements:
 
 1. Stateless functions
 2. Stateful functions
 3. Join as combination of stateless and stateful functions
-4. Materialisation
-5. Collector
-6. Long running tasks
+4. Materialisation (TODO)
 
 ### Stateless
 
@@ -122,7 +119,7 @@ To ensure events are published for the multiple topics that are being joined, th
 1. Maintain publishing state for all topics (currently, the last result state is global per key, this can be changed to be per topic per key)
 2. Merge topics into one intermediate topic, and perform a stateful function
 
-In this codebase, option two is the chosen option for reasons of:
+In this codebase, option two is the preferred option for reasons of:
 
 1. Avoiding to impose limits on the number of messages being published, which can increase the state size written into the store, which implication should be obvious
 2. Stateless map that can be used to merge topics are cheaper in terms of time latency than transaction locking failure
@@ -133,34 +130,11 @@ In this codebase, option two is the chosen option for reasons of:
 
 ![Join Pattern](docs/join-pattern.drawio.png "Join Pattern")
 
-It is recommended to use your own custom intermediate topic mapper for better control of your dataflow.
-However, a standard implementation is provided as a reference.
-
 ### Materialiser
 
 Materialise function batch upserts into database.
 
-### Collector
-
-In an extremely high throughput situation, it makes a lot of sense to:
-
-1. Pre-aggregate input topics
-2. Perform stateful operation against pre-aggregated output
-
-This reduces the amount of state writes performed.
-Even when RAM based reliable redundant storage is used, it is still wise to pre-aggregate in a very high throughput situation against stateful operations.
-
-Example:
-
-1. In an ecommerce inventory handling for orders, the orders can be pre-aggregated (to a certain extent where the message size does not blow up the Kafka cluster), and final inventory check is performed one time for all the pre-aggregated orders
-2. In an event space management system, the updates against seat booking can be pre-aggregated before checking against the entire section
-
-### Tasks
-
-Long running actions are tricky to deal with in Kafka, because partitions can be blocked for uneven long running task duration. 
-The solution is to use other types of message queue, such as RabbitMQ with AMQP.
-
-## Limitations
+### Limitations
 
 To keep the simplicity of implementation, temporal operations are not yet considered in this project.
 Examples of temporal operations that are not considered for implementation yet:
@@ -168,23 +142,7 @@ Examples of temporal operations that are not considered for implementation yet:
 1. End of time window only publishing. With states, a window can be emulated, but an output will be published for each message received instead of only at the end of the window.
 2. Per-key publication rate limiter. Combining state storage, commit offset, and real time ticks can be implemented, however that complicates the interfaces needed.
 
-## To Do
-
-1. Integrations
-   1. MongoDB
-   2. Cassandra
-   3. AWS DynamoDB
-   4. GCP Bigtable
-2. Local state caching
-3. Unit test coverage
-4. Replace prometheus with otel
-
-## Notes
-
-This project solves dataflow in a very specific way.
-If you are interested to improve this project more or have some feedback, please contact me.
-
-## Kafka Migration
+### Kafka Migration
 
 The way to migrate stateful functions to a mirrored Kafka cluster are by:
 
@@ -198,7 +156,7 @@ Such deduplication can be peformed using a unique Kafka header identifier.
 
 However, if the application functionality can already tolerate at least once execution, then there will be no problems with migration.
 
-## Functions
+### Functions
 
 The functions are used as is, because function for pointer struct can be used as is.
 As proof, the following unit test will pass.
@@ -260,21 +218,13 @@ func TestPointerStuff(t *testing.T) {
 }
 ```
 
-## Rootless Podman
-
-You only need to add `DOCKER_HOST` according to your `podman info`. Example:
-
-```
-export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
-```
-
-## Microbatching
+### Microbatching
 
 Microbatching is applied in this repository to achieve better throughput.
 Maximum batching wait time can be configured. 
 Per message semantics can be achieved by configuration, however throughput will suffer without increasing compute resources.
 
-## WHY?
+### Why
 
 Why do I build this instead of using tools like Spark, Flink, Kafka Streams?
 
@@ -303,9 +253,14 @@ This is how I would build and deploy flows:
 2. One schema management repository (if no tools are used)
 3. "app-domain-function" naming convention everywhere (consumer group, kubernetes deployment, etc)
 
+## Rootless Podman
+
+You only need to add `DOCKER_HOST` according to your `podman info`. Example:
+
+```
+export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
+```
+
 ## Credits
 
-### Example Pages
-
-Example pages uses Creative Tim free Material Bootstrap examples, subject to its [Copyright license](https://github.com/creativetimofficial/material-dashboard/blob/master/LICENSE.md).
-
+The web uses the free version of web-awesome. Check them out for a well implemented web components.

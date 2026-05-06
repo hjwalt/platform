@@ -1,12 +1,12 @@
-package decorators
+package decorator
 
 import (
 	"net/http"
 
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/agent/harness"
-	"github.com/hjwalt/platform/example"
 	"github.com/hjwalt/platform/flow"
+	"github.com/hjwalt/platform/web"
 )
 
 type RuntimeDecorator struct {
@@ -16,8 +16,8 @@ type RuntimeDecorator struct {
 	Tool                 map[string]agent.Tool
 }
 
-func (d *RuntimeDecorator) Decorate(c example.Context, w http.ResponseWriter, r *http.Request) (example.Context, error) {
-	return example.Context{
+func (d *RuntimeDecorator) Decorate(c web.Context, w http.ResponseWriter, r *http.Request) (web.Context, error) {
+	return web.Context{
 		Context:              c.Context,
 		Chat:                 d.Chat,
 		AgentMessageProducer: d.AgentMessageProducer,
