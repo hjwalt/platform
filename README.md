@@ -218,12 +218,6 @@ func TestPointerStuff(t *testing.T) {
 }
 ```
 
-### Microbatching
-
-Microbatching is applied in this repository to achieve better throughput.
-Maximum batching wait time can be configured. 
-Per message semantics can be achieved by configuration, however throughput will suffer without increasing compute resources.
-
 ### Why
 
 Why do I build this instead of using tools like Spark, Flink, Kafka Streams?
