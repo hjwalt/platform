@@ -101,6 +101,7 @@ func (r *holder) Block() {
 	)
 
 	if startErr != nil {
+		runtime.Stop()
 		panic(startErr)
 	}
 

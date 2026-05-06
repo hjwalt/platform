@@ -94,7 +94,7 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 	toolData := in.Tool
 	if tool, exists := r.Tools[toolData.Name]; exists {
 		newToolStates := st.ToolStates
-		newToolStates[in.Tool.Name] = ToolState_Requested
+		newToolStates[in.Tool.Id] = ToolState_Requested
 
 		if tool.Auto() {
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
@@ -116,7 +116,7 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 		}
 	} else {
 		newToolStates := st.ToolStates
-		newToolStates[in.Tool.Name] = ToolState_Failed
+		newToolStates[in.Tool.Id] = ToolState_Failed
 
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
@@ -133,6 +133,25 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 
 func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	toolData := in.Tool
+
+	toolState, exist := st.ToolStates[toolData.Id]
+	if !exist {
+		toolState = ToolState_Requested
+	}
+
+	if toolState != ToolState_Requested {
+		return either.Left[ExecutionState, agent.Message](ExecutionState{
+			Messages:   append(st.Messages, in),
+			ToolStates: st.ToolStates,
+			Next: Result{Messages: []agent.Message{{
+				Context: in.Context,
+				Type:    agent.MessageType_Error,
+				Message: "tool " + toolData.Name + " already executed",
+				Tool:    toolData,
+			}}},
+		})
+	}
+
 	if tool, exists := r.Tools[toolData.Name]; exists {
 		result, err := tool.Execute(toolData.Arguments)
 		if err != nil {
@@ -140,7 +159,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		}
 
 		newToolStates := st.ToolStates
-		newToolStates[in.Tool.Name] = ToolState_Executed
+		newToolStates[in.Tool.Id] = ToolState_Executed
 
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
@@ -154,7 +173,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		})
 	} else {
 		newToolStates := st.ToolStates
-		newToolStates[in.Tool.Name] = ToolState_Failed
+		newToolStates[in.Tool.Id] = ToolState_Failed
 
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),

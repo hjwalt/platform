@@ -38,16 +38,6 @@ func get(c example.Context, w http.ResponseWriter, r *http.Request) (render.View
 		messageViews = append(messageViews, chat_item.View(c, message))
 	}
 
-	// messageViews = append(messageViews, chat_item.View(c, agent.Message{
-	// 	Context: "web",
-	// 	Type:    agent.MessageType_ToolRequest,
-	// 	Message: "tool call",
-	// 	Tool: agent.ToolCall{
-	// 		Id:        "call_12345",
-	// 		Name:      "web search",
-	// 		Arguments: "{\"Term\":\"Hello\"}",
-	// 	},
-	// }))
 	return layout.Dashboard(
 		component_sidebar.View(),
 		render.Component(
@@ -92,7 +82,51 @@ func post(c example.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	}
 }
 
+func postTool(c example.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error parsing form data", http.StatusBadRequest)
+		return nil, err
+	}
+
+	slog.Info("", "form", r.PostForm)
+
+	contextValue, contextExists := r.PostForm["context"]
+	toolId, toolIdExists := r.PostForm["tool_id"]
+	toolArguments, toolArgumentsExists := r.PostForm["tool_arguments"]
+	toolName, toolNameExists := r.PostForm["tool_name"]
+	toolMessage, toolMessageExists := r.PostForm["tool_message"]
+
+	if contextExists && toolIdExists && toolArgumentsExists && toolNameExists && toolMessageExists {
+		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
+			{
+				Value: agent.Message{
+					Context: contextValue[0],
+					Type:    agent.MessageType_ToolExecute,
+					Message: "execution approved to " + toolMessage[0],
+					Tool: agent.ToolCall{
+						Id:        toolId[0],
+						Arguments: toolArguments[0],
+						Name:      toolName[0],
+					},
+				},
+			},
+		})
+
+		return chat_list.View([]render.View{}), nil
+	} else {
+		return chat_list.View([]render.View{
+			chat_item.View(c, agent.Message{
+				Context: "web",
+				Type:    agent.MessageType_User,
+				Message: "no message received",
+			}),
+		}), nil
+	}
+}
+
 func Add(builder route.Builder[example.Context]) {
 	builder.Handle(path, http.MethodGet, render.Handle(get, page_error_500.Error))
 	builder.Handle(path, http.MethodPost, render.Handle(post, page_error_500.Error))
+	builder.Handle(toolPath, http.MethodPost, render.Handle(postTool, page_error_500.Error))
 }

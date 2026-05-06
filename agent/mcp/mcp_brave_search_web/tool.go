@@ -196,7 +196,7 @@ func (t *Tool) Request(input string) (string, error) {
 }
 
 func (t *Tool) Auto() bool {
-	return true
+	return false
 }
 
 func Add(server *mcp.Server) {

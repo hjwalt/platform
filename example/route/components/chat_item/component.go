@@ -26,8 +26,8 @@ var titles = map[agent.MessageType]string{
 
 type Model struct {
 	Title         string
-	Message       string
 	IsToolRequest bool
+	Message       agent.Message
 }
 
 func View(c example.Context, message agent.Message) render.View {
@@ -38,7 +38,7 @@ func View(c example.Context, message agent.Message) render.View {
 				Html,
 				Model{
 					Title:         titles[message.Type],
-					Message:       message.Message,
+					Message:       message,
 					IsToolRequest: true,
 				},
 				make(map[string]render.View),
@@ -51,7 +51,7 @@ func View(c example.Context, message agent.Message) render.View {
 				Html,
 				Model{
 					Title:         titles[message.Type],
-					Message:       message.Message,
+					Message:       message,
 					IsToolRequest: false,
 				},
 				make(map[string]render.View),

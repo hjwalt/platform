@@ -5,13 +5,72 @@
     </h3>
     <wa-markdown>
       <script type="text/markdown">
-{{ .Model.Message }}
+{{ .Model.Message.Message }}
     </script>
     </wa-markdown>
+    </wa-button>
     {{if .Model.IsToolRequest}}
     <div slot="footer">
-      <wa-button variant="brand">Submit</wa-button>
-      <wa-button variant="brand">Cancel</wa-button>
+      <div class="wa-flank:start wa-gap-2xs">
+        <form method="POST"
+              data-hx-post="/chat/tool"
+              data-hx-target="#chat-result"
+              data-hx-swap="outerHTML">
+          <input type="hidden"
+                 name="type"
+                 value="execute" />
+          <input type="hidden"
+                 name="context"
+                 value="{{ .Model.Message.Context }}" />
+          <input type="hidden"
+                 name="tool_message"
+                 value="{{ .Model.Message.Message }}" />
+          <input type="hidden"
+                 name="tool_id"
+                 value="{{ .Model.Message.Tool.Id }}" />
+          <input type="hidden"
+                 name="tool_name"
+                 value="{{ .Model.Message.Tool.Name }}" />
+          <input type="hidden"
+                 name="tool_arguments"
+                 value="{{ .Model.Message.Tool.Arguments }}" />
+          <wa-button variant="brand"
+                     size="xs"
+                     appearance="accent"
+                     type="submit">
+            Submit
+          </wa-button>
+        </form>
+        <form method="POST"
+              data-hx-post="/chat/tool"
+              data-hx-target="#chat-result"
+              data-hx-swap="outerHTML">
+          <input type="hidden"
+                 name="type"
+                 value="reject" />
+          <input type="hidden"
+                 name="context"
+                 value="{{ .Model.Message.Context }}" />
+          <input type="hidden"
+                 name="tool_message"
+                 value="{{ .Model.Message.Message }}" />
+          <input type="hidden"
+                 name="tool_id"
+                 value="{{ .Model.Message.Tool.Id }}" />
+          <input type="hidden"
+                 name="tool_name"
+                 value="{{ .Model.Message.Tool.Name }}" />
+          <input type="hidden"
+                 name="tool_arguments"
+                 value="{{ .Model.Message.Tool.Arguments }}" />
+          <wa-button variant="danger"
+                     size="xs"
+                     appearance="accent"
+                     type="submit">
+            Cancel
+          </wa-button>
+        </form>
+      </div>
     </div>
     {{end}}
 </wa-card>
