@@ -5,12 +5,15 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "Lemonade (local)",
       "options": {
-        "baseURL": "http://localhost:8000/api/v1",
+        "baseURL": "http://localhost:13305/api/v1",
         "timeout": false
       },
       "models": {
         "Qwen3-Coder-30B-A3B-Instruct-GGUF": {
           "name": "Qwen3-Coder-30B-A3B-Instruct-GGUF"
+        },
+        "gemma4-it-e4b-FLM": {
+          "name": "gemma4-it-e4b-FLM"
         }
       }
     }
