@@ -1,11 +1,13 @@
 # Platform
 
-Async AI platform.
+Async LLM / AI platform.
 
 Generally a way to avoid synchronous function calls by splitting out tool and model eval into message handlers.
 Some of the packages can be used independently:
 
+- agent: general harness and tools built around OpenAI compatible endpoint and MCP sdk
 - flow: simplifies implementation of async functions
+- format: a collection of ways to convert to and from byte array and to mask and unmask / encrypt and decrypt byte array
 - reflect: a way to safely convert to and from types
 - web: simplifies the way to register pages, also serves as an example on how to build a good enough backend rendered UI with interactions via HTMX and design via web components
 
@@ -71,7 +73,6 @@ Switching between different container technology will be done some time in the f
 - Container first
 - Do one thing, and only one thing well
 - Ease to change integrations
-- Protobuf as primary bytes encoding
 - Sane defaults
 - Simple format helpers, with bytes as default
 - Idiomatic golang
@@ -236,16 +237,10 @@ Deploy a flow that is too small its costly, deploy a flow that is too big it con
 
 So the idea of a lightweight flow comes in.
 Its similar to Kafka streams, but every single step is independently deployed, every intermediate data types are independently designed.
-With a schema management system, Kafka, and Kubernetes, its the right balance of performance, ease of deployement, and flexibility.
-Its also written in golang, so that the resource use of each lightweight flow step is small, yet it can be scaled both horizontally and vertically very well.
-In theory other language like C++ and Rust will also work, but at the time of implementation I am far more familiar with golang and Java.
-So golang it is.
+With a schema management system, Kafka, and Kubernetes, its the right balance of performance, ease of deployment, and flexibility.
 
-This is how I would build and deploy flows:
-
-1. One repository per bounded context, so that every bounded context is isolated without having hundreds of repositories
-2. One schema management repository (if no tools are used)
-3. "app-domain-function" naming convention everywhere (consumer group, kubernetes deployment, etc)
+Its written in golang, so that the resource use of each lightweight flow step is small, yet it can be scaled both horizontally and vertically very well.
+In theory other language like C++ and Rust will also work. I attempted Rust, the type and memory safety rules just makes the implementation a far bigger hassle than I would like it to be.
 
 ## Rootless Podman
 
@@ -257,4 +252,10 @@ export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 
 ## Credits
 
-The web uses the free version of web-awesome. Check them out for a well implemented web components.
+The web page uses the free version of web-awesome. Check them out for a really well implemented web components.
+
+## Caveat
+
+These code are an amalgamation of a few old repositories I have to create a more cohesive codebase. As it is going to be a constant work in progress for experiments, expect breaking interface changes.
+
+Do not use this for production use case, however, it may be helpful if you want your own fun little chatbot.
