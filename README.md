@@ -54,7 +54,7 @@ make group-delete
 See the source in `main.go` or `example` folder
 
 ```
-docker-compose up -d
+docker compose up -d
 make reset
 make run
 ```
