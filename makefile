@@ -29,7 +29,7 @@ build:
 	go build -o bin/platform
 
 run:
-	go run ./main.go
+	./script/run.sh
 
 reset:
 	./script/reset.sh

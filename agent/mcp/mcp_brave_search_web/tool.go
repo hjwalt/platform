@@ -17,7 +17,7 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
-type BraveSearchConfiguration struct {
+type Configuration struct {
 	BaseUrl string
 	Secret  string
 }
@@ -50,36 +50,8 @@ type Tool struct {
 }
 
 func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error) {
-	success, err := brave_search.WebSearch(
-		context.Background(),
-		t.Brave,
-		[]brave_search.Param{
-			brave_search.WithTerm(params.Term),
-		},
-		[]brave_search.Header{
-			brave_search.WithSubscriptionToken(t.ApiKey),
-		},
-	)
-
-	if err != nil {
-		return nil, Response{Results: make([]SearchResult, 0)}, err
-	}
-
-	results := make([]SearchResult, len(success.Web.Results))
-	for i, braveResults := range success.Web.Results {
-		results[i] = SearchResult{
-			Title:         braveResults.Title,
-			URL:           braveResults.URL,
-			Description:   braveResults.Description,
-			Language:      braveResults.Language,
-			ContentType:   braveResults.ContentType,
-			ExtraSnippets: braveResults.ExtraSnippets,
-		}
-	}
-
-	slog.Info("search", "request", req, "response", len(results))
-
-	return nil, Response{Results: results}, err
+	results, err := t.internal(params)
+	return nil, results, err
 }
 
 func (t *Tool) internal(params Request) (Response, error) {
@@ -200,7 +172,7 @@ func Add(server *mcp.Server) {
 	in, _ := jsonschema.For[Request](opts)
 	out, _ := jsonschema.For[Response](opts)
 
-	instance := Instance(BraveSearchConfiguration{
+	instance := Instance(Configuration{
 		BaseUrl: "https://api.search.brave.com/res/v1/",
 		Secret:  environment.GetString("BRAVE_TOKEN", ""),
 	})
@@ -218,7 +190,7 @@ func Add(server *mcp.Server) {
 	)
 }
 
-func Instance(config BraveSearchConfiguration) Mcp {
+func Instance(config Configuration) Mcp {
 	return &Tool{
 		Brave: &brave_search.BraveClient{
 			Client:  http.DefaultClient,

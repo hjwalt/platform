@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/agent/harness"
 	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
+	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/flow/converter"
@@ -35,9 +36,14 @@ func main() {
 			Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
 			Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
 		},
-		BraveSearch: mcp_brave_search_web.BraveSearchConfiguration{
-			BaseUrl: environment.GetString("BRAVE_SEARCH_URL", "https://api.search.brave.com/res/v1/"),
-			Secret:  environment.GetString("BRAVE_TOKEN", ""),
+		Tool: configuration.ToolConfiguration{
+			BraveSearch: mcp_brave_search_web.Configuration{
+				BaseUrl: environment.GetString("BRAVE_SEARCH_URL", "https://api.search.brave.com/res/v1/"),
+				Secret:  environment.GetString("BRAVE_TOKEN", ""),
+			},
+			Shell: shell_tool.Configuration{
+				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
+			},
 		},
 		Server: configuration.WebServerConfiguration{
 			Port:               3001,
@@ -77,7 +83,8 @@ func main() {
 
 	// AI -- tools
 
-	holder.AddTool(mcp_brave_search_web.Instance(config.BraveSearch))
+	holder.AddTool(mcp_brave_search_web.Instance(config.Tool.BraveSearch))
+	holder.AddTool(shell_tool.Instance(config.Tool.Shell))
 
 	// Runtimes
 

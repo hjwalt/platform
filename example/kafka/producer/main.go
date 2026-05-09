@@ -7,6 +7,7 @@ import (
 	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/flow/converter"
 	"github.com/hjwalt/platform/flow/flow_runtime_kafka"
+	"github.com/hjwalt/platform/flow/metadata"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/message/kafka"
 )
@@ -31,11 +32,12 @@ func main() {
 			flow_runtime_kafka.New("test"),
 			format.Json[TestMessage](),
 		),
+		metadata.IdUpdate,
 	)
 
 	kafkaProducer.Start()
 
-	producer.Produce(context.Background(), []flow.Message[TestMessage]{
+	producer.ProduceMessage(context.Background(), []flow.Message[TestMessage]{
 		{
 			Metadata: flow.Metadata{
 				Id:     uuid.New().String(),

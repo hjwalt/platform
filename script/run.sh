@@ -2,4 +2,4 @@
 
 # export INSTANCE=word-materialise
 
-go run ./main
+go run ./main.go

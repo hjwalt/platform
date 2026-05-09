@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/component/component_chat_item"
 	"github.com/hjwalt/platform/web/component/component_chat_list"
@@ -60,15 +59,13 @@ func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, e
 	slog.Info("", "form", r.PostForm)
 	if message, exists := r.PostForm["message"]; exists && len(message) > 0 {
 
-		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
-			{
-				Value: agent.NewMessage(
-					"web",
-					agent.MessageType_User,
-					message[0],
-					agent.ToolCall{},
-				),
-			},
+		c.AgentMessageProducer.Produce(c, []agent.Message{
+			agent.NewMessage(
+				"web",
+				agent.MessageType_User,
+				message[0],
+				agent.ToolCall{},
+			),
 		})
 
 		return component_chat_list.View([]render.View{}), nil
@@ -100,19 +97,17 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	toolMessage, toolMessageExists := r.PostForm["tool_message"]
 
 	if contextExists && toolIdExists && toolArgumentsExists && toolNameExists && toolMessageExists {
-		c.AgentMessageProducer.Produce(c, []flow.Message[agent.Message]{
-			{
-				Value: agent.NewMessage(
-					contextValue[0],
-					agent.MessageType_ToolExecute,
-					"execution approved to "+toolMessage[0],
-					agent.ToolCall{
-						Id:        toolId[0],
-						Arguments: toolArguments[0],
-						Name:      toolName[0],
-					},
-				),
-			},
+		c.AgentMessageProducer.Produce(c, []agent.Message{
+			agent.NewMessage(
+				contextValue[0],
+				agent.MessageType_ToolExecute,
+				"execution approved to "+toolMessage[0],
+				agent.ToolCall{
+					Id:        toolId[0],
+					Arguments: toolArguments[0],
+					Name:      toolName[0],
+				},
+			),
 		})
 
 		return component_chat_list.View([]render.View{}), nil

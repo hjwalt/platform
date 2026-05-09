@@ -34,7 +34,7 @@ func (r *Consumer[IV, ERR]) Handle(ctx context.Context, msg flow.Message[IV]) er
 			Value:     result.Get(),
 			Timestamp: time.Now(),
 		}
-		return r.ErrorProducer.Produce(ctx, []flow.Message[ERR]{errorMessage})
+		return r.ErrorProducer.ProduceMessage(ctx, []flow.Message[ERR]{errorMessage})
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
@@ -141,6 +142,7 @@ func OpenAiToolSchema[M any](name string, description string) openai.ChatComplet
 	opts := &jsonschema.ForOptions{}
 	toolSchema, _ := jsonschema.For[M](opts)
 	unmarshalled, _ := format.Convert(toolSchema, schemaFormat, openAiFormat)
+	slog.Info("schema", "schema", toolSchema, "unmarshalled", unmarshalled)
 	return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
 		Name:        name,
 		Description: openai.String(description),

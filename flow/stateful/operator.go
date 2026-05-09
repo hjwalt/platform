@@ -64,7 +64,7 @@ func (r *Operator[IV, OV, ST, ERR]) Handle(parentCtx context.Context, msg flow.M
 			Value:     nextState.Right(),
 			Timestamp: time.Now(),
 		}
-		return r.ErrorProducer.Produce(ctx, []flow.Message[ERR]{errorMessage})
+		return r.ErrorProducer.ProduceMessage(ctx, []flow.Message[ERR]{errorMessage})
 	}
 
 	stateWriteErr := r.StateStore.Write(ctx, flow.State[ST]{
@@ -83,7 +83,7 @@ func (r *Operator[IV, OV, ST, ERR]) Handle(parentCtx context.Context, msg flow.M
 			Value:     result.Get(),
 			Timestamp: time.Now(),
 		}
-		return r.OutputProducer.Produce(ctx, []flow.Message[OV]{outputMessage})
+		return r.OutputProducer.ProduceMessage(ctx, []flow.Message[OV]{outputMessage})
 	}
 	if handlerError.IsPresent() {
 		errorMessage := flow.Message[ERR]{
@@ -91,7 +91,7 @@ func (r *Operator[IV, OV, ST, ERR]) Handle(parentCtx context.Context, msg flow.M
 			Value:     handlerError.Get(),
 			Timestamp: time.Now(),
 		}
-		return r.ErrorProducer.Produce(ctx, []flow.Message[ERR]{errorMessage})
+		return r.ErrorProducer.ProduceMessage(ctx, []flow.Message[ERR]{errorMessage})
 	}
 	return nil
 }

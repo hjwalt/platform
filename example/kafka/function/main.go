@@ -114,6 +114,7 @@ func main() {
 			flow_runtime_kafka.New("test"),
 			format.Json[TestMessage](),
 		),
+		metadata.IdUpdate,
 	)
 
 	completedProducer := converter.RuntimeToFlowProducer(
@@ -122,6 +123,7 @@ func main() {
 			flow_runtime_kafka.New("completed"),
 			format.Json[Completed](),
 		),
+		metadata.IdUpdate,
 	)
 
 	metricProducer := converter.RuntimeToFlowProducer(
@@ -130,6 +132,7 @@ func main() {
 			flow_runtime_kafka.New("metric"),
 			format.Json[Metric](),
 		),
+		metadata.IdUpdate,
 	)
 
 	errorProducer := converter.RuntimeToFlowProducer(
@@ -138,6 +141,7 @@ func main() {
 			flow_runtime_kafka.New("error"),
 			format.Json[TestError](),
 		),
+		metadata.IdUpdate,
 	)
 
 	incrementConsumer := kafka.NewConsumer(

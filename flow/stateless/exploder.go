@@ -47,7 +47,7 @@ func (r *Exploder[IV, OV, ERR]) Handle(parentCtx context.Context, msg flow.Messa
 				Value:     entry,
 				Timestamp: time.Now(),
 			}
-			return r.OutputProducer.Produce(ctx, []flow.Message[OV]{outputMessage})
+			return r.OutputProducer.ProduceMessage(ctx, []flow.Message[OV]{outputMessage})
 		}
 	}
 	if handlerError.IsPresent() {
@@ -56,7 +56,7 @@ func (r *Exploder[IV, OV, ERR]) Handle(parentCtx context.Context, msg flow.Messa
 			Value:     handlerError.Get(),
 			Timestamp: time.Now(),
 		}
-		return r.ErrorProducer.Produce(ctx, []flow.Message[ERR]{errorMessage})
+		return r.ErrorProducer.ProduceMessage(ctx, []flow.Message[ERR]{errorMessage})
 	}
 	return nil
 }

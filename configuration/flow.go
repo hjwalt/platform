@@ -12,6 +12,11 @@ import (
 )
 
 func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
+	agentFlow := harness.Flow{
+		Tools: holder.GetTool(),
+		Model: holder.GetLanguageModel(),
+	}
+
 	// Producer
 
 	kafkaProducer := kafka.NewProducer(conf.Flow.Agent.Producer)
@@ -23,6 +28,7 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 			flow_runtime_kafka.New(conf.Flow.Agent.Topic),
 			format.Json[agent.Message](),
 		),
+		agentFlow.MessageMetadata,
 	)
 	holder.Add(messageProducer)
 	holder.SetAgentMessageProducer(messageProducer)
@@ -33,15 +39,11 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 			flow_runtime_kafka.New(conf.Flow.Result.Topic),
 			format.Json[agent.Result](),
 		),
+		agentFlow.ResultMetadata,
 	)
 	holder.Add(resultProducer)
 
 	// Consumer
-
-	agentFlow := harness.Flow{
-		Tools: holder.GetTool(),
-		Model: holder.GetLanguageModel(),
-	}
 
 	chatConsumer := kafka.NewConsumer(
 		conf.Flow.Agent.Consumer,

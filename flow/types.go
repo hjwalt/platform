@@ -32,7 +32,8 @@ type Handler[V any] interface {
 }
 
 type Producer[V any] interface {
-	Produce(context.Context, []Message[V]) error
+	ProduceMessage(context.Context, []Message[V]) error
+	Produce(context.Context, []V) error
 	Start() error
 	Stop()
 }

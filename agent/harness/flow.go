@@ -86,11 +86,12 @@ func (r *Flow) Next(ctx context.Context, in agent.Message, st ExecutionState) (o
 		st.Next.Messages = make([]agent.Message, 0)
 	}
 
+	slog.InfoContext(ctx, "next", "len", len(st.Next.Messages))
 	return optional.Of(st.Next), optional.Empty[agent.Message]()
 }
 
 func (r *Flow) Explode(ctx context.Context, in agent.Result) (optional.Optional[[]agent.Message], optional.Optional[agent.Message]) {
-	slog.Info("exploding", "len", len(in.Messages))
+	slog.InfoContext(ctx, "exploding", "len", len(in.Messages))
 	return optional.Of(in.Messages), optional.Empty[agent.Message]()
 }
 
@@ -103,6 +104,7 @@ func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionS
 	if err != nil {
 		return r.updateError(ctx, in, err)
 	}
+	slog.InfoContext(ctx, "next", "len", len(result))
 
 	return either.Left[ExecutionState, agent.Message](ExecutionState{
 		Messages:   append(st.Messages, in),
