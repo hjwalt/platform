@@ -52,14 +52,11 @@ type MessageRuntime[M any] interface {
 	RuntimeToFlowMetadata(M) Metadata
 }
 
-type MetadataOperation interface {
-	OnSuccess(Metadata) Metadata
-	OnError(Metadata Metadata) Metadata
-}
-
 type Store[V any] interface {
 	Read(ctx context.Context, id string) (State[V], error)
 	Write(ctx context.Context, s State[V]) error
 	Start() error
 	Stop()
 }
+
+type ExtractMetadata[V any] func(ctx context.Context, prev Metadata, value V) Metadata

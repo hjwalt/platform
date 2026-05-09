@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hjwalt/platform/commons/trusted"
+	"github.com/hjwalt/platform/trusted"
 )
 
 var primary atomic.Pointer[Primary]

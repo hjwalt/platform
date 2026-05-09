@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hjwalt/platform/commons/trusted"
+	"github.com/hjwalt/platform/trusted"
 	"github.com/stretchr/testify/assert"
 )
 

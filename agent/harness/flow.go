@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/hjwalt/platform/agent"
+	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/type/either"
 	"github.com/hjwalt/platform/type/optional"
@@ -21,6 +22,26 @@ func (r *Flow) Key(ctx context.Context, in agent.Message) (string, error) {
 		id = "DEFAULT"
 	}
 	return id, nil
+}
+
+func (r *Flow) ResultMetadata(ctx context.Context, pref flow.Metadata, value agent.Result) flow.Metadata {
+	return flow.Metadata{
+		Id:       value.Id,
+		Group:    pref.Group,
+		Attempt:  0,
+		Sequence: pref.Sequence + 1,
+		Source:   "AGENT_HARNESS",
+	}
+}
+
+func (r *Flow) MessageMetadata(ctx context.Context, pref flow.Metadata, value agent.Message) flow.Metadata {
+	return flow.Metadata{
+		Id:       value.Id,
+		Group:    value.Context,
+		Attempt:  0,
+		Sequence: pref.Sequence + 1,
+		Source:   "AGENT_HARNESS",
+	}
 }
 
 func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
@@ -53,13 +74,13 @@ func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
 				Messages:   append(st.Messages, in),
 				ToolStates: st.ToolStates,
-				Next:       Result{Messages: []agent.Message{}},
+				Next:       agent.EmptyResult(),
 			})
 		}
 	}
 }
 
-func (r *Flow) Next(ctx context.Context, in agent.Message, st ExecutionState) (optional.Optional[Result], optional.Optional[agent.Message]) {
+func (r *Flow) Next(ctx context.Context, in agent.Message, st ExecutionState) (optional.Optional[agent.Result], optional.Optional[agent.Message]) {
 	// setting state defaults
 	if st.Next.Messages == nil {
 		st.Next.Messages = make([]agent.Message, 0)
@@ -68,7 +89,7 @@ func (r *Flow) Next(ctx context.Context, in agent.Message, st ExecutionState) (o
 	return optional.Of(st.Next), optional.Empty[agent.Message]()
 }
 
-func (r *Flow) Explode(ctx context.Context, in Result) (optional.Optional[[]agent.Message], optional.Optional[agent.Message]) {
+func (r *Flow) Explode(ctx context.Context, in agent.Result) (optional.Optional[[]agent.Message], optional.Optional[agent.Message]) {
 	slog.Info("exploding", "len", len(in.Messages))
 	return optional.Of(in.Messages), optional.Empty[agent.Message]()
 }
@@ -86,7 +107,7 @@ func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionS
 	return either.Left[ExecutionState, agent.Message](ExecutionState{
 		Messages:   append(st.Messages, in),
 		ToolStates: st.ToolStates,
-		Next:       Result{Messages: result},
+		Next:       agent.NewResult(result),
 	})
 }
 
@@ -100,18 +121,18 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
 				Messages:   append(st.Messages, in),
 				ToolStates: newToolStates,
-				Next: Result{Messages: []agent.Message{agent.NewMessage(
+				Next: agent.SingleResult(agent.NewMessage(
 					in.Context,
 					agent.MessageType_ToolExecute,
 					"execution approved to "+in.Message,
 					in.Tool,
-				)}},
+				)),
 			})
 		} else {
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
 				Messages:   append(st.Messages, in),
 				ToolStates: newToolStates,
-				Next:       Result{Messages: []agent.Message{}},
+				Next:       agent.EmptyResult(),
 			})
 		}
 	} else {
@@ -121,12 +142,12 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: newToolStates,
-			Next: Result{Messages: []agent.Message{agent.NewMessage(
+			Next: agent.SingleResult(agent.NewMessage(
 				in.Context,
 				agent.MessageType_Error,
 				"tool "+toolData.Name+" does not exist",
 				toolData,
-			)}},
+			)),
 		})
 	}
 }
@@ -143,12 +164,12 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: st.ToolStates,
-			Next: Result{Messages: []agent.Message{agent.NewMessage(
+			Next: agent.SingleResult(agent.NewMessage(
 				in.Context,
 				agent.MessageType_Error,
 				"tool "+toolData.Name+" already executed",
 				toolData,
-			)}},
+			)),
 		})
 	}
 
@@ -164,12 +185,12 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: newToolStates,
-			Next: Result{Messages: []agent.Message{agent.NewMessage(
+			Next: agent.SingleResult(agent.NewMessage(
 				in.Context,
 				agent.MessageType_ToolResult,
 				result,
 				toolData,
-			)}},
+			)),
 		})
 	} else {
 		newToolStates := st.ToolStates
@@ -178,12 +199,12 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		return either.Left[ExecutionState, agent.Message](ExecutionState{
 			Messages:   append(st.Messages, in),
 			ToolStates: newToolStates,
-			Next: Result{Messages: []agent.Message{agent.NewMessage(
+			Next: agent.SingleResult(agent.NewMessage(
 				in.Context,
 				agent.MessageType_Error,
 				"tool "+toolData.Name+" does not exist",
 				toolData,
-			)}},
+			)),
 		})
 	}
 }

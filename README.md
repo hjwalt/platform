@@ -11,6 +11,8 @@ Some of the packages can be used independently:
 - reflect: a way to safely convert to and from types
 - web: simplifies the way to register pages, also serves as an example on how to build a good enough backend rendered UI with interactions via HTMX and design via web components
 
+The purpose of building this is to gain more control on how tools and models gets executed, with more type safety.
+
 ## Developing
 
 ### Tools Used
@@ -40,15 +42,6 @@ make cov
 make htmlcov
 ```
 
-Commands used when running examples locally:
-
-```
-make reset
-make run
-make listen
-make group-delete
-```
-
 ### Running
 
 See the source in `main.go` or `example` folder
@@ -59,14 +52,9 @@ make reset
 make run
 ```
 
-1. `docker-compose up -d` will start zookeeper, kafka, and postgresql with ports exposed to your host network detached from your terminal
+1. `docker compose up -d` will start zookeeper, kafka, and postgresql with ports exposed to your host network detached from your terminal
 2. `make reset` will clean up the topics on kafka and postgresql table, and add some example events
 3. `make run` will start the example word count application
-
-### Test
-
-Some tests uses `testcontainers-go` which are set up for rootless Podman based context.
-Switching between different container technology will be done some time in the future.
 
 ## Principles
 
@@ -76,16 +64,6 @@ Switching between different container technology will be done some time in the f
 - Sane defaults
 - Simple format helpers, with bytes as default
 - Idiomatic golang
-
-### Semantics
-
-At least once publishing with effectively once state update.
-Additional application based deduplication is recommended (request id header deduplication for instance).
-
-### Integrations
-
-- Kafka using librdkafka via its golang binding
-- Postgresql using Bun
 
 ## Flow
 
@@ -134,6 +112,16 @@ In this codebase, option two is the preferred option for reasons of:
 ### Materialiser
 
 Materialise function batch upserts into database.
+
+### Semantics
+
+At least once publishing with effectively once state update.
+Additional application based deduplication is recommended (request id header deduplication for instance).
+
+### Integrations
+
+- Kafka using librdkafka via its golang binding
+- Postgresql using Bun
 
 ### Limitations
 
@@ -242,13 +230,30 @@ With a schema management system, Kafka, and Kubernetes, its the right balance of
 Its written in golang, so that the resource use of each lightweight flow step is small, yet it can be scaled both horizontally and vertically very well.
 In theory other language like C++ and Rust will also work. I attempted Rust, the type and memory safety rules just makes the implementation a far bigger hassle than I would like it to be.
 
-## Rootless Podman
+## Misc
 
-You only need to add `DOCKER_HOST` according to your `podman info`. Example:
+### Runtime
 
-```
-export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
-```
+Runtimes are independent context that needs to be maintained from the start until the end of the program execution.
+Runtimes usually also needs to be instantiated and cleaned up.
+
+Examples of runtimes:
+
+1. HTTP server
+2. Kafka consumer
+3. Kafka producer
+4. Database connection
+
+Why is it important to standardise?
+
+1. Golang is too barebone. This kind of runtime management needs to keep getting rewritten.
+2. Resource management is not a difficult problem but the cost of mistakes is high. Your program can hang, you can have connections interrupted without clean disconnect, and many more. Reducing the potential scope of failure is in general a good idea.
+
+### Trusted
+
+Trusted is a collection of stuff that is practically impossible to test.
+Keeping this collection of untestable code as small as possible is a must.
+
 
 ## Credits
 

@@ -1,6 +1,8 @@
 package harness
 
-import "github.com/hjwalt/platform/agent"
+import (
+	"github.com/hjwalt/platform/agent"
+)
 
 type ToolState int
 
@@ -14,10 +16,5 @@ const (
 type ExecutionState struct {
 	Messages   []agent.Message
 	ToolStates map[string]ToolState
-	Next       Result
-}
-
-type Result struct {
-	Id       string
-	Messages []agent.Message
+	Next       agent.Result
 }

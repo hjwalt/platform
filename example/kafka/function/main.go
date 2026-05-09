@@ -151,7 +151,8 @@ func main() {
 			stateless.NewOperator(
 				"Increment",
 				Increment,
-				metadata.MessageUpdate(),
+				metadata.IdUpdate,
+				metadata.AttemptIncrement,
 				outputProducer,
 				errorProducer,
 			),
@@ -173,7 +174,8 @@ func main() {
 			stateless.NewOperator(
 				"Complete",
 				Complete,
-				metadata.MessageUpdate(),
+				metadata.IdUpdate,
+				metadata.AttemptIncrement,
 				completedProducer,
 				errorProducer,
 			),
@@ -194,7 +196,7 @@ func main() {
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
 				LogCompleted,
-				metadata.MessageUpdate(),
+				metadata.AttemptIncrement,
 				errorProducer,
 			),
 			converter.NewConverter(
@@ -214,7 +216,7 @@ func main() {
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
 				LogError,
-				metadata.MessageUpdate(),
+				metadata.AttemptIncrement,
 				errorProducer,
 			),
 			converter.NewConverter(
@@ -234,7 +236,7 @@ func main() {
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
 				LogMetric,
-				metadata.MessageUpdate(),
+				metadata.AttemptIncrement,
 				errorProducer,
 			),
 			converter.NewConverter(
@@ -264,7 +266,8 @@ func main() {
 				KeyFunction,
 				StateUpdate,
 				Accumulate,
-				metadata.MessageUpdate(),
+				metadata.IdUpdate,
+				metadata.AttemptIncrement,
 				metricProducer,
 				errorProducer,
 				fileStore,

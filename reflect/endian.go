@@ -3,7 +3,7 @@ package reflect
 import (
 	"encoding/binary"
 
-	"github.com/hjwalt/platform/commons/trusted"
+	"github.com/hjwalt/platform/trusted"
 )
 
 func Endian() binary.ByteOrder {

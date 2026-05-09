@@ -8,7 +8,7 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/hjwalt/platform/commons/trusted"
+	"github.com/hjwalt/platform/trusted"
 )
 
 type AesGcmFormat struct {

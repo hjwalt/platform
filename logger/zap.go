@@ -3,7 +3,7 @@ package logger
 import (
 	"log/slog"
 
-	"github.com/hjwalt/platform/commons/trusted"
+	"github.com/hjwalt/platform/trusted"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

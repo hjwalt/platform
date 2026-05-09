@@ -7,18 +7,22 @@ import (
 	"github.com/hjwalt/platform/flow"
 )
 
-func NewConsumer[IV any, ERR any](handler Consume[IV, ERR], metadataOperation flow.MetadataOperation, errorProducer flow.Producer[ERR]) flow.Handler[IV] {
+func NewConsumer[IV any, ERR any](
+	handler Consume[IV, ERR],
+	errorMetadata flow.ExtractMetadata[ERR],
+	errorProducer flow.Producer[ERR],
+) flow.Handler[IV] {
 	return &Consumer[IV, ERR]{
-		HandlerFunction:   handler,
-		MetadataOperation: metadataOperation,
-		ErrorProducer:     errorProducer,
+		HandlerFunction: handler,
+		ErrorMetadata:   errorMetadata,
+		ErrorProducer:   errorProducer,
 	}
 }
 
 type Consumer[IV any, ERR any] struct {
-	HandlerFunction   Consume[IV, ERR]
-	MetadataOperation flow.MetadataOperation
-	ErrorProducer     flow.Producer[ERR]
+	HandlerFunction Consume[IV, ERR]
+	ErrorMetadata   flow.ExtractMetadata[ERR]
+	ErrorProducer   flow.Producer[ERR]
 }
 
 func (r *Consumer[IV, ERR]) Handle(ctx context.Context, msg flow.Message[IV]) error {
@@ -26,7 +30,7 @@ func (r *Consumer[IV, ERR]) Handle(ctx context.Context, msg flow.Message[IV]) er
 
 	if result.IsPresent() {
 		errorMessage := flow.Message[ERR]{
-			Metadata:  r.MetadataOperation.OnError(msg.Metadata),
+			Metadata:  r.ErrorMetadata(ctx, msg.Metadata, result.Get()),
 			Value:     result.Get(),
 			Timestamp: time.Now(),
 		}

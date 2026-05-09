@@ -140,3 +140,13 @@
 {"level":"error","ts":1753516089.3377018,"caller":"logger/zap_test.go:57","msg":"test","error":"test error"}
 {"level":"info","ts":1753516089.3377101,"caller":"logger/zap_test.go:59","msg":"test","key":"value"}
 {"level":"info","ts":1753516089.337722,"caller":"logger/zap_test.go:62","msg":"test","attr":"attr-val","test.groupattr":"group-val","key":"value"}
+{"level":"debug","ts":1778292880.063157,"caller":"logger/zap_test.go:35","msg":"test","test":"test"}
+{"level":"info","ts":1778292880.0631845,"caller":"logger/zap_test.go:36","msg":"test","test":"test"}
+{"level":"warn","ts":1778292880.06319,"caller":"logger/zap_test.go:37","msg":"test","test":"test"}
+{"level":"error","ts":1778292880.0631952,"caller":"logger/zap_test.go:38","msg":"test","test":"test"}
+{"level":"debug","ts":1778292880.063205,"caller":"logger/zap_test.go:40","msg":"test test 0"}
+{"level":"info","ts":1778292880.0632126,"caller":"logger/zap_test.go:41","msg":"test test 0"}
+{"level":"warn","ts":1778292880.0632179,"caller":"logger/zap_test.go:42","msg":"test test 0"}
+{"level":"error","ts":1778292880.0632246,"caller":"logger/zap_test.go:43","msg":"test test 0"}
+{"level":"info","ts":1778292880.063237,"caller":"logger/zap_test.go:45","msg":"test","key":"value"}
+{"level":"info","ts":1778292880.0632474,"caller":"logger/zap_test.go:48","msg":"test","attr":"attr-val","test.groupattr":"group-val","key":"value"}

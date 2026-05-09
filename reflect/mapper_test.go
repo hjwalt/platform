@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hjwalt/platform/commons/structure"
 	"github.com/hjwalt/platform/reflect"
+	"github.com/hjwalt/platform/type/void"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -255,7 +255,7 @@ func TestMapperMappingVoid(t *testing.T) {
 		"str": "str",
 	}
 
-	var target structure.Void
+	var target void.Void
 
 	newval := mapper.Set(target, source)
 

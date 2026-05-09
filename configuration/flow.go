@@ -5,7 +5,6 @@ import (
 	"github.com/hjwalt/platform/agent/harness"
 	"github.com/hjwalt/platform/flow/converter"
 	"github.com/hjwalt/platform/flow/flow_runtime_kafka"
-	"github.com/hjwalt/platform/flow/metadata"
 	"github.com/hjwalt/platform/flow/stateful"
 	"github.com/hjwalt/platform/flow/stateless"
 	"github.com/hjwalt/platform/format"
@@ -32,10 +31,11 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 		kafkaProducer,
 		converter.NewConverter(
 			flow_runtime_kafka.New(conf.Flow.Result.Topic),
-			format.Json[harness.Result](),
+			format.Json[agent.Result](),
 		),
 	)
 	holder.Add(resultProducer)
+
 	// Consumer
 
 	agentFlow := harness.Flow{
@@ -51,7 +51,8 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 				agentFlow.Key,
 				agentFlow.Update,
 				agentFlow.Next,
-				metadata.MessageUpdate(),
+				agentFlow.ResultMetadata,
+				agentFlow.MessageMetadata,
 				resultProducer,
 				holder.GetAgentMessageProducer(),
 				converter.RuntimeToFlowStore(
@@ -73,13 +74,14 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 			stateless.NewExploder(
 				"agent_explode",
 				agentFlow.Explode,
-				metadata.MessageUpdate(),
+				agentFlow.MessageMetadata,
+				agentFlow.MessageMetadata,
 				holder.GetAgentMessageProducer(),
 				holder.GetAgentMessageProducer(),
 			),
 			converter.NewConverter(
 				flow_runtime_kafka.New(conf.Flow.Agent.Topic), // irrelevant
-				format.Json[harness.Result](),
+				format.Json[agent.Result](),
 			),
 		),
 	)

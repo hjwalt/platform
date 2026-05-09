@@ -44,6 +44,32 @@ func NewMessage(
 	}
 }
 
+type Result struct {
+	Id       string
+	Messages []Message
+}
+
+func NewResult(messages []Message) Result {
+	return Result{
+		Id:       uuid.New().String(),
+		Messages: messages,
+	}
+}
+
+func SingleResult(message Message) Result {
+	return Result{
+		Id:       uuid.New().String(),
+		Messages: []Message{message},
+	}
+}
+
+func EmptyResult() Result {
+	return Result{
+		Id:       uuid.New().String(),
+		Messages: make([]Message, 0),
+	}
+}
+
 type Tool interface {
 	Name() string
 	Description() string

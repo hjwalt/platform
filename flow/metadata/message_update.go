@@ -1,33 +1,28 @@
 package metadata
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/flow"
 )
 
-func MessageUpdate() flow.MetadataOperation {
-	return MessageUpdateOperation{}
-}
-
-type MessageUpdateOperation struct {
-}
-
-func (r MessageUpdateOperation) OnSuccess(meta flow.Metadata) flow.Metadata {
+func IdUpdate[V any](ctx context.Context, pref flow.Metadata, value V) flow.Metadata {
 	return flow.Metadata{
 		Id:       uuid.New().String(),
-		Group:    meta.Group,
+		Group:    pref.Group,
 		Attempt:  0,
-		Sequence: meta.Sequence,
-		Source:   meta.Source,
+		Sequence: pref.Sequence,
+		Source:   pref.Source,
 	}
 }
 
-func (r MessageUpdateOperation) OnError(meta flow.Metadata) flow.Metadata {
+func AttemptIncrement[V any](ctx context.Context, pref flow.Metadata, value V) flow.Metadata {
 	return flow.Metadata{
 		Id:       uuid.New().String(),
-		Group:    meta.Group,
-		Attempt:  1,
-		Sequence: meta.Sequence,
-		Source:   meta.Source,
+		Group:    pref.Group,
+		Attempt:  pref.Attempt + 1,
+		Sequence: pref.Sequence,
+		Source:   pref.Source,
 	}
 }
