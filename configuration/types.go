@@ -1,7 +1,7 @@
 package configuration
 
 import (
-	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
+	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
 	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
 	"github.com/hjwalt/platform/message/kafka"
 )
@@ -20,7 +20,7 @@ type OpenAiConfiguration struct {
 }
 
 type ToolConfiguration struct {
-	BraveSearch mcp_brave_search_web.Configuration
+	BraveSearch brave_search_web_tool.Configuration
 	Shell       shell_tool.Configuration
 }
 

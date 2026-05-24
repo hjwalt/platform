@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hjwalt/platform/agent"
+	agent_tool "github.com/hjwalt/platform/agent/tool"
 	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/runtime"
 	"github.com/hjwalt/platform/state"
@@ -14,8 +15,8 @@ import (
 
 type Context interface {
 	Add(runtimes ...runtime.Runtime)
-	AddTool(tools ...agent.Tool)
-	GetTool() map[string]agent.Tool
+	SetToolContainer(agent_tool.Container)
+	GetToolContainer() agent_tool.Container
 	SetLanguageModel(agent.LanguageModel)
 	GetLanguageModel() agent.LanguageModel
 	SetAgentMessageProducer(flow.Producer[agent.Message])
@@ -28,7 +29,7 @@ type Context interface {
 func ContextBuilder() Context {
 	return &holder{
 		Runtimes:             make([]runtime.Runtime, 0),
-		Tools:                make(map[string]agent.Tool, 0),
+		ToolContainer:        optional.Empty[agent_tool.Container](),
 		RagModel:             optional.Empty[agent.LanguageModel](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
 		AgentHarnessStore:    optional.Empty[state.Store](),
@@ -37,7 +38,7 @@ func ContextBuilder() Context {
 
 type holder struct {
 	Runtimes             []runtime.Runtime
-	Tools                map[string]agent.Tool
+	ToolContainer        optional.Optional[agent_tool.Container]
 	RagModel             optional.Optional[agent.LanguageModel]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
 	AgentHarnessStore    optional.Optional[state.Store]
@@ -47,14 +48,15 @@ func (r *holder) Add(runtimes ...runtime.Runtime) {
 	r.Runtimes = append(r.Runtimes, runtimes...)
 }
 
-func (r *holder) AddTool(tools ...agent.Tool) {
-	for _, tool := range tools {
-		r.Tools[tool.Name()] = tool
-	}
+func (r *holder) SetToolContainer(value agent_tool.Container) {
+	r.ToolContainer = optional.Of(value)
 }
 
-func (r *holder) GetTool() map[string]agent.Tool {
-	return r.Tools
+func (r *holder) GetToolContainer() agent_tool.Container {
+	if !r.ToolContainer.IsPresent() {
+		r.Missing()
+	}
+	return r.ToolContainer.Get()
 }
 
 func (r *holder) SetLanguageModel(value agent.LanguageModel) {

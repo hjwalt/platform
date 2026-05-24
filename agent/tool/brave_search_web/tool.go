@@ -1,4 +1,4 @@
-package mcp_brave_search_web
+package brave_search_web_tool
 
 import (
 	"context"
@@ -7,24 +7,18 @@ import (
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/agent/llm"
-	"github.com/hjwalt/platform/agent/tool/brave_search"
+	agent_tool "github.com/hjwalt/platform/agent/tool"
+	"github.com/hjwalt/platform/agent/util/brave_search"
+	tool_string_wrapper "github.com/hjwalt/platform/agent/util/string_wrapper"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/reflect"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/openai/openai-go/v3"
 )
 
 type Configuration struct {
 	BaseUrl string
 	Secret  string
-}
-
-type Mcp interface {
-	agent.Tool
-	Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error)
 }
 
 type Request struct {
@@ -49,12 +43,7 @@ type Tool struct {
 	ApiKey string
 }
 
-func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error) {
-	results, err := t.internal(params)
-	return nil, results, err
-}
-
-func (t *Tool) internal(params Request) (Response, error) {
+func (t *Tool) Apply(params Request) (Response, error) {
 	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
@@ -95,21 +84,36 @@ func (t *Tool) Description() string {
 	return "Search the internet with the terms to gather more information. Use the URL in the search results to fetch the page for more information."
 }
 
-func (t *Tool) Schema() openai.ChatCompletionToolUnionParam {
-	return llm.OpenAiToolSchema[Request](t.Name(), t.Description())
+func (t *Tool) RequestFormat() format.Format[Request] {
+	return format.Json[Request]()
 }
 
-func (t *Tool) Execute(input string) (string, error) {
-	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
-	if requestParseErr != nil {
-		return "", requestParseErr
-	}
+func (t *Tool) RequestSchema() *jsonschema.Schema {
+	opts := &jsonschema.ForOptions{}
+	toolSchema, _ := jsonschema.For[Request](opts)
+	return toolSchema
+}
 
-	response, internalErr := t.internal(request)
-	if internalErr != nil {
-		return "", internalErr
-	}
+func (t *Tool) DescribeRequest(request Request) string {
+	outputBuilder := strings.Builder{}
 
+	outputBuilder.WriteString("search the web with term ")
+	outputBuilder.WriteString(request.Term)
+
+	return outputBuilder.String()
+}
+
+func (t *Tool) ResultFormat() format.Format[Response] {
+	return format.Json[Response]()
+}
+
+func (t *Tool) ResultSchema() *jsonschema.Schema {
+	opts := &jsonschema.ForOptions{}
+	toolSchema, _ := jsonschema.For[Response](opts)
+	return toolSchema
+}
+
+func (t *Tool) DescribeResult(response Response) string {
 	outputBuilder := strings.Builder{}
 
 	for i, result := range response.Results {
@@ -145,52 +149,14 @@ func (t *Tool) Execute(input string) (string, error) {
 		}
 	}
 
-	return outputBuilder.String(), nil
-}
-
-func (t *Tool) Request(input string) (string, error) {
-	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
-	if requestParseErr != nil {
-		return "", requestParseErr
-	}
-
-	outputBuilder := strings.Builder{}
-
-	outputBuilder.WriteString("search the web with term ")
-	outputBuilder.WriteString(request.Term)
-
-	return outputBuilder.String(), nil
+	return outputBuilder.String()
 }
 
 func (t *Tool) Auto() bool {
 	return false
 }
 
-func Add(server *mcp.Server) {
-	opts := &jsonschema.ForOptions{}
-
-	in, _ := jsonschema.For[Request](opts)
-	out, _ := jsonschema.For[Response](opts)
-
-	instance := Instance(Configuration{
-		BaseUrl: "https://api.search.brave.com/res/v1/",
-		Secret:  environment.GetString("BRAVE_TOKEN", ""),
-	})
-
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:         instance.Name(),
-			Title:        instance.Name(),
-			Description:  instance.Description(),
-			InputSchema:  in,
-			OutputSchema: out,
-		},
-		instance.Behaviour,
-	)
-}
-
-func Instance(config Configuration) Mcp {
+func Create(config Configuration) agent_tool.Sync[Request, Response] {
 	return &Tool{
 		Brave: &brave_search.BraveClient{
 			Client:  http.DefaultClient,
@@ -200,7 +166,13 @@ func Instance(config Configuration) Mcp {
 	}
 }
 
-var (
-	RequestFormat  = format.Json[Request]()
-	ResponseFormat = format.Json[Response]()
-)
+func AddToMcp(server *mcp.Server) {
+	agent_tool.AddToMcp(server, Create(Configuration{
+		BaseUrl: "https://api.search.brave.com/res/v1/",
+		Secret:  environment.GetString("BRAVE_TOKEN", ""),
+	}))
+}
+
+func AddToContainer(container agent_tool.Container, config Configuration) {
+	container.AddSync(tool_string_wrapper.StringWrapSync(Create(config)))
+}

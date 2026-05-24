@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hjwalt/platform/agent/mcp/mcp_brave_search_web"
+	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -30,7 +30,7 @@ func runServer(url string) {
 	// Add MCP-level logging middleware.
 	server.AddReceivingMiddleware(createLoggingMiddleware())
 
-	mcp_brave_search_web.Add(server)
+	brave_search_web_tool.AddToMcp(server)
 
 	// Create the streamable HTTP handler.
 	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {

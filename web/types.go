@@ -13,5 +13,4 @@ type Context struct {
 	Chat                 agent.LanguageModel
 	AgentHarnessStore    flow.Store[harness.ExecutionState]
 	AgentMessageProducer flow.Producer[agent.Message]
-	Tool                 map[string]agent.Tool
 }

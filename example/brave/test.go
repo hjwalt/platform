@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/hjwalt/platform/agent/tool/brave_search"
+	"github.com/hjwalt/platform/agent/util/brave_search"
 	"github.com/hjwalt/platform/environment"
 )
 

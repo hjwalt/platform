@@ -13,7 +13,6 @@ type RuntimeDecorator struct {
 	Chat                 agent.LanguageModel
 	AgentMessageProducer flow.Producer[agent.Message]
 	AgentHarnessStore    flow.Store[harness.ExecutionState]
-	Tool                 map[string]agent.Tool
 }
 
 func (d *RuntimeDecorator) Decorate(c web.Context, w http.ResponseWriter, r *http.Request) (web.Context, error) {
@@ -22,6 +21,5 @@ func (d *RuntimeDecorator) Decorate(c web.Context, w http.ResponseWriter, r *htt
 		Chat:                 d.Chat,
 		AgentMessageProducer: d.AgentMessageProducer,
 		AgentHarnessStore:    d.AgentHarnessStore,
-		Tool:                 d.Tool,
 	}, nil
 }

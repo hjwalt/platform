@@ -1,25 +1,18 @@
 package shell_tool
 
 import (
-	"context"
 	"os/exec"
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/agent/llm"
+	agent_tool "github.com/hjwalt/platform/agent/tool"
+	tool_string_wrapper "github.com/hjwalt/platform/agent/util/string_wrapper"
 	"github.com/hjwalt/platform/format"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/openai/openai-go/v3"
 )
 
 type Configuration struct {
 	BaseDir string
-}
-
-type Mcp interface {
-	agent.Tool
-	Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error)
 }
 
 type Request struct {
@@ -34,12 +27,7 @@ type Tool struct {
 	BaseDir string
 }
 
-func (t *Tool) Behaviour(ctx context.Context, req *mcp.CallToolRequest, params Request) (*mcp.CallToolResult, Response, error) {
-	results, err := t.internal(params)
-	return nil, results, err
-}
-
-func (t *Tool) internal(params Request) (Response, error) {
+func (t *Tool) Apply(params Request) (Response, error) {
 	args := strings.Split(params.Command, " ")
 	cmd := exec.Command(args[0], args[1:]...)
 
@@ -62,73 +50,56 @@ func (t *Tool) Description() string {
 	return "Execute command in linux shell with arguments to achieve a specific goal. Assume you have the general tools provided in linux kernels."
 }
 
-func (t *Tool) Schema() openai.ChatCompletionToolUnionParam {
-	return llm.OpenAiToolSchema[Request](t.Name(), t.Description())
+func (t *Tool) RequestFormat() format.Format[Request] {
+	return format.Json[Request]()
 }
 
-func (t *Tool) Execute(input string) (string, error) {
-	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
-	if requestParseErr != nil {
-		return "", requestParseErr
-	}
-
-	response, internalErr := t.internal(request)
-	if internalErr != nil {
-		return "", internalErr
-	}
-
-	return response.Result, nil
+func (t *Tool) RequestSchema() *jsonschema.Schema {
+	opts := &jsonschema.ForOptions{}
+	toolSchema, _ := jsonschema.For[Request](opts)
+	return toolSchema
 }
 
-func (t *Tool) Request(input string) (string, error) {
-	request, requestParseErr := RequestFormat.Unmarshal([]byte(input))
-	if requestParseErr != nil {
-		return "", requestParseErr
-	}
-
+func (t *Tool) DescribeRequest(request Request) string {
 	outputBuilder := strings.Builder{}
 
 	outputBuilder.WriteString("execute shell command `")
 	outputBuilder.WriteString(request.Command)
 	outputBuilder.WriteString("`")
 
-	return outputBuilder.String(), nil
+	return outputBuilder.String()
+}
+
+func (t *Tool) ResultFormat() format.Format[Response] {
+	return format.Json[Response]()
+}
+
+func (t *Tool) ResultSchema() *jsonschema.Schema {
+	opts := &jsonschema.ForOptions{}
+	toolSchema, _ := jsonschema.For[Response](opts)
+	return toolSchema
+}
+
+func (t *Tool) DescribeResult(response Response) string {
+	return response.Result
 }
 
 func (t *Tool) Auto() bool {
 	return false
 }
 
-func Add(server *mcp.Server) {
-	opts := &jsonschema.ForOptions{}
-
-	in, _ := jsonschema.For[Request](opts)
-	out, _ := jsonschema.For[Response](opts)
-
-	instance := Instance(Configuration{
-		BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd/",
-	})
-
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:         instance.Name(),
-			Title:        instance.Name(),
-			Description:  instance.Description(),
-			InputSchema:  in,
-			OutputSchema: out,
-		},
-		instance.Behaviour,
-	)
-}
-
-func Instance(config Configuration) Mcp {
+func Create(config Configuration) agent_tool.Sync[Request, Response] {
 	return &Tool{
 		BaseDir: config.BaseDir,
 	}
 }
 
-var (
-	RequestFormat  = format.Json[Request]()
-	ResponseFormat = format.Json[Response]()
-)
+func AddToMcp(server *mcp.Server) {
+	agent_tool.AddToMcp(server, Create(Configuration{
+		BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd/",
+	}))
+}
+
+func AddToContainer(container agent_tool.Container, config Configuration) {
+	container.AddSync(tool_string_wrapper.StringWrapSync(Create(config)))
+}

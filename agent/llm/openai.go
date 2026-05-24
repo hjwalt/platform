@@ -141,6 +141,10 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 func OpenAiToolSchema[M any](name string, description string) openai.ChatCompletionToolUnionParam {
 	opts := &jsonschema.ForOptions{}
 	toolSchema, _ := jsonschema.For[M](opts)
+	return FromJsonSchema(name, description, toolSchema)
+}
+
+func FromJsonSchema(name string, description string, toolSchema *jsonschema.Schema) openai.ChatCompletionToolUnionParam {
 	unmarshalled, _ := format.Convert(toolSchema, schemaFormat, openAiFormat)
 	slog.Info("schema", "schema", toolSchema, "unmarshalled", unmarshalled)
 	return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
