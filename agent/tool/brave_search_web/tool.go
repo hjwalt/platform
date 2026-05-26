@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	agent_tool "github.com/hjwalt/platform/agent/tool"
+	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/agent/util/brave_search"
+	tool_mcp "github.com/hjwalt/platform/agent/util/mcp"
 	tool_string_wrapper "github.com/hjwalt/platform/agent/util/string_wrapper"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/format"
@@ -43,7 +44,7 @@ type Tool struct {
 	ApiKey string
 }
 
-func (t *Tool) Apply(params Request) (Response, error) {
+func (t *Tool) Apply(ctx context.Context, params Request) (Response, error) {
 	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
@@ -156,7 +157,7 @@ func (t *Tool) Auto() bool {
 	return false
 }
 
-func Create(config Configuration) agent_tool.Sync[Request, Response] {
+func Create(config Configuration) agent.SyncTool[Request, Response] {
 	return &Tool{
 		Brave: &brave_search.BraveClient{
 			Client:  http.DefaultClient,
@@ -167,12 +168,12 @@ func Create(config Configuration) agent_tool.Sync[Request, Response] {
 }
 
 func AddToMcp(server *mcp.Server) {
-	agent_tool.AddToMcp(server, Create(Configuration{
+	tool_mcp.AddToMcp(server, Create(Configuration{
 		BaseUrl: "https://api.search.brave.com/res/v1/",
 		Secret:  environment.GetString("BRAVE_TOKEN", ""),
 	}))
 }
 
-func AddToContainer(container agent_tool.Container, config Configuration) {
+func AddToContainer(container agent.ToolContainer, config Configuration) {
 	container.AddSync(tool_string_wrapper.StringWrapSync(Create(config)))
 }

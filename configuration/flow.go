@@ -13,7 +13,7 @@ import (
 
 func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 	agentFlow := harness.Flow{
-		Tools: holder.GetToolContainer().AsToolMap(),
+		Tools: holder.GetToolContainer(),
 		Model: holder.GetLanguageModel(),
 	}
 

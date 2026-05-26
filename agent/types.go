@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/runtime"
-	"github.com/openai/openai-go/v3"
 )
 
 type MessageType string
@@ -27,6 +26,12 @@ type Message struct {
 	Type    MessageType
 	Message string
 	Tool    ToolCall
+}
+
+type ToolCall struct {
+	Id        string
+	Name      string
+	Arguments string
 }
 
 func NewMessage(
@@ -68,21 +73,6 @@ func EmptyResult() Result {
 		Id:       uuid.New().String(),
 		Messages: make([]Message, 0),
 	}
-}
-
-type Tool interface {
-	Name() string
-	Description() string
-	Schema() openai.ChatCompletionToolUnionParam
-	Execute(string) (string, error)
-	Request(string) (string, error)
-	Auto() bool
-}
-
-type ToolCall struct {
-	Id        string
-	Name      string
-	Arguments string
 }
 
 type LanguageModel interface {

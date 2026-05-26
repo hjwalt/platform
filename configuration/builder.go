@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hjwalt/platform/agent"
-	agent_tool "github.com/hjwalt/platform/agent/tool"
 	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/runtime"
 	"github.com/hjwalt/platform/state"
@@ -15,8 +14,8 @@ import (
 
 type Context interface {
 	Add(runtimes ...runtime.Runtime)
-	SetToolContainer(agent_tool.Container)
-	GetToolContainer() agent_tool.Container
+	SetToolContainer(agent.ToolContainer)
+	GetToolContainer() agent.ToolContainer
 	SetLanguageModel(agent.LanguageModel)
 	GetLanguageModel() agent.LanguageModel
 	SetAgentMessageProducer(flow.Producer[agent.Message])
@@ -29,7 +28,7 @@ type Context interface {
 func ContextBuilder() Context {
 	return &holder{
 		Runtimes:             make([]runtime.Runtime, 0),
-		ToolContainer:        optional.Empty[agent_tool.Container](),
+		ToolContainer:        optional.Empty[agent.ToolContainer](),
 		RagModel:             optional.Empty[agent.LanguageModel](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
 		AgentHarnessStore:    optional.Empty[state.Store](),
@@ -38,7 +37,7 @@ func ContextBuilder() Context {
 
 type holder struct {
 	Runtimes             []runtime.Runtime
-	ToolContainer        optional.Optional[agent_tool.Container]
+	ToolContainer        optional.Optional[agent.ToolContainer]
 	RagModel             optional.Optional[agent.LanguageModel]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
 	AgentHarnessStore    optional.Optional[state.Store]
@@ -48,11 +47,11 @@ func (r *holder) Add(runtimes ...runtime.Runtime) {
 	r.Runtimes = append(r.Runtimes, runtimes...)
 }
 
-func (r *holder) SetToolContainer(value agent_tool.Container) {
+func (r *holder) SetToolContainer(value agent.ToolContainer) {
 	r.ToolContainer = optional.Of(value)
 }
 
-func (r *holder) GetToolContainer() agent_tool.Container {
+func (r *holder) GetToolContainer() agent.ToolContainer {
 	if !r.ToolContainer.IsPresent() {
 		r.Missing()
 	}

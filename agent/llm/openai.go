@@ -24,14 +24,14 @@ type OpenAiModelConfig struct {
 	Model    string
 	Endpoint string
 	Secret   string
-	Tools    map[string]agent.Tool
+	Tools    agent.ToolContainer
 }
 
 type OpenAiModel struct {
 	Model    string
 	Endpoint string
 	Secret   string
-	Tools    map[string]agent.Tool
+	Tools    agent.ToolContainer
 	Schemas  []openai.ChatCompletionToolUnionParam
 	client   openai.Client
 }
@@ -42,12 +42,7 @@ func (r *OpenAiModel) Start() error {
 		option.WithAPIKey(r.Secret), // defaults to os.LookupEnv("OPENAI_API_KEY")
 	)
 
-	schemas := make([]openai.ChatCompletionToolUnionParam, 0)
-	for _, tool := range r.Tools {
-		schemas = append(schemas, tool.Schema())
-	}
-
-	r.Schemas = schemas
+	r.Schemas = r.Tools.OpenAiParams()
 
 	return nil
 }
@@ -116,19 +111,15 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 						Arguments: toolCall.Function.Arguments,
 					}
 
-					if tool, exists := r.Tools[toolData.Name]; exists {
-						if toolRequestMessage, messageErr := tool.Request(toolData.Arguments); messageErr == nil {
-							outputMessages = append(outputMessages, agent.NewMessage(
-								messages[0].Context,
-								agent.MessageType_ToolRequest,
-								toolRequestMessage,
-								toolData,
-							))
-						} else {
-							// TODO: do something with error
-						}
+					if toolRequestMessage, messageErr := r.Tools.DescribeRequest(toolData); messageErr == nil {
+						outputMessages = append(outputMessages, agent.NewMessage(
+							messages[0].Context,
+							agent.MessageType_ToolRequest,
+							toolRequestMessage,
+							toolData,
+						))
 					} else {
-						// TODO: do something with missing tool
+						// TODO: do something with error
 					}
 				}
 			}

@@ -12,7 +12,7 @@ import (
 )
 
 type Flow struct {
-	Tools map[string]agent.Tool
+	Tools agent.ToolContainer
 	Model agent.LanguageModel
 }
 
@@ -115,11 +115,11 @@ func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionS
 
 func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	toolData := in.Tool
-	if tool, exists := r.Tools[toolData.Name]; exists {
+	if exists := r.Tools.Exists(toolData); exists {
 		newToolStates := st.ToolStates
 		newToolStates[in.Tool.Id] = ToolState_Requested
 
-		if tool.Auto() {
+		if r.Tools.Auto(toolData) {
 			return either.Left[ExecutionState, agent.Message](ExecutionState{
 				Messages:   append(st.Messages, in),
 				ToolStates: newToolStates,
@@ -175,12 +175,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 		})
 	}
 
-	if tool, exists := r.Tools[toolData.Name]; exists {
-		result, err := tool.Execute(toolData.Arguments)
-		if err != nil {
-			return r.updateError(ctx, in, err)
-		}
-
+	if result, toolError := r.Tools.Execute(ctx, toolData); toolError == nil {
 		newToolStates := st.ToolStates
 		newToolStates[in.Tool.Id] = ToolState_Executed
 
@@ -204,7 +199,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 			Next: agent.SingleResult(agent.NewMessage(
 				in.Context,
 				agent.MessageType_Error,
-				"tool "+toolData.Name+" does not exist",
+				toolError.Error(),
 				toolData,
 			)),
 		})

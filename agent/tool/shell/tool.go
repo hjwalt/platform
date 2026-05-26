@@ -1,11 +1,13 @@
 package shell_tool
 
 import (
+	"context"
 	"os/exec"
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	agent_tool "github.com/hjwalt/platform/agent/tool"
+	"github.com/hjwalt/platform/agent"
+	tool_mcp "github.com/hjwalt/platform/agent/util/mcp"
 	tool_string_wrapper "github.com/hjwalt/platform/agent/util/string_wrapper"
 	"github.com/hjwalt/platform/format"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -27,7 +29,7 @@ type Tool struct {
 	BaseDir string
 }
 
-func (t *Tool) Apply(params Request) (Response, error) {
+func (t *Tool) Apply(ctx context.Context, params Request) (Response, error) {
 	args := strings.Split(params.Command, " ")
 	cmd := exec.Command(args[0], args[1:]...)
 
@@ -88,18 +90,18 @@ func (t *Tool) Auto() bool {
 	return false
 }
 
-func Create(config Configuration) agent_tool.Sync[Request, Response] {
+func Create(config Configuration) agent.SyncTool[Request, Response] {
 	return &Tool{
 		BaseDir: config.BaseDir,
 	}
 }
 
 func AddToMcp(server *mcp.Server) {
-	agent_tool.AddToMcp(server, Create(Configuration{
+	tool_mcp.AddToMcp(server, Create(Configuration{
 		BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd/",
 	}))
 }
 
-func AddToContainer(container agent_tool.Container, config Configuration) {
+func AddToContainer(container agent.ToolContainer, config Configuration) {
 	container.AddSync(tool_string_wrapper.StringWrapSync(Create(config)))
 }

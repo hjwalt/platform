@@ -1,12 +1,13 @@
-package agent_tool
+package tool_mcp
 
 import (
 	"context"
 
+	"github.com/hjwalt/platform/agent"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-func AddToMcp[REQ any, RES any](server *mcp.Server, tool Sync[REQ, RES]) {
+func AddToMcp[REQ any, RES any](server *mcp.Server, tool agent.SyncTool[REQ, RES]) {
 	mcp.AddTool(
 		server,
 		&mcp.Tool{
@@ -20,9 +21,9 @@ func AddToMcp[REQ any, RES any](server *mcp.Server, tool Sync[REQ, RES]) {
 	)
 }
 
-func mcpBehaviour[REQ any, RES any](tool Sync[REQ, RES]) mcp.ToolHandlerFor[REQ, RES] {
+func mcpBehaviour[REQ any, RES any](tool agent.SyncTool[REQ, RES]) mcp.ToolHandlerFor[REQ, RES] {
 	return func(ctx context.Context, req *mcp.CallToolRequest, params REQ) (*mcp.CallToolResult, RES, error) {
-		results, err := tool.Apply(params)
+		results, err := tool.Apply(ctx, params)
 		return nil, results, err
 	}
 }

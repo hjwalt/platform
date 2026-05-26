@@ -1,25 +1,24 @@
 package tool_string_wrapper
 
 import (
+	"context"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
-	"github.com/hjwalt/platform/agent/llm"
-	agent_tool "github.com/hjwalt/platform/agent/tool"
 	"github.com/hjwalt/platform/format"
-	"github.com/openai/openai-go/v3"
 )
 
 type syncToolWrapper[REQ any, RES any] struct {
-	delegate agent_tool.Sync[REQ, RES]
+	delegate agent.SyncTool[REQ, RES]
 }
 
-func (t *syncToolWrapper[REQ, RES]) Apply(stringRequest string) (string, error) {
+func (t *syncToolWrapper[REQ, RES]) Apply(ctx context.Context, stringRequest string) (string, error) {
 	request, requestParseErr := format.Convert(stringRequest, t.RequestFormat(), t.delegate.RequestFormat())
 	if requestParseErr != nil {
 		return "", requestParseErr
 	}
 
-	response, responseErr := t.delegate.Apply(request)
+	response, responseErr := t.delegate.Apply(ctx, request)
 	if responseErr != nil {
 		return "", responseErr
 	}
@@ -71,53 +70,8 @@ func (t *syncToolWrapper[REQ, RES]) Auto() bool {
 	return t.delegate.Auto()
 }
 
-func StringWrapSync[REQ any, RES any](delegate agent_tool.Sync[REQ, RES]) agent_tool.SyncWrapper {
+func StringWrapSync[REQ any, RES any](delegate agent.SyncTool[REQ, RES]) agent.SyncToolWrapper {
 	return &syncToolWrapper[REQ, RES]{
 		delegate: delegate,
-	}
-}
-
-// TODO: remove the need of these
-type ToolWrapper struct {
-	tool agent_tool.SyncWrapper
-}
-
-func (t *ToolWrapper) Name() string {
-	return t.tool.Name()
-}
-
-func (t *ToolWrapper) Description() string {
-	return t.tool.Description()
-}
-
-func (t *ToolWrapper) Schema() openai.ChatCompletionToolUnionParam {
-	return llm.FromJsonSchema(t.Name(), t.Description(), t.tool.RequestSchema())
-}
-
-func (t *ToolWrapper) Execute(input string) (string, error) {
-	response, internalErr := t.tool.Apply(input)
-	if internalErr != nil {
-		return "", internalErr
-	}
-	return t.tool.DescribeResult(response), nil
-}
-
-func (t *ToolWrapper) Request(input string) (string, error) {
-	return t.tool.DescribeRequest(input), nil
-}
-
-func (t *ToolWrapper) Auto() bool {
-	return false
-}
-
-func WrapSync[REQ any, RES any](tool agent_tool.Sync[REQ, RES]) agent.Tool {
-	return &ToolWrapper{
-		tool: StringWrapSync[REQ, RES](tool),
-	}
-}
-
-func WrapWrapper(tool agent_tool.SyncWrapper) agent.Tool {
-	return &ToolWrapper{
-		tool: tool,
 	}
 }

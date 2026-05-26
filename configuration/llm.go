@@ -10,7 +10,7 @@ func RegisterOpenAi(holder Context, conf Configuration) {
 		Model:    conf.OpenAi.Model,
 		Endpoint: conf.OpenAi.Endpoint,
 		Secret:   conf.OpenAi.Secret,
-		Tools:    holder.GetToolContainer().AsToolMap(),
+		Tools:    holder.GetToolContainer(),
 	})
 	holder.Add(model)
 
