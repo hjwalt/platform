@@ -5,42 +5,43 @@ import (
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/format"
+	"github.com/hjwalt/platform/type/optional"
 	"github.com/openai/openai-go/v3"
 )
 
-type ToolDefinition[REQ any, RES any] interface {
+type BasicToolDefinition[REQ any] interface {
 	Name() string
 	Description() string
 	RequestFormat() format.Format[REQ]
 	RequestSchema() *jsonschema.Schema
 	DescribeRequest(REQ) string
-	ResultFormat() format.Format[RES]
-	ResultSchema() *jsonschema.Schema
-	DescribeResult(RES) string
 	Auto() bool
 }
 
 type SyncTool[REQ any, RES any] interface {
-	ToolDefinition[REQ, RES]
+	BasicToolDefinition[REQ]
 	Apply(context.Context, REQ) (RES, error)
+	ResultFormat() format.Format[RES]
+	ResultSchema() *jsonschema.Schema
+	DescribeResult(RES) string
 }
 
-type AsyncTool[REQ any, RES any] interface {
-	ToolDefinition[REQ, RES]
-	Send(context.Context, REQ) error
+type AsyncTool[REQ any] interface {
+	BasicToolDefinition[REQ]
+	Send(context.Context, Parent, ToolCall, REQ) error
 }
 
 type SyncToolWrapper SyncTool[string, string]
 
-type AsyncToolWrapper AsyncTool[string, string]
+type AsyncToolWrapper AsyncTool[string]
 
 type ToolContainer interface {
 	// Register
 	AddSync(SyncToolWrapper)
-	GetSync() map[string]SyncToolWrapper
+	AddAsync(AsyncToolWrapper)
 
 	// Execution behaviour
-	Execute(context.Context, ToolCall) (string, error)
+	Execute(context.Context, Message, ToolCall) (optional.Optional[string], error)
 	DescribeRequest(ToolCall) (string, error)
 	Exists(ToolCall) bool
 	Auto(ToolCall) bool

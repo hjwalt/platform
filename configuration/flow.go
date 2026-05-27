@@ -11,7 +11,29 @@ import (
 	"github.com/hjwalt/platform/message/kafka"
 )
 
+func RegisterKafkaProducer(holder Context, conf Configuration) {
+	kafkaProducer := kafka.NewProducer(conf.Flow.Agent.Producer)
+	holder.Add(kafkaProducer)
+	holder.SetKafkaProducer(kafkaProducer)
+}
+
+func RegisterKafkaAgentMessageProducer(holder Context, conf Configuration) {
+	flowMetadata := harness.FlowMetadata{}
+
+	messageProducer := converter.RuntimeToFlowProducer(
+		holder.GetKafkaProducer(),
+		converter.NewConverter(
+			flow_runtime_kafka.New(conf.Flow.Agent.Topic),
+			format.Json[agent.Message](),
+		),
+		flowMetadata.MessageMetadata,
+	)
+	holder.Add(messageProducer)
+	holder.SetAgentMessageProducer(messageProducer)
+}
+
 func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
+	flowMetadata := harness.FlowMetadata{}
 	agentFlow := harness.Flow{
 		Tools: holder.GetToolContainer(),
 		Model: holder.GetLanguageModel(),
@@ -19,27 +41,13 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 
 	// Producer
 
-	kafkaProducer := kafka.NewProducer(conf.Flow.Agent.Producer)
-	holder.Add(kafkaProducer)
-
-	messageProducer := converter.RuntimeToFlowProducer(
-		kafkaProducer,
-		converter.NewConverter(
-			flow_runtime_kafka.New(conf.Flow.Agent.Topic),
-			format.Json[agent.Message](),
-		),
-		agentFlow.MessageMetadata,
-	)
-	holder.Add(messageProducer)
-	holder.SetAgentMessageProducer(messageProducer)
-
 	resultProducer := converter.RuntimeToFlowProducer(
-		kafkaProducer,
+		holder.GetKafkaProducer(),
 		converter.NewConverter(
 			flow_runtime_kafka.New(conf.Flow.Result.Topic),
 			format.Json[agent.Result](),
 		),
-		agentFlow.ResultMetadata,
+		flowMetadata.ResultMetadata,
 	)
 	holder.Add(resultProducer)
 
@@ -50,11 +58,11 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 		converter.FlowToRuntimeHandler(
 			stateful.NewOperator(
 				"agent_handle",
-				agentFlow.Key,
+				flowMetadata.Key,
 				agentFlow.Update,
 				agentFlow.Next,
-				agentFlow.ResultMetadata,
-				agentFlow.MessageMetadata,
+				flowMetadata.ResultMetadata,
+				flowMetadata.MessageMetadata,
 				resultProducer,
 				holder.GetAgentMessageProducer(),
 				converter.RuntimeToFlowStore(
@@ -76,8 +84,8 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 			stateless.NewExploder(
 				"agent_explode",
 				agentFlow.Explode,
-				agentFlow.MessageMetadata,
-				agentFlow.MessageMetadata,
+				flowMetadata.MessageMetadata,
+				flowMetadata.MessageMetadata,
 				holder.GetAgentMessageProducer(),
 				holder.GetAgentMessageProducer(),
 			),

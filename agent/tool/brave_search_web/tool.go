@@ -154,7 +154,7 @@ func (t *Tool) DescribeResult(response Response) string {
 }
 
 func (t *Tool) Auto() bool {
-	return false
+	return true
 }
 
 func Create(config Configuration) agent.SyncTool[Request, Response] {

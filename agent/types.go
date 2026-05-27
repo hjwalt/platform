@@ -18,6 +18,7 @@ const (
 	MessageType_ToolExecute MessageType = "TOOL_EXECUTE"
 	MessageType_Agent       MessageType = "AGENT"
 	MessageType_Error       MessageType = "ERROR"
+	MessageType_Fork        MessageType = "FORK"
 )
 
 type Message struct {
@@ -26,12 +27,17 @@ type Message struct {
 	Type    MessageType
 	Message string
 	Tool    ToolCall
+	Parent  Parent
 }
 
 type ToolCall struct {
 	Id        string
 	Name      string
 	Arguments string
+}
+
+type Parent struct {
+	Context string
 }
 
 func NewMessage(
@@ -46,6 +52,23 @@ func NewMessage(
 		Type:    messageType,
 		Message: message,
 		Tool:    tool,
+		Parent:  Parent{},
+	}
+}
+
+func Fork(
+	context string,
+	message string,
+	tool ToolCall,
+	parent Parent,
+) Message {
+	return Message{
+		Id:      uuid.New().String(),
+		Context: context,
+		Type:    MessageType_Fork,
+		Message: message,
+		Tool:    tool,
+		Parent:  parent,
 	}
 }
 

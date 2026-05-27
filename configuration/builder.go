@@ -7,6 +7,8 @@ import (
 
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/flow"
+	"github.com/hjwalt/platform/message"
+	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
 	"github.com/hjwalt/platform/state"
 	"github.com/hjwalt/platform/type/optional"
@@ -18,6 +20,8 @@ type Context interface {
 	GetToolContainer() agent.ToolContainer
 	SetLanguageModel(agent.LanguageModel)
 	GetLanguageModel() agent.LanguageModel
+	SetKafkaProducer(message.Producer[kafka.KafkaMetadata])
+	GetKafkaProducer() message.Producer[kafka.KafkaMetadata]
 	SetAgentMessageProducer(flow.Producer[agent.Message])
 	GetAgentMessageProducer() flow.Producer[agent.Message]
 	SetAgentHarnessStore(state.Store)
@@ -30,6 +34,7 @@ func ContextBuilder() Context {
 		Runtimes:             make([]runtime.Runtime, 0),
 		ToolContainer:        optional.Empty[agent.ToolContainer](),
 		RagModel:             optional.Empty[agent.LanguageModel](),
+		KafkaProducer:        optional.Empty[message.Producer[kafka.KafkaMetadata]](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
 		AgentHarnessStore:    optional.Empty[state.Store](),
 	}
@@ -39,6 +44,7 @@ type holder struct {
 	Runtimes             []runtime.Runtime
 	ToolContainer        optional.Optional[agent.ToolContainer]
 	RagModel             optional.Optional[agent.LanguageModel]
+	KafkaProducer        optional.Optional[message.Producer[kafka.KafkaMetadata]]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
 	AgentHarnessStore    optional.Optional[state.Store]
 }
@@ -67,6 +73,17 @@ func (r *holder) GetLanguageModel() agent.LanguageModel {
 		r.Missing()
 	}
 	return r.RagModel.Get()
+}
+
+func (r *holder) SetKafkaProducer(value message.Producer[kafka.KafkaMetadata]) {
+	r.KafkaProducer = optional.Of(value)
+}
+
+func (r *holder) GetKafkaProducer() message.Producer[kafka.KafkaMetadata] {
+	if !r.KafkaProducer.IsPresent() {
+		r.Missing()
+	}
+	return r.KafkaProducer.Get()
 }
 
 func (r *holder) SetAgentMessageProducer(value flow.Producer[agent.Message]) {

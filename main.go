@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/agent/harness"
 	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
+	fork_tool "github.com/hjwalt/platform/agent/tool/fork"
 	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
@@ -43,6 +44,17 @@ func main() {
 			},
 			Shell: shell_tool.Configuration{
 				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
+			},
+			ResearchAgent: fork_tool.Configuration{
+				AgentName: "research-agent",
+				SystemPrompt: `
+				You are a research agent. Perform your query with these in mind:
+
+				1. Search the web based on the request
+				2. Do not deviate from the query
+				3. Where there are ambiguity, seek clarification from the user
+				4. Spin up more research agent only if there are significant sub-topic to research on 
+				`,
 			},
 		},
 		Server: configuration.WebServerConfiguration{
@@ -83,6 +95,8 @@ func main() {
 
 	// Runtimes
 
+	configuration.RegisterKafkaProducer(holder, config)
+	configuration.RegisterKafkaAgentMessageProducer(holder, config)
 	configuration.RegisterTools(holder, config)
 	configuration.RegisterAgentHarnessStore(holder, config)
 	configuration.RegisterOpenAi(holder, config)
