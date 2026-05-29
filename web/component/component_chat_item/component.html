@@ -8,12 +8,16 @@
 {{ .Model.Message.Message }}
     </script>
     </wa-markdown>
+    {{if .Model.IsAgentRequest}}
+    <wa-button href="/chat/{{ .Model.Message.Tool.Id }}" class="w-full">
+    See More
     </wa-button>
+    {{end}}
     {{if .Model.IsToolRequest}}
     <div slot="footer">
       <div class="wa-flank:start wa-gap-2xs">
         <form method="POST"
-              data-hx-post="/chat/tool"
+              data-hx-post="/chat/{{ .Model.Message.Context }}/tool"
               data-hx-target="#chat-result"
               data-hx-swap="outerHTML">
           <input type="hidden"
@@ -42,7 +46,7 @@
           </wa-button>
         </form>
         <form method="POST"
-              data-hx-post="/chat/tool"
+              data-hx-post="/chat/{{ .Model.Message.Context }}/tool"
               data-hx-target="#chat-result"
               data-hx-swap="outerHTML">
           <input type="hidden"

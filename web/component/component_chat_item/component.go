@@ -3,6 +3,7 @@ package component_chat_item
 import (
 	"embed"
 	"html/template"
+	"strings"
 
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/web/render"
@@ -24,21 +25,24 @@ var titles = map[agent.MessageType]string{
 }
 
 type Model struct {
-	Title         string
-	IsToolRequest bool
-	Message       agent.Message
+	Title          string
+	IsToolRequest  bool
+	IsAgentRequest bool
+	Message        agent.Message
 }
 
 func View(message agent.Message) render.View {
 	switch message.Type {
 	case agent.MessageType_ToolRequest:
 		{
+
 			return render.Component(
 				Html,
 				Model{
-					Title:         titles[message.Type],
-					Message:       message,
-					IsToolRequest: true,
+					Title:          titles[message.Type],
+					Message:        message,
+					IsToolRequest:  true,
+					IsAgentRequest: strings.Contains(message.Tool.Name, "agent"),
 				},
 				make(map[string]render.View),
 				[]render.View{},
@@ -49,9 +53,10 @@ func View(message agent.Message) render.View {
 			return render.Component(
 				Html,
 				Model{
-					Title:         titles[message.Type],
-					Message:       message,
-					IsToolRequest: false,
+					Title:          titles[message.Type],
+					Message:        message,
+					IsToolRequest:  false,
+					IsAgentRequest: false,
 				},
 				make(map[string]render.View),
 				[]render.View{},

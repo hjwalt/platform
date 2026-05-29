@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/component/component_chat_item"
@@ -23,10 +24,12 @@ var html = render.Embedded(files, "page.html")
 
 const (
 	path     = "/chat"
+	idPath   = "/chat/{chat_id}"
 	toolPath = "/chat/tool"
 )
 
 type model struct {
+	Context string
 }
 
 func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
@@ -41,7 +44,33 @@ func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, er
 		component_sidebar.View(),
 		render.Component(
 			html,
-			model{},
+			model{
+				Context: "web",
+			},
+			map[string]render.View{
+				"chats": component_chat_list.View(messageViews),
+			},
+			[]render.View{},
+		)), nil
+}
+
+func getWithId(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	chatId := chi.URLParam(r, "chat_id")
+
+	state, _ := c.AgentHarnessStore.Read(c, chatId)
+
+	messageViews := make([]render.View, 0)
+	for _, message := range state.Value.Messages {
+		messageViews = append(messageViews, component_chat_item.View(message))
+	}
+
+	return layout.Dashboard(
+		component_sidebar.View(),
+		render.Component(
+			html,
+			model{
+				Context: chatId,
+			},
 			map[string]render.View{
 				"chats": component_chat_list.View(messageViews),
 			},
@@ -50,6 +79,8 @@ func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, er
 }
 
 func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	chatId := chi.URLParam(r, "chat_id")
+
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form data", http.StatusBadRequest)
@@ -61,7 +92,7 @@ func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, e
 
 		c.AgentMessageProducer.Produce(c, []agent.Message{
 			agent.NewMessage(
-				"web",
+				chatId,
 				agent.MessageType_User,
 				message[0],
 				agent.ToolCall{},
@@ -72,7 +103,7 @@ func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, e
 	} else {
 		return component_chat_list.View([]render.View{
 			component_chat_item.View(agent.NewMessage(
-				"web",
+				chatId,
 				agent.MessageType_User,
 				"no message received",
 				agent.ToolCall{},
@@ -125,6 +156,7 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 
 func Add(builder route.Builder[web.Context]) {
 	builder.Handle(path, http.MethodGet, render.Handle(get, page_error_500.Error))
-	builder.Handle(path, http.MethodPost, render.Handle(post, page_error_500.Error))
+	builder.Handle(idPath, http.MethodGet, render.Handle(getWithId, page_error_500.Error))
+	builder.Handle(idPath, http.MethodPost, render.Handle(post, page_error_500.Error))
 	builder.Handle(toolPath, http.MethodPost, render.Handle(postTool, page_error_500.Error))
 }

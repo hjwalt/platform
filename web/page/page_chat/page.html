@@ -18,7 +18,7 @@
     <div class="w-full wa-stack p-r-s">
       <wa-divider></wa-divider>
       <form method="POST"
-            data-hx-post="/chat"
+            data-hx-post="/chat/{{ .Model.Context }}"
             data-hx-target="#chat-result"
             data-hx-swap="outerHTML"
             hx-on::after-request="if(event.detail.successful) this.reset()">
