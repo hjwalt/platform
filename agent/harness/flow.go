@@ -57,13 +57,12 @@ func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState
 
 	// reset next
 	st = st.SetNext(agent.EmptyResult())
-	st = st.AppendMessage(in)
 
 	slog.InfoContext(ctx, "updating state", "message", in.Type)
 	switch in.Type {
-	case agent.MessageType_Fork:
+	case agent.MessageType_Start:
 		{
-			return r.forkMessage(in, st)
+			return r.startAgent(in, st)
 		}
 	case agent.MessageType_Agent:
 		{
@@ -83,6 +82,7 @@ func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState
 		}
 	default:
 		{
+			st = st.AppendMessage(in)
 			return either.Left[ExecutionState, agent.Message](st)
 		}
 	}
@@ -98,22 +98,28 @@ func (r *Flow) Explode(ctx context.Context, in agent.Result) (optional.Optional[
 	return optional.Of(in.Messages), optional.Empty[agent.Message]()
 }
 
-func (r *Flow) forkMessage(in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
-	st = st.SetParent(in.Parent, in.Tool)
+func (r *Flow) startAgent(in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+	st = st.AppendMessage(agent.NewMessage(
+		in.Context,
+		agent.MessageType_System,
+		in.Agent.SystemMessage,
+		in.Tool,
+	))
+	st = st.SetAgentContext(in.Agent, in.Tool)
 	st = st.SetNext(agent.SingleResult(agent.NewMessage(
 		in.Context,
 		agent.MessageType_User,
 		in.Message,
 		agent.ToolCall{},
 	)))
-
 	return either.Left[ExecutionState, agent.Message](st)
 }
 
 func (r *Flow) mergeMessage(in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
-	if st.Parent.Context != "" {
+	st = st.AppendMessage(in)
+	if st.Parent.ParentContext != "" {
 		st = st.SetNext(agent.SingleResult(agent.NewMessage(
-			st.Parent.Context,
+			st.Parent.ParentContext,
 			agent.MessageType_ToolResult,
 			in.Message,
 			st.ParentToolCall,
@@ -124,7 +130,8 @@ func (r *Flow) mergeMessage(in agent.Message, st ExecutionState) either.Either[E
 }
 
 func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
-	if result, err := r.Model.Chat(context.Background(), st.Messages); err != nil {
+	st = st.AppendMessage(in)
+	if result, err := r.Model.Chat(context.Background(), st.Messages, st.Parent.AllowedTools); err != nil {
 		st = st.SetNext(agent.SingleResult(agent.NewMessage(
 			in.Context,
 			agent.MessageType_Error,
@@ -140,6 +147,7 @@ func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionS
 }
 
 func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+	st = st.AppendMessage(in)
 	toolData := in.Tool
 	if exists := r.Tools.Exists(toolData); exists {
 		st = st.UpdateToolState(in.Tool.Id, ToolState_Requested)
@@ -165,6 +173,7 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 }
 
 func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+	st = st.AppendMessage(in)
 	toolData := in.Tool
 
 	toolState, exist := st.ToolStates[toolData.Id]

@@ -17,6 +17,10 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+const (
+	Name = "web search"
+)
+
 type Configuration struct {
 	BaseUrl string
 	Secret  string
@@ -78,7 +82,7 @@ func (t *Tool) Apply(ctx context.Context, params Request) (Response, error) {
 }
 
 func (t *Tool) Name() string {
-	return "web search"
+	return Name
 }
 
 func (t *Tool) Description() string {

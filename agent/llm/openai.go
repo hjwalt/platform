@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
@@ -32,8 +31,8 @@ type OpenAiModel struct {
 	Endpoint string
 	Secret   string
 	Tools    agent.ToolContainer
-	Schemas  []openai.ChatCompletionToolUnionParam
-	client   openai.Client
+	// Schemas  []openai.ChatCompletionToolUnionParam
+	client openai.Client
 }
 
 func (r *OpenAiModel) Start() error {
@@ -42,15 +41,13 @@ func (r *OpenAiModel) Start() error {
 		option.WithAPIKey(r.Secret), // defaults to os.LookupEnv("OPENAI_API_KEY")
 	)
 
-	r.Schemas = r.Tools.OpenAiParams()
-
 	return nil
 }
 
 func (r *OpenAiModel) Stop() {
 }
 
-func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]agent.Message, error) {
+func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowedTools []string) ([]agent.Message, error) {
 	modelMessage := make([]openai.ChatCompletionMessageParamUnion, 0)
 	for _, message := range messages {
 		switch message.Type {
@@ -77,7 +74,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message) ([]age
 		Messages: modelMessage,
 		Seed:     openai.Int(0),
 		Model:    r.Model,
-		Tools:    r.Schemas,
+		Tools:    r.Tools.OpenAiParamsFiltered(allowedTools),
 	}
 
 	completion, err := r.client.Chat.Completions.New(ctx, params)
@@ -137,7 +134,6 @@ func OpenAiToolSchema[M any](name string, description string) openai.ChatComplet
 
 func FromJsonSchema(name string, description string, toolSchema *jsonschema.Schema) openai.ChatCompletionToolUnionParam {
 	unmarshalled, _ := format.Convert(toolSchema, schemaFormat, openAiFormat)
-	slog.Info("schema", "schema", toolSchema, "unmarshalled", unmarshalled)
 	return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
 		Name:        name,
 		Description: openai.String(description),

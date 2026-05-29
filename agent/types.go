@@ -18,7 +18,7 @@ const (
 	MessageType_ToolExecute MessageType = "TOOL_EXECUTE"
 	MessageType_Agent       MessageType = "AGENT"
 	MessageType_Error       MessageType = "ERROR"
-	MessageType_Fork        MessageType = "FORK"
+	MessageType_Start       MessageType = "FORK"
 )
 
 type Message struct {
@@ -27,7 +27,7 @@ type Message struct {
 	Type    MessageType
 	Message string
 	Tool    ToolCall
-	Parent  Parent
+	Agent   AgentContext
 }
 
 type ToolCall struct {
@@ -36,8 +36,10 @@ type ToolCall struct {
 	Arguments string
 }
 
-type Parent struct {
-	Context string
+type AgentContext struct {
+	ParentContext string
+	SystemMessage string
+	AllowedTools  []string
 }
 
 func NewMessage(
@@ -52,23 +54,23 @@ func NewMessage(
 		Type:    messageType,
 		Message: message,
 		Tool:    tool,
-		Parent:  Parent{},
+		Agent:   AgentContext{},
 	}
 }
 
-func Fork(
+func Start(
 	context string,
 	message string,
 	tool ToolCall,
-	parent Parent,
+	parent AgentContext,
 ) Message {
 	return Message{
 		Id:      uuid.New().String(),
 		Context: context,
-		Type:    MessageType_Fork,
+		Type:    MessageType_Start,
 		Message: message,
 		Tool:    tool,
-		Parent:  parent,
+		Agent:   parent,
 	}
 }
 
@@ -100,7 +102,7 @@ func EmptyResult() Result {
 
 type LanguageModel interface {
 	runtime.Runtime
-	Chat(context.Context, []Message) ([]Message, error)
+	Chat(context.Context, []Message, []string) ([]Message, error)
 }
 
 var (

@@ -41,6 +41,22 @@ func (r *container) OpenAiParams() []openai.ChatCompletionToolUnionParam {
 	return tools
 }
 
+func (r *container) OpenAiParamsFiltered(allowed []string) []openai.ChatCompletionToolUnionParam {
+	if len(allowed) == 0 {
+		return r.OpenAiParams()
+	}
+
+	tools := make([]openai.ChatCompletionToolUnionParam, 0)
+	for _, toolName := range allowed {
+		if v, syncExists := r.sync[toolName]; syncExists {
+			tools = append(tools, llm.FromJsonSchema(v.Name(), v.Description(), v.RequestSchema()))
+		} else if v, asyncExists := r.async[toolName]; asyncExists {
+			tools = append(tools, llm.FromJsonSchema(v.Name(), v.Description(), v.RequestSchema()))
+		}
+	}
+	return tools
+}
+
 func (r *container) Execute(ctx context.Context, in agent.Message, call agent.ToolCall) (optional.Optional[string], error) {
 	if tool, exists := r.sync[call.Name]; exists {
 		response, internalErr := tool.Apply(ctx, call.Arguments)
@@ -49,7 +65,7 @@ func (r *container) Execute(ctx context.Context, in agent.Message, call agent.To
 		}
 		return optional.Of(tool.DescribeResult(response)), nil
 	} else if asyncTool, exists := r.async[call.Name]; exists {
-		internalErr := asyncTool.Send(ctx, agent.Parent{Context: in.Context}, call, call.Arguments)
+		internalErr := asyncTool.Send(ctx, agent.AgentContext{ParentContext: in.Context}, call, call.Arguments)
 		if internalErr != nil {
 			return optional.Empty[string](), internalErr
 		}

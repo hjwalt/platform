@@ -45,6 +45,7 @@ func main() {
 			Shell: shell_tool.Configuration{
 				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
 			},
+			// TODO: rename as skills, this is basically that
 			ResearchAgent: fork_tool.Configuration{
 				AgentName: "research-agent",
 				SystemPrompt: `
@@ -55,6 +56,9 @@ func main() {
 				3. Where there are ambiguity, seek clarification from the user
 				4. Spin up more research agent only if there are significant sub-topic to research on 
 				`,
+				AllowedTools: []string{
+					brave_search_web_tool.Name,
+				},
 			},
 		},
 		Server: configuration.WebServerConfiguration{

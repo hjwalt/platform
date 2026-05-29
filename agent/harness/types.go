@@ -15,7 +15,7 @@ const (
 
 type ExecutionState struct {
 	Context        string
-	Parent         agent.Parent
+	Parent         agent.AgentContext
 	ParentToolCall agent.ToolCall
 	Messages       []agent.Message
 	ToolStates     map[string]ToolState
@@ -27,7 +27,7 @@ func (st ExecutionState) SetContext(ctx string) ExecutionState {
 	return st
 }
 
-func (st ExecutionState) SetParent(parent agent.Parent, tool agent.ToolCall) ExecutionState {
+func (st ExecutionState) SetAgentContext(parent agent.AgentContext, tool agent.ToolCall) ExecutionState {
 	st.Parent = parent
 	st.ParentToolCall = tool
 	return st

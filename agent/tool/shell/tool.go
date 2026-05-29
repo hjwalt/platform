@@ -13,6 +13,10 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+const (
+	Name = "linux shell"
+)
+
 type Configuration struct {
 	BaseDir string
 }
@@ -45,7 +49,7 @@ func (t *Tool) Apply(ctx context.Context, params Request) (Response, error) {
 }
 
 func (t *Tool) Name() string {
-	return "linux-shell"
+	return Name
 }
 
 func (t *Tool) Description() string {

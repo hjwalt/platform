@@ -12,7 +12,7 @@ type asyncWrapper[REQ any] struct {
 	delegate agent.AsyncTool[REQ]
 }
 
-func (t *asyncWrapper[REQ]) Send(ctx context.Context, parent agent.Parent, toolCall agent.ToolCall, stringRequest string) error {
+func (t *asyncWrapper[REQ]) Send(ctx context.Context, parent agent.AgentContext, toolCall agent.ToolCall, stringRequest string) error {
 	request, requestParseErr := format.Convert(stringRequest, t.RequestFormat(), t.delegate.RequestFormat())
 	if requestParseErr != nil {
 		return requestParseErr

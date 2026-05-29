@@ -28,7 +28,7 @@ type SyncTool[REQ any, RES any] interface {
 
 type AsyncTool[REQ any] interface {
 	BasicToolDefinition[REQ]
-	Send(context.Context, Parent, ToolCall, REQ) error
+	Send(context.Context, AgentContext, ToolCall, REQ) error
 }
 
 type SyncToolWrapper SyncTool[string, string]
@@ -48,4 +48,5 @@ type ToolContainer interface {
 
 	// OpenAi
 	OpenAiParams() []openai.ChatCompletionToolUnionParam
+	OpenAiParamsFiltered([]string) []openai.ChatCompletionToolUnionParam
 }

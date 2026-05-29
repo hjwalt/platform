@@ -14,6 +14,7 @@ import (
 type Configuration struct {
 	AgentName    string
 	SystemPrompt string
+	AllowedTools []string
 }
 
 type Request struct {
@@ -23,17 +24,21 @@ type Request struct {
 type Tool struct {
 	AgentName    string
 	SystemPrompt string
+	AllowedTools []string
 	Producer     flow.Producer[agent.Message]
 }
 
-func (t *Tool) Send(ctx context.Context, parent agent.Parent, toolCall agent.ToolCall, params Request) error {
-	t.Producer.Produce(ctx, []agent.Message{agent.Fork(
+func (t *Tool) Send(ctx context.Context, parent agent.AgentContext, toolCall agent.ToolCall, params Request) error {
+	t.Producer.Produce(ctx, []agent.Message{agent.Start(
 		toolCall.Id,
 		params.Prompt,
 		toolCall,
-		parent,
+		agent.AgentContext{
+			ParentContext: parent.ParentContext,
+			SystemMessage: t.SystemPrompt,
+			AllowedTools:  t.AllowedTools,
+		},
 	)})
-
 	return nil
 }
 
@@ -57,18 +62,13 @@ func (t *Tool) RequestSchema() *jsonschema.Schema {
 
 func (t *Tool) DescribeRequest(request Request) string {
 	outputBuilder := strings.Builder{}
-
 	outputBuilder.WriteString("Running agent: ")
+	outputBuilder.WriteString("\n")
 	outputBuilder.WriteString(t.AgentName)
 	outputBuilder.WriteString("\n\n")
 	outputBuilder.WriteString("With prompt: ")
 	outputBuilder.WriteString("\n")
 	outputBuilder.WriteString(request.Prompt)
-	outputBuilder.WriteString("\n\n")
-	outputBuilder.WriteString("Your capability is defined as follows: ")
-	outputBuilder.WriteString("\n")
-	outputBuilder.WriteString(t.SystemPrompt)
-
 	return outputBuilder.String()
 }
 
@@ -80,6 +80,7 @@ func Create(config Configuration, producer flow.Producer[agent.Message]) agent.A
 	return &Tool{
 		AgentName:    config.AgentName,
 		SystemPrompt: config.SystemPrompt,
+		AllowedTools: config.AllowedTools,
 		Producer:     producer,
 	}
 }
