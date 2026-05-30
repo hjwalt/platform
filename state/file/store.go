@@ -1,4 +1,4 @@
-package state_file
+package file_store
 
 import (
 	"context"
@@ -9,11 +9,21 @@ import (
 	"github.com/hjwalt/platform/state"
 )
 
-type FileStore struct {
+func New(config Configuration) state.Store {
+	return &store{
+		Path: config.Path,
+	}
+}
+
+type Configuration struct {
 	Path string
 }
 
-func (r *FileStore) Read(ctx context.Context, id string) (state.State, error) {
+type store struct {
+	Path string
+}
+
+func (r *store) Read(ctx context.Context, id string) (state.State, error) {
 	file := r.Path + id + ".dat"
 
 	bytes, err := os.ReadFile(file)
@@ -34,7 +44,7 @@ func (r *FileStore) Read(ctx context.Context, id string) (state.State, error) {
 	}, nil
 }
 
-func (r *FileStore) Write(ctx context.Context, state state.State) error {
+func (r *store) Write(ctx context.Context, state state.State) error {
 	file := r.Path + state.Id + ".dat"
 
 	writeErr := os.WriteFile(file, state.Value, 0644)
@@ -45,11 +55,11 @@ func (r *FileStore) Write(ctx context.Context, state state.State) error {
 	return nil
 }
 
-func (r *FileStore) Start() error {
+func (r *store) Start() error {
 	return nil
 }
 
-func (r *FileStore) Stop() {
+func (r *store) Stop() {
 
 }
 

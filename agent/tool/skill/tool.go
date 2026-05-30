@@ -1,4 +1,4 @@
-package fork_tool
+package agent_skill
 
 import (
 	"context"
@@ -12,8 +12,9 @@ import (
 )
 
 type Configuration struct {
-	AgentName    string
-	SystemPrompt string
+	Name         string
+	Description  string
+	Skill        string
 	AllowedTools []string
 }
 
@@ -21,14 +22,15 @@ type Request struct {
 	Prompt string `json:"prompt" jsonschema:"prompt for this agent"`
 }
 
-type Tool struct {
-	AgentName    string
-	SystemPrompt string
-	AllowedTools []string
-	Producer     flow.Producer[agent.Message]
+type tool struct {
+	AgentName        string
+	AgentDescription string
+	SystemPrompt     string
+	AllowedTools     []string
+	Producer         flow.Producer[agent.Message]
 }
 
-func (t *Tool) Send(ctx context.Context, parent agent.AgentContext, toolCall agent.ToolCall, params Request) error {
+func (t *tool) Send(ctx context.Context, parent agent.AgentContext, toolCall agent.ToolCall, params Request) error {
 	t.Producer.Produce(ctx, []agent.Message{agent.Start(
 		toolCall.Id,
 		params.Prompt,
@@ -42,25 +44,25 @@ func (t *Tool) Send(ctx context.Context, parent agent.AgentContext, toolCall age
 	return nil
 }
 
-func (t *Tool) Name() string {
+func (t *tool) Name() string {
 	return t.AgentName
 }
 
-func (t *Tool) Description() string {
-	return "Achieve specific goals based on the prompt for this agent. \n\n The agent's capability is defined as follows: \n\n" + t.SystemPrompt
+func (t *tool) Description() string {
+	return t.AgentDescription
 }
 
-func (t *Tool) RequestFormat() format.Format[Request] {
+func (t *tool) RequestFormat() format.Format[Request] {
 	return format.Json[Request]()
 }
 
-func (t *Tool) RequestSchema() *jsonschema.Schema {
+func (t *tool) RequestSchema() *jsonschema.Schema {
 	opts := &jsonschema.ForOptions{}
 	toolSchema, _ := jsonschema.For[Request](opts)
 	return toolSchema
 }
 
-func (t *Tool) DescribeRequest(request Request) string {
+func (t *tool) DescribeRequest(request Request) string {
 	outputBuilder := strings.Builder{}
 	outputBuilder.WriteString("Running agent: ")
 	outputBuilder.WriteString("\n")
@@ -72,16 +74,17 @@ func (t *Tool) DescribeRequest(request Request) string {
 	return outputBuilder.String()
 }
 
-func (t *Tool) Auto() bool {
+func (t *tool) Auto() bool {
 	return true
 }
 
 func Create(config Configuration, producer flow.Producer[agent.Message]) agent.AsyncTool[Request] {
-	return &Tool{
-		AgentName:    config.AgentName,
-		SystemPrompt: config.SystemPrompt,
-		AllowedTools: config.AllowedTools,
-		Producer:     producer,
+	return &tool{
+		AgentName:        config.Name,
+		AgentDescription: config.Description,
+		SystemPrompt:     config.Skill,
+		AllowedTools:     config.AllowedTools,
+		Producer:         producer,
 	}
 }
 

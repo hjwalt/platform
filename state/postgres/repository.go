@@ -1,4 +1,4 @@
-package state_bun
+package postgres_store
 
 import (
 	"context"

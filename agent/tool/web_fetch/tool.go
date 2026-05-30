@@ -1,8 +1,9 @@
-package shell_tool
+package web_fetch_tool
 
 import (
 	"context"
-	"os/exec"
+	"io"
+	"net/http"
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
@@ -14,37 +15,38 @@ import (
 )
 
 const (
-	Name = "linux shell"
+	Name = "web fetch"
 )
 
 type Configuration struct {
-	BaseDir string
 }
 
 type Request struct {
-	Command string `json:"command" jsonschema:"shell command to run with the arguments separated with space"`
+	Link string `json:"link" jsonschema:"Link or URL to fetch"`
 }
 
 type Response struct {
-	Result string `json:"result" jsonschema:"command output"`
+	Html string `json:"html" jsonschema:"html output"`
 }
 
 type tool struct {
-	BaseDir string
 }
 
 func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
-	args := strings.Split(params.Command, " ")
-	cmd := exec.Command(args[0], args[1:]...)
-
-	cmd.Dir = t.BaseDir
-	output, err := cmd.CombinedOutput()
+	response, err := http.Get(params.Link)
 	if err != nil {
 		return Response{}, err
 	}
 
+	defer response.Body.Close()
+
+	body, readErr := io.ReadAll(response.Body)
+	if readErr != nil {
+		return Response{}, err
+	}
+
 	return Response{
-		Result: string(output),
+		Html: string(body),
 	}, nil
 }
 
@@ -53,7 +55,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Execute command in linux shell with arguments to achieve a specific goal. Assume you have the general tools provided in linux kernels."
+	return "Fetch content of link or URL"
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {
@@ -69,8 +71,8 @@ func (t *tool) RequestSchema() *jsonschema.Schema {
 func (t *tool) DescribeRequest(request Request) string {
 	outputBuilder := strings.Builder{}
 
-	outputBuilder.WriteString("execute shell command `")
-	outputBuilder.WriteString(request.Command)
+	outputBuilder.WriteString("fetching URL `")
+	outputBuilder.WriteString(request.Link)
 	outputBuilder.WriteString("`")
 
 	return outputBuilder.String()
@@ -87,7 +89,7 @@ func (t *tool) ResultSchema() *jsonschema.Schema {
 }
 
 func (t *tool) DescribeResult(response Response) string {
-	return response.Result
+	return response.Html
 }
 
 func (t *tool) Auto() bool {
@@ -95,15 +97,11 @@ func (t *tool) Auto() bool {
 }
 
 func Create(config Configuration) agent.SyncTool[Request, Response] {
-	return &tool{
-		BaseDir: config.BaseDir,
-	}
+	return &tool{}
 }
 
 func AddToMcp(server *mcp.Server) {
-	tool_mcp.AddToMcp(server, Create(Configuration{
-		BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd/",
-	}))
+	tool_mcp.AddToMcp(server, Create(Configuration{}))
 }
 
 func AddToContainer(container agent.ToolContainer, config Configuration) {

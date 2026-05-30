@@ -2,9 +2,11 @@ package configuration
 
 import (
 	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
-	fork_tool "github.com/hjwalt/platform/agent/tool/fork"
 	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
+	agent_skill "github.com/hjwalt/platform/agent/tool/skill"
+	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	"github.com/hjwalt/platform/message/kafka"
+	file_store "github.com/hjwalt/platform/state/file"
 )
 
 type Configuration struct {
@@ -23,7 +25,8 @@ type OpenAiConfiguration struct {
 type ToolConfiguration struct {
 	BraveSearch   brave_search_web_tool.Configuration
 	Shell         shell_tool.Configuration
-	ResearchAgent fork_tool.Configuration
+	ResearchAgent agent_skill.Configuration
+	WebFetch      web_fetch_tool.Configuration
 }
 
 type WebServerConfiguration struct {
@@ -32,6 +35,7 @@ type WebServerConfiguration struct {
 }
 
 type FlowConfiguration struct {
+	Store  file_store.Configuration
 	Agent  AgentFlowConfiguration
 	Result AgentFlowConfiguration
 }

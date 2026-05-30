@@ -8,14 +8,19 @@
 {{ .Model.Message.Message }}
     </script>
     </wa-markdown>
-    {{if .Model.IsAgentRequest}}
-    <wa-button href="/chat/{{ .Model.Message.Tool.Id }}" class="w-full">
-    See More
-    </wa-button>
-    {{end}}
     {{if .Model.IsToolRequest}}
     <div slot="footer">
       <div class="wa-flank:start wa-gap-2xs">
+        {{if .Model.IsAgentRequest}}
+        <div>
+          <wa-button href="/chat/{{ .Model.Message.Tool.Id }}"
+                     size="xs"
+                     appearance="accent">
+            See More
+          </wa-button>
+        </div>
+        {{end}}
+        {{if .Model.IsToolApprovalNeeded}}
         <form method="POST"
               data-hx-post="/chat/{{ .Model.Message.Context }}/tool"
               data-hx-target="#chat-result"
@@ -74,6 +79,7 @@
             Cancel
           </wa-button>
         </form>
+        {{end}}
       </div>
     </div>
     {{end}}

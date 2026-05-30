@@ -2,7 +2,7 @@ package configuration
 
 import (
 	"github.com/hjwalt/platform/agent/llm"
-	"github.com/hjwalt/platform/state/state_file"
+	file_store "github.com/hjwalt/platform/state/file"
 )
 
 func RegisterOpenAi(holder Context, conf Configuration) {
@@ -18,9 +18,7 @@ func RegisterOpenAi(holder Context, conf Configuration) {
 }
 
 func RegisterAgentHarnessStore(holder Context, conf Configuration) {
-	store := &state_file.FileStore{
-		Path: "/home/hjwalt/Projects/tmp/platform/",
-	}
+	store := file_store.New(conf.Flow.Store)
 	holder.Add(store)
 	holder.SetAgentHarnessStore(store)
 }

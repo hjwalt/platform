@@ -25,7 +25,7 @@ var html = render.Embedded(files, "page.html")
 const (
 	path     = "/chat"
 	idPath   = "/chat/{chat_id}"
-	toolPath = "/chat/tool"
+	toolPath = "/chat/{chat_id}/tool"
 )
 
 type model struct {
@@ -37,7 +37,7 @@ func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, er
 
 	messageViews := make([]render.View, 0)
 	for _, message := range state.Value.Messages {
-		messageViews = append(messageViews, component_chat_item.View(message))
+		messageViews = append(messageViews, component_chat_item.ViewWithState(message, state.Value))
 	}
 
 	return layout.Dashboard(
@@ -61,7 +61,7 @@ func getWithId(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vi
 
 	messageViews := make([]render.View, 0)
 	for _, message := range state.Value.Messages {
-		messageViews = append(messageViews, component_chat_item.View(message))
+		messageViews = append(messageViews, component_chat_item.ViewWithState(message, state.Value))
 	}
 
 	return layout.Dashboard(

@@ -13,7 +13,7 @@ import (
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
-	"github.com/hjwalt/platform/state/state_file"
+	file_store "github.com/hjwalt/platform/state/file"
 	"github.com/hjwalt/platform/type/either"
 	"github.com/hjwalt/platform/type/optional"
 )
@@ -251,9 +251,9 @@ func main() {
 	)
 
 	fileStore := converter.RuntimeToFlowStore(
-		&state_file.FileStore{
+		file_store.New(file_store.Configuration{
 			Path: "/home/hjwalt/Projects/platform/tmp/",
-		},
+		}),
 		format.Json[TestState](),
 	)
 

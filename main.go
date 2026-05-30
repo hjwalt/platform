@@ -5,8 +5,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/agent/harness"
 	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
-	fork_tool "github.com/hjwalt/platform/agent/tool/fork"
 	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
+	agent_skill "github.com/hjwalt/platform/agent/tool/skill"
+	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/flow/converter"
@@ -14,6 +15,7 @@ import (
 	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
+	file_store "github.com/hjwalt/platform/state/file"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/decorator"
 	"github.com/hjwalt/platform/web/page/page_billing"
@@ -45,19 +47,21 @@ func main() {
 			Shell: shell_tool.Configuration{
 				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
 			},
-			// TODO: rename as skills, this is basically that
-			ResearchAgent: fork_tool.Configuration{
-				AgentName: "research-agent",
-				SystemPrompt: `
+			ResearchAgent: agent_skill.Configuration{
+				Name:        "research-agent",
+				Description: "Perform deep research on specific topics based on user prompt. Invoke when user mentions \"research\", \"find out more\".",
+				Skill: `
 				You are a research agent. Perform your query with these in mind:
 
 				1. Search the web based on the request
-				2. Do not deviate from the query
-				3. Where there are ambiguity, seek clarification from the user
-				4. Spin up more research agent only if there are significant sub-topic to research on 
+				2. Fetch the web page URL or link to get the full information
+				3. Do not deviate from the query
+				4. Where there are ambiguity, seek clarification from the user
+				5. Spin up more research agent only if there are significant sub-topic to research on 
 				`,
 				AllowedTools: []string{
 					brave_search_web_tool.Name,
+					web_fetch_tool.Name,
 				},
 			},
 		},
@@ -66,6 +70,9 @@ func main() {
 			StaticResourcePath: "./web/static",
 		},
 		Flow: configuration.FlowConfiguration{
+			Store: file_store.Configuration{
+				Path: "/home/hjwalt/Projects/platform/tmp/agent/",
+			},
 			Agent: configuration.AgentFlowConfiguration{
 				Topic: "AGENT",
 				Producer: kafka.KafkaProducerConfiguration{

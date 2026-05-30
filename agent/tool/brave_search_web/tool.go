@@ -43,12 +43,12 @@ type SearchResult struct {
 	ExtraSnippets []string `json:"extra_snippets"`
 }
 
-type Tool struct {
+type tool struct {
 	Brave  *brave_search.BraveClient
 	ApiKey string
 }
 
-func (t *Tool) Apply(ctx context.Context, params Request) (Response, error) {
+func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
 	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
@@ -81,25 +81,25 @@ func (t *Tool) Apply(ctx context.Context, params Request) (Response, error) {
 	return Response{Results: results}, err
 }
 
-func (t *Tool) Name() string {
+func (t *tool) Name() string {
 	return Name
 }
 
-func (t *Tool) Description() string {
+func (t *tool) Description() string {
 	return "Search the internet with the terms to gather more information. Use the URL in the search results to fetch the page for more information."
 }
 
-func (t *Tool) RequestFormat() format.Format[Request] {
+func (t *tool) RequestFormat() format.Format[Request] {
 	return format.Json[Request]()
 }
 
-func (t *Tool) RequestSchema() *jsonschema.Schema {
+func (t *tool) RequestSchema() *jsonschema.Schema {
 	opts := &jsonschema.ForOptions{}
 	toolSchema, _ := jsonschema.For[Request](opts)
 	return toolSchema
 }
 
-func (t *Tool) DescribeRequest(request Request) string {
+func (t *tool) DescribeRequest(request Request) string {
 	outputBuilder := strings.Builder{}
 
 	outputBuilder.WriteString("search the web with term ")
@@ -108,17 +108,17 @@ func (t *Tool) DescribeRequest(request Request) string {
 	return outputBuilder.String()
 }
 
-func (t *Tool) ResultFormat() format.Format[Response] {
+func (t *tool) ResultFormat() format.Format[Response] {
 	return format.Json[Response]()
 }
 
-func (t *Tool) ResultSchema() *jsonschema.Schema {
+func (t *tool) ResultSchema() *jsonschema.Schema {
 	opts := &jsonschema.ForOptions{}
 	toolSchema, _ := jsonschema.For[Response](opts)
 	return toolSchema
 }
 
-func (t *Tool) DescribeResult(response Response) string {
+func (t *tool) DescribeResult(response Response) string {
 	outputBuilder := strings.Builder{}
 
 	for i, result := range response.Results {
@@ -157,12 +157,12 @@ func (t *Tool) DescribeResult(response Response) string {
 	return outputBuilder.String()
 }
 
-func (t *Tool) Auto() bool {
+func (t *tool) Auto() bool {
 	return true
 }
 
 func Create(config Configuration) agent.SyncTool[Request, Response] {
-	return &Tool{
+	return &tool{
 		Brave: &brave_search.BraveClient{
 			Client:  http.DefaultClient,
 			BaseUrl: config.BaseUrl,
