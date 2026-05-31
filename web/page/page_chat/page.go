@@ -23,10 +23,11 @@ var files embed.FS
 var html = render.Embedded(files, "page.html")
 
 const (
-	path         = "/chat"
-	idPath       = "/chat/{chat_id}"
-	toolPath     = "/chat/{chat_id}/tool"
-	chatViewPath = "/chat-view"
+	path           = "/chat"
+	idPath         = "/chat/{chat_id}"
+	toolPath       = "/chat/{chat_id}/accept"
+	rejectToolPath = "/chat/{chat_id}/reject"
+	chatViewPath   = "/chat-view"
 )
 
 type chat struct {
@@ -151,6 +152,7 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 	toolArguments, toolArgumentsExists := r.PostForm["tool_arguments"]
 	toolName, toolNameExists := r.PostForm["tool_name"]
 	toolMessage, toolMessageExists := r.PostForm["tool_message"]
+	toolReasoningContent, _ := r.PostForm["tool_reasoning_content"]
 
 	if contextExists && toolIdExists && toolArgumentsExists && toolNameExists && toolMessageExists {
 		c.AgentMessageProducer.Produce(c, []agent.Message{
@@ -158,7 +160,7 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 				contextValue[0],
 				agent.MessageType_ToolExecute,
 				"execution approved to "+toolMessage[0],
-				"",
+				getValue(toolReasoningContent),
 				agent.ToolCall{
 					Id:        toolId[0],
 					Arguments: toolArguments[0],
@@ -174,11 +176,63 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 				"web",
 				agent.MessageType_User,
 				"no message received",
-				"",
+				getValue(toolReasoningContent),
 				agent.ToolCall{},
 			)),
 		}), nil
 	}
+}
+
+func rejectTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error parsing form data", http.StatusBadRequest)
+		return nil, err
+	}
+
+	slog.Info("", "form", r.PostForm)
+
+	contextValue, contextExists := r.PostForm["context"]
+	toolId, toolIdExists := r.PostForm["tool_id"]
+	toolArguments, toolArgumentsExists := r.PostForm["tool_arguments"]
+	toolName, toolNameExists := r.PostForm["tool_name"]
+	toolMessage, toolMessageExists := r.PostForm["tool_message"]
+	toolReasoningContent, _ := r.PostForm["tool_reasoning_content"]
+
+	if contextExists && toolIdExists && toolArgumentsExists && toolNameExists && toolMessageExists {
+		c.AgentMessageProducer.Produce(c, []agent.Message{
+			agent.NewMessage(
+				contextValue[0],
+				agent.MessageType_ToolResult,
+				"execution rejected to "+toolMessage[0],
+				getValue(toolReasoningContent),
+				agent.ToolCall{
+					Id:        toolId[0],
+					Arguments: toolArguments[0],
+					Name:      toolName[0],
+				},
+			),
+		})
+
+		return component_chat_list.View([]render.View{}), nil
+	} else {
+		return component_chat_list.View([]render.View{
+			component_chat_item.View(agent.NewMessage(
+				"web",
+				agent.MessageType_User,
+				"no message received",
+				getValue(toolReasoningContent),
+				agent.ToolCall{},
+			)),
+		}), nil
+	}
+}
+
+func getValue(contents []string) string {
+	if len(contents) == 0 {
+		return ""
+	}
+	return contents[0]
 }
 
 func Add(builder route.Builder[web.Context]) {
@@ -186,5 +240,6 @@ func Add(builder route.Builder[web.Context]) {
 	builder.Handle(idPath, http.MethodGet, render.Handle(getWithId, page_error_500.Error))
 	builder.Handle(idPath, http.MethodPost, render.Handle(post, page_error_500.Error))
 	builder.Handle(toolPath, http.MethodPost, render.Handle(postTool, page_error_500.Error))
+	builder.Handle(rejectToolPath, http.MethodPost, render.Handle(rejectTool, page_error_500.Error))
 	builder.Handle(chatViewPath, http.MethodPost, render.Handle(postChatView, page_error_500.Error))
 }

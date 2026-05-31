@@ -22,7 +22,7 @@
         {{end}}
         {{if .Model.IsToolApprovalNeeded}}
         <form method="POST"
-              data-hx-post="/chat/{{ .Model.Message.Context }}/tool"
+              data-hx-post="/chat/{{ .Model.Message.Context }}/accept"
               data-hx-target="#chat-result"
               data-hx-swap="outerHTML">
           <input type="hidden"
@@ -34,6 +34,9 @@
           <input type="hidden"
                  name="tool_message"
                  value="{{ .Model.Message.Message }}" />
+          <input type="hidden"
+                 name="tool_reasoning_content"
+                 value="{{ .Model.Message.ReasoningContent }}" />
           <input type="hidden"
                  name="tool_id"
                  value="{{ .Model.Message.Tool.Id }}" />
@@ -51,7 +54,7 @@
           </wa-button>
         </form>
         <form method="POST"
-              data-hx-post="/chat/{{ .Model.Message.Context }}/tool"
+              data-hx-post="/chat/{{ .Model.Message.Context }}/reject"
               data-hx-target="#chat-result"
               data-hx-swap="outerHTML">
           <input type="hidden"
@@ -63,6 +66,9 @@
           <input type="hidden"
                  name="tool_message"
                  value="{{ .Model.Message.Message }}" />
+          <input type="hidden"
+                 name="tool_reasoning_content"
+                 value="{{ .Model.Message.ReasoningContent }}" />
           <input type="hidden"
                  name="tool_id"
                  value="{{ .Model.Message.Tool.Id }}" />

@@ -69,13 +69,17 @@ func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState
 		{
 			return r.mergeMessage(in, st)
 		}
-	case agent.MessageType_User, agent.MessageType_ToolResult:
+	case agent.MessageType_User:
 		{
 			return r.modelExecute(ctx, in, st)
 		}
 	case agent.MessageType_ToolRequest:
 		{
 			return r.toolRequest(ctx, in, st)
+		}
+	case agent.MessageType_ToolResult:
+		{
+			return r.toolResult(ctx, in, st)
 		}
 	case agent.MessageType_ToolExecute:
 		{
@@ -132,6 +136,8 @@ func (r *Flow) mergeMessage(in agent.Message, st ExecutionState) either.Either[E
 }
 
 func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+	// TODO: tidy up messages based on tool execution result
+
 	if result, err := r.Model.Chat(context.Background(), st.Messages, st.Parent.AllowedTools); err != nil {
 		st = st.SetNext(agent.SingleResult(agent.NewMessage(
 			in.Context,
@@ -214,4 +220,9 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 	}
 
 	return either.Left[ExecutionState, agent.Message](st)
+}
+
+func (r *Flow) toolResult(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
+	st = st.UpdateToolState(in.Tool.Id, ToolState_Executed)
+	return r.modelExecute(ctx, in, st)
 }
