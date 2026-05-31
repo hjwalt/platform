@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"github.com/hjwalt/platform/agent/llm"
 	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
 	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
 	agent_skill "github.com/hjwalt/platform/agent/tool/skill"
@@ -17,14 +18,8 @@ type Configuration struct {
 }
 
 type ModelConfiguration struct {
-	Parser OpenAiConfiguration
-	Agent  OpenAiConfiguration
-}
-
-type OpenAiConfiguration struct {
-	Model    string
-	Endpoint string
-	Secret   string
+	Parser llm.ModelConfig
+	Agent  llm.ModelConfig
 }
 
 type ToolConfiguration struct {

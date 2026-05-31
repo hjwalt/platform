@@ -103,6 +103,7 @@ func (r *Flow) startAgent(in agent.Message, st ExecutionState) either.Either[Exe
 		in.Context,
 		agent.MessageType_System,
 		in.Agent.SystemMessage,
+		in.ReasoningContent,
 		in.Tool,
 	))
 	st = st.SetAgentContext(in.Agent, in.Tool)
@@ -110,6 +111,7 @@ func (r *Flow) startAgent(in agent.Message, st ExecutionState) either.Either[Exe
 		in.Context,
 		agent.MessageType_User,
 		in.Message,
+		in.ReasoningContent,
 		agent.ToolCall{},
 	)))
 	return either.Left[ExecutionState, agent.Message](st)
@@ -121,6 +123,7 @@ func (r *Flow) mergeMessage(in agent.Message, st ExecutionState) either.Either[E
 			st.Parent.ParentContext,
 			agent.MessageType_ToolResult,
 			in.Message,
+			in.ReasoningContent,
 			st.ParentToolCall,
 		)))
 	}
@@ -134,6 +137,7 @@ func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionS
 			in.Context,
 			agent.MessageType_Error,
 			err.Error(),
+			in.ReasoningContent,
 			in.Tool,
 		)))
 	} else {
@@ -153,6 +157,7 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 				in.Context,
 				agent.MessageType_ToolExecute,
 				"execution approved to "+in.Message,
+				in.ReasoningContent,
 				in.Tool,
 			)))
 		}
@@ -162,6 +167,7 @@ func (r *Flow) toolRequest(ctx context.Context, in agent.Message, st ExecutionSt
 			in.Context,
 			agent.MessageType_Error,
 			"tool "+toolData.Name+" does not exist",
+			in.ReasoningContent,
 			toolData,
 		)))
 	}
@@ -182,6 +188,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 			in.Context,
 			agent.MessageType_Error,
 			"tool "+toolData.Name+" already executed",
+			in.ReasoningContent,
 			toolData,
 		)))
 	} else if result, toolError := r.Tools.Execute(ctx, in, toolData); toolError == nil {
@@ -191,6 +198,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 				in.Context,
 				agent.MessageType_ToolResult,
 				result.Get(),
+				in.ReasoningContent,
 				toolData,
 			)))
 		}
@@ -200,6 +208,7 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 			in.Context,
 			agent.MessageType_Error,
 			toolError.Error(),
+			in.ReasoningContent,
 			toolData,
 		)))
 	}

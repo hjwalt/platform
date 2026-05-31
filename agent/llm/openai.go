@@ -10,23 +10,16 @@ import (
 	"github.com/openai/openai-go/v3/option"
 )
 
-func OpenAi(config OpenAiModelConfig) agent.LanguageModel {
-	return &OpenAiModel{
+func createOpenAi(config ModelConfig, tools agent.ToolContainer) agent.LanguageModel {
+	return &openAiModel{
 		Model:    config.Model,
 		Endpoint: config.Endpoint,
 		Secret:   config.Secret,
-		Tools:    config.Tools,
+		Tools:    tools,
 	}
 }
 
-type OpenAiModelConfig struct {
-	Model    string
-	Endpoint string
-	Secret   string
-	Tools    agent.ToolContainer
-}
-
-type OpenAiModel struct {
+type openAiModel struct {
 	Model    string
 	Endpoint string
 	Secret   string
@@ -34,7 +27,7 @@ type OpenAiModel struct {
 	client   openai.Client
 }
 
-func (r *OpenAiModel) Start() error {
+func (r *openAiModel) Start() error {
 	r.client = openai.NewClient(
 		option.WithBaseURL(r.Endpoint),
 		option.WithAPIKey(r.Secret), // defaults to os.LookupEnv("OPENAI_API_KEY")
@@ -43,43 +36,28 @@ func (r *OpenAiModel) Start() error {
 	return nil
 }
 
-func (r *OpenAiModel) Stop() {
+func (r *openAiModel) Stop() {
 }
 
-func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowedTools []string) ([]agent.Message, error) {
+func (r *openAiModel) Chat(ctx context.Context, messages []agent.Message, allowedTools []string) ([]agent.Message, error) {
 	modelMessage := make([]openai.ChatCompletionMessageParamUnion, 0)
 	for _, message := range messages {
 		switch message.Type {
 		case agent.MessageType_System:
 			{
-				modelMessage = append(modelMessage, openai.SystemMessage(message.Message))
+				modelMessage = append(modelMessage, OpenAiSystemMessage(message))
 			}
 		case agent.MessageType_User:
 			{
-				modelMessage = append(modelMessage, openai.UserMessage(message.Message))
+				modelMessage = append(modelMessage, OpenAiUserMessage(message))
 			}
 		case agent.MessageType_ToolRequest:
 			{
-				param := openai.ChatCompletionMessageParamUnion{
-					OfAssistant: &openai.ChatCompletionAssistantMessageParam{
-						ToolCalls: []openai.ChatCompletionMessageToolCallUnionParam{
-							{
-								OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
-									ID: message.Tool.Id,
-									Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
-										Arguments: message.Tool.Arguments,
-										Name:      message.Tool.Name,
-									},
-								},
-							},
-						},
-					},
-				}
-				modelMessage = append(modelMessage, param)
+				modelMessage = append(modelMessage, OpenAiToolRequestMessage(message))
 			}
 		case agent.MessageType_ToolResult:
 			{
-				modelMessage = append(modelMessage, openai.ToolMessage(message.Message, message.Tool.Id))
+				modelMessage = append(modelMessage, OpenAiToolResultMessage(message))
 			}
 		}
 	}
@@ -88,9 +66,6 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 		Messages: modelMessage,
 		Model:    r.Model,
 		Tools:    r.Tools.OpenAiParamsFiltered(allowedTools),
-		// Seed:     openai.Int(0),
-		// ReasoningEffort: openai.ReasoningEffortMedium,
-		// Temperature:     openai.Float(0.1),
 	}
 
 	completion, err := r.client.Chat.Completions.New(ctx, params)
@@ -99,13 +74,13 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 			messages[0].Context,
 			agent.MessageType_Error,
 			err.Error(),
+			"",
 			agent.ToolCall{},
 		)}, err
 	}
 
 	outputMessages := make([]agent.Message, 0)
 	for _, choice := range completion.Choices {
-
 		switch choice.FinishReason {
 		case "stop":
 			{
@@ -113,6 +88,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 					messages[0].Context,
 					agent.MessageType_Agent,
 					choice.Message.Content,
+					"",
 					agent.ToolCall{},
 				))
 			}
@@ -130,6 +106,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 							messages[0].Context,
 							agent.MessageType_ToolRequest,
 							toolRequestMessage,
+							"",
 							toolData,
 						))
 					} else {
@@ -146,16 +123,46 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 func OpenAiToolSchema[M any](name string, description string) openai.ChatCompletionToolUnionParam {
 	opts := &jsonschema.ForOptions{}
 	toolSchema, _ := jsonschema.For[M](opts)
-	return FromJsonSchema(name, description, toolSchema)
+	return OpenAiFromJsonSchema(name, description, toolSchema)
 }
 
-func FromJsonSchema(name string, description string, toolSchema *jsonschema.Schema) openai.ChatCompletionToolUnionParam {
+func OpenAiFromJsonSchema(name string, description string, toolSchema *jsonschema.Schema) openai.ChatCompletionToolUnionParam {
 	unmarshalled, _ := format.Convert(toolSchema, schemaFormat, openAiFormat)
 	return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
 		Name:        name,
 		Description: openai.String(description),
 		Parameters:  unmarshalled,
 	})
+}
+
+func OpenAiSystemMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {
+	return openai.SystemMessage(message.Message)
+}
+
+func OpenAiUserMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {
+	return openai.UserMessage(message.Message)
+}
+
+func OpenAiToolRequestMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {
+	return openai.ChatCompletionMessageParamUnion{
+		OfAssistant: &openai.ChatCompletionAssistantMessageParam{
+			ToolCalls: []openai.ChatCompletionMessageToolCallUnionParam{
+				{
+					OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
+						ID: message.Tool.Id,
+						Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
+							Arguments: message.Tool.Arguments,
+							Name:      message.Tool.Name,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func OpenAiToolResultMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {
+	return openai.ToolMessage(message.Message, message.Tool.Id)
 }
 
 var (

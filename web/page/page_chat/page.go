@@ -118,6 +118,7 @@ func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, e
 				chatId,
 				agent.MessageType_User,
 				message[0],
+				"",
 				agent.ToolCall{},
 			),
 		})
@@ -129,6 +130,7 @@ func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, e
 				chatId,
 				agent.MessageType_User,
 				"no message received",
+				"",
 				agent.ToolCall{},
 			)),
 		}), nil
@@ -156,6 +158,7 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 				contextValue[0],
 				agent.MessageType_ToolExecute,
 				"execution approved to "+toolMessage[0],
+				"",
 				agent.ToolCall{
 					Id:        toolId[0],
 					Arguments: toolArguments[0],
@@ -171,6 +174,7 @@ func postTool(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vie
 				"web",
 				agent.MessageType_User,
 				"no message received",
+				"",
 				agent.ToolCall{},
 			)),
 		}), nil

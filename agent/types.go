@@ -22,12 +22,13 @@ const (
 )
 
 type Message struct {
-	Id      string
-	Context string
-	Type    MessageType
-	Message string
-	Tool    ToolCall
-	Agent   AgentContext
+	Id               string
+	Context          string
+	Type             MessageType
+	Message          string
+	ReasoningContent string
+	Tool             ToolCall
+	Agent            AgentContext
 }
 
 type ToolCall struct {
@@ -46,15 +47,17 @@ func NewMessage(
 	context string,
 	messageType MessageType,
 	message string,
+	reasoning string,
 	tool ToolCall,
 ) Message {
 	return Message{
-		Id:      uuid.New().String(),
-		Context: context,
-		Type:    messageType,
-		Message: message,
-		Tool:    tool,
-		Agent:   AgentContext{},
+		Id:               uuid.New().String(),
+		Context:          context,
+		Type:             messageType,
+		Message:          message,
+		ReasoningContent: reasoning,
+		Tool:             tool,
+		Agent:            AgentContext{},
 	}
 }
 
@@ -65,12 +68,13 @@ func Start(
 	parent AgentContext,
 ) Message {
 	return Message{
-		Id:      uuid.New().String(),
-		Context: context,
-		Type:    MessageType_Start,
-		Message: message,
-		Tool:    tool,
-		Agent:   parent,
+		Id:               uuid.New().String(),
+		Context:          context,
+		Type:             MessageType_Start,
+		Message:          message,
+		ReasoningContent: "",
+		Tool:             tool,
+		Agent:            parent,
 	}
 }
 

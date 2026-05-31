@@ -7,24 +7,14 @@ import (
 )
 
 func RegisterParserModel(holder Context, conf Configuration) {
-	model := llm.OpenAi(llm.OpenAiModelConfig{
-		Model:    conf.Model.Parser.Model,
-		Endpoint: conf.Model.Parser.Endpoint,
-		Secret:   conf.Model.Parser.Secret,
-		Tools:    tool_container.New(),
-	})
+	model := llm.New(conf.Model.Parser, tool_container.New())
 	holder.Add(model)
 
 	holder.SetParserModel(model)
 }
 
 func RegisterAgentModel(holder Context, conf Configuration) {
-	model := llm.OpenAi(llm.OpenAiModelConfig{
-		Model:    conf.Model.Agent.Model,
-		Endpoint: conf.Model.Agent.Endpoint,
-		Secret:   conf.Model.Agent.Secret,
-		Tools:    holder.GetToolContainer(),
-	})
+	model := llm.New(conf.Model.Agent, holder.GetToolContainer())
 	holder.Add(model)
 
 	holder.SetAgentModel(model)

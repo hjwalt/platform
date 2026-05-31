@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 
+	"github.com/cohesion-org/deepseek-go"
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/format"
 	"github.com/hjwalt/platform/type/optional"
@@ -46,7 +47,7 @@ type ToolContainer interface {
 	Exists(ToolCall) bool
 	Auto(ToolCall) bool
 
-	// OpenAi
-	OpenAiParams() []openai.ChatCompletionToolUnionParam
+	// ToolParams
 	OpenAiParamsFiltered([]string) []openai.ChatCompletionToolUnionParam
+	DeepSeekParams([]string) []deepseek.Tool
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/agent/harness"
+	"github.com/hjwalt/platform/agent/llm"
 	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
 	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
 	agent_skill "github.com/hjwalt/platform/agent/tool/skill"
@@ -34,22 +35,25 @@ func main() {
 	instanceId := uuid.New().String()
 	config := configuration.Configuration{
 		Model: configuration.ModelConfiguration{
-			Parser: configuration.OpenAiConfiguration{
-				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
-				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
-				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
-				Model:    "gemini-3.5-flash",
-				Endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/",
-				Secret:   environment.GetString("GEMINI_TOKEN", "lemonade"),
-			},
-			Agent: configuration.OpenAiConfiguration{
+			Parser: llm.ModelConfig{
 				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
 				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
 				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
 
-				Model:    "gemini-3.5-flash",
-				Endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/",
-				Secret:   environment.GetString("GEMINI_TOKEN", "lemonade"),
+				Type:     llm.DeepSeek,
+				Model:    "deepseek-v4-flash",
+				Endpoint: "https://api.deepseek.com",
+				Secret:   environment.GetString("DEEPSEEK_TOKEN", "deepseek"),
+			},
+			Agent: llm.ModelConfig{
+				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
+				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
+				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+
+				Type:     llm.DeepSeek,
+				Model:    "deepseek-v4-flash",
+				Endpoint: "https://api.deepseek.com",
+				Secret:   environment.GetString("DEEPSEEK_TOKEN", "deepseek"),
 			},
 		},
 		Tool: configuration.ToolConfiguration{
@@ -133,7 +137,6 @@ func main() {
 
 	httpBuilder.AddMiddlewares(
 		middleware.RequestID,
-		middleware.RealIP,
 		middleware.CleanPath,
 		middleware.Recoverer,
 	)
