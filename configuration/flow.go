@@ -36,7 +36,7 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 	flowMetadata := harness.FlowMetadata{}
 	agentFlow := harness.Flow{
 		Tools: holder.GetToolContainer(),
-		Model: holder.GetLanguageModel(),
+		Model: holder.GetAgentModel(),
 	}
 
 	// Producer

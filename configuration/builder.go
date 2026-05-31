@@ -18,8 +18,10 @@ type Context interface {
 	Add(runtimes ...runtime.Runtime)
 	SetToolContainer(agent.ToolContainer)
 	GetToolContainer() agent.ToolContainer
-	SetLanguageModel(agent.LanguageModel)
-	GetLanguageModel() agent.LanguageModel
+	SetAgentModel(agent.LanguageModel)
+	GetAgentModel() agent.LanguageModel
+	SetParserModel(agent.LanguageModel)
+	GetParserModel() agent.LanguageModel
 	SetKafkaProducer(message.Producer[kafka.KafkaMetadata])
 	GetKafkaProducer() message.Producer[kafka.KafkaMetadata]
 	SetAgentMessageProducer(flow.Producer[agent.Message])
@@ -33,7 +35,8 @@ func ContextBuilder() Context {
 	return &holder{
 		Runtimes:             make([]runtime.Runtime, 0),
 		ToolContainer:        optional.Empty[agent.ToolContainer](),
-		RagModel:             optional.Empty[agent.LanguageModel](),
+		AgentModel:           optional.Empty[agent.LanguageModel](),
+		ParserModel:          optional.Empty[agent.LanguageModel](),
 		KafkaProducer:        optional.Empty[message.Producer[kafka.KafkaMetadata]](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
 		AgentHarnessStore:    optional.Empty[state.Store](),
@@ -43,7 +46,8 @@ func ContextBuilder() Context {
 type holder struct {
 	Runtimes             []runtime.Runtime
 	ToolContainer        optional.Optional[agent.ToolContainer]
-	RagModel             optional.Optional[agent.LanguageModel]
+	AgentModel           optional.Optional[agent.LanguageModel]
+	ParserModel          optional.Optional[agent.LanguageModel]
 	KafkaProducer        optional.Optional[message.Producer[kafka.KafkaMetadata]]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
 	AgentHarnessStore    optional.Optional[state.Store]
@@ -64,15 +68,26 @@ func (r *holder) GetToolContainer() agent.ToolContainer {
 	return r.ToolContainer.Get()
 }
 
-func (r *holder) SetLanguageModel(value agent.LanguageModel) {
-	r.RagModel = optional.Of(value)
+func (r *holder) SetAgentModel(value agent.LanguageModel) {
+	r.AgentModel = optional.Of(value)
 }
 
-func (r *holder) GetLanguageModel() agent.LanguageModel {
-	if !r.RagModel.IsPresent() {
+func (r *holder) GetAgentModel() agent.LanguageModel {
+	if !r.AgentModel.IsPresent() {
 		r.Missing()
 	}
-	return r.RagModel.Get()
+	return r.AgentModel.Get()
+}
+
+func (r *holder) SetParserModel(value agent.LanguageModel) {
+	r.ParserModel = optional.Of(value)
+}
+
+func (r *holder) GetParserModel() agent.LanguageModel {
+	if !r.ParserModel.IsPresent() {
+		r.Missing()
+	}
+	return r.ParserModel.Get()
 }
 
 func (r *holder) SetKafkaProducer(value message.Producer[kafka.KafkaMetadata]) {

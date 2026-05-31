@@ -13,7 +13,7 @@ func RegisterTools(holder Context, conf Configuration) {
 
 	brave_search_web_tool.AddToContainer(container, conf.Tool.BraveSearch)
 	shell_tool.AddToContainer(container, conf.Tool.Shell)
-	web_fetch_tool.AddToContainer(container, conf.Tool.WebFetch)
+	web_fetch_tool.AddToContainer(container, conf.Tool.WebFetch, holder.GetParserModel())
 	agent_skill.AddToContainer(container, conf.Tool.ResearchAgent, holder.GetAgentMessageProducer())
 
 	holder.SetToolContainer(container)

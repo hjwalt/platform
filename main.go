@@ -25,14 +25,25 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func CreateConfig() configuration.Configuration {
-	instanceId := uuid.New().String()
+func main() {
+	logger.Default()
+	godotenv.Load()
 
-	return configuration.Configuration{
-		OpenAi: configuration.OpenAiConfiguration{
-			Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
-			Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
-			Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+	// Config building
+
+	instanceId := uuid.New().String()
+	config := configuration.Configuration{
+		Model: configuration.ModelConfiguration{
+			Parser: configuration.OpenAiConfiguration{
+				Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
+				Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
+				Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+			},
+			Agent: configuration.OpenAiConfiguration{
+				Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
+				Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
+				Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+			},
 		},
 		Tool: configuration.ToolConfiguration{
 			BraveSearch: brave_search_web_tool.Configuration{
@@ -96,15 +107,6 @@ func CreateConfig() configuration.Configuration {
 			},
 		},
 	}
-}
-
-func main() {
-	logger.Default()
-	godotenv.Load()
-
-	// Config building
-
-	config := CreateConfig()
 
 	holder := configuration.ContextBuilder()
 
@@ -112,9 +114,10 @@ func main() {
 
 	configuration.RegisterKafkaProducer(holder, config)
 	configuration.RegisterKafkaAgentMessageProducer(holder, config)
+	configuration.RegisterParserModel(holder, config)
 	configuration.RegisterTools(holder, config)
 	configuration.RegisterAgentHarnessStore(holder, config)
-	configuration.RegisterOpenAi(holder, config)
+	configuration.RegisterAgentModel(holder, config)
 	configuration.RegisterKafkaAgentFlow(holder, config)
 
 	// HTTP
@@ -130,7 +133,7 @@ func main() {
 
 	httpBuilder.AddDecorators(
 		&decorator.RuntimeDecorator{
-			Chat:                 holder.GetLanguageModel(),
+			Chat:                 holder.GetAgentModel(),
 			AgentMessageProducer: holder.GetAgentMessageProducer(),
 			AgentHarnessStore:    converter.RuntimeToFlowStore(holder.GetAgentHarnessStore(), format.Json[harness.ExecutionState]()),
 		},

@@ -26,10 +26,12 @@ type Request struct {
 }
 
 type Response struct {
-	Html string `json:"html" jsonschema:"html output"`
+	Html   string `json:"html" jsonschema:"html output"`
+	Parsed string `json:"parsed" jsonschema:"parsed content using language model"`
 }
 
 type tool struct {
+	model agent.LanguageModel
 }
 
 func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
@@ -45,8 +47,37 @@ func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
 		return Response{}, err
 	}
 
+	htmlResult := string(body)
+
+	result, err := t.model.Chat(
+		context.Background(),
+		[]agent.Message{
+			{
+				Type:    agent.MessageType_User,
+				Message: "parse the following html into its content: \n\n" + htmlResult,
+			},
+		},
+		[]string{},
+	)
+
+	parsed := ""
+	if err != nil {
+		parsed = "failed to parse response HTML using model due to error " + err.Error()
+	}
+
+	if len(result) == 0 {
+		parsed = "failed to parse response HTML due to model returning empty results"
+	}
+
+	if result[0].Type != agent.MessageType_Agent {
+		parsed = "failed to parse response HTML due to model returning invalid response"
+	}
+
+	parsed = result[0].Message
+
 	return Response{
-		Html: string(body),
+		Html:   htmlResult,
+		Parsed: parsed,
 	}, nil
 }
 
@@ -89,22 +120,23 @@ func (t *tool) ResultSchema() *jsonschema.Schema {
 }
 
 func (t *tool) DescribeResult(response Response) string {
-	// TODO: parse this html to reduce the amount of token used
-	return response.Html
+	return response.Parsed
 }
 
 func (t *tool) Auto() bool {
 	return false
 }
 
-func Create(config Configuration) agent.SyncTool[Request, Response] {
-	return &tool{}
+func Create(config Configuration, model agent.LanguageModel) agent.SyncTool[Request, Response] {
+	return &tool{
+		model: model,
+	}
 }
 
-func AddToMcp(server *mcp.Server) {
-	tool_mcp.AddToMcp(server, Create(Configuration{}))
+func AddToMcp(server *mcp.Server, model agent.LanguageModel) {
+	tool_mcp.AddToMcp(server, Create(Configuration{}, model))
 }
 
-func AddToContainer(container agent.ToolContainer, config Configuration) {
-	container.AddSync(tool_string_wrapper.StringWrapSync(Create(config)))
+func AddToContainer(container agent.ToolContainer, config Configuration, model agent.LanguageModel) {
+	container.AddSync(tool_string_wrapper.StringWrapSync(Create(config, model)))
 }

@@ -11,9 +11,14 @@ import (
 
 type Configuration struct {
 	Tool   ToolConfiguration
-	OpenAi OpenAiConfiguration
+	Model  ModelConfiguration
 	Server WebServerConfiguration
 	Flow   FlowConfiguration
+}
+
+type ModelConfiguration struct {
+	Parser OpenAiConfiguration
+	Agent  OpenAiConfiguration
 }
 
 type OpenAiConfiguration struct {
