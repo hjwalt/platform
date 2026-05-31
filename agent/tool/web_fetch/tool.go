@@ -89,6 +89,7 @@ func (t *tool) ResultSchema() *jsonschema.Schema {
 }
 
 func (t *tool) DescribeResult(response Response) string {
+	// TODO: parse this html to reduce the amount of token used
 	return response.Html
 }
 

@@ -25,15 +25,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	logger.Default()
-	godotenv.Load()
-
-	// Config building
-
+func CreateConfig() configuration.Configuration {
 	instanceId := uuid.New().String()
 
-	config := configuration.Configuration{
+	return configuration.Configuration{
 		OpenAi: configuration.OpenAiConfiguration{
 			Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
 			Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
@@ -101,6 +96,15 @@ func main() {
 			},
 		},
 	}
+}
+
+func main() {
+	logger.Default()
+	godotenv.Load()
+
+	// Config building
+
+	config := CreateConfig()
 
 	holder := configuration.ContextBuilder()
 

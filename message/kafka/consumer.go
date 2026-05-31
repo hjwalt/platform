@@ -46,6 +46,7 @@ func (r *KafkaConsumer) Start() error {
 		"group.id":                 r.GroupId,
 		"auto.offset.reset":        "smallest",
 		"allow.auto.create.topics": "true",
+		"max.poll.interval.ms":     "1800000",
 		// allows using async commit and manual offset storing
 		"enable.auto.commit":       "true",
 		"enable.auto.offset.store": "false",

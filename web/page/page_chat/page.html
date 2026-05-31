@@ -2,10 +2,38 @@
   <div class="flex-grow flex-fix">
     <div class="h-full w-full flex-column flex-align-items-stretch">
       <div class="w-full p-r-s">
-        <div class="wa-heading-l">
-          Chat
-        </div>
-        <wa-divider></wa-divider>
+        <form method="POST"
+              action="/chat-view">
+          <div class="flex-row flex-align-items-center">
+            <span class="wa-heading-l p-r-s p-t-s p-b-s">
+              Chat
+            </span>
+            <wa-select size="xs"
+                       name="chat_id"
+                       class="p-r-s">
+              {{range $val := .Model.Chats}}
+              {{if $val.Current}}
+              <wa-option value="{{$val.Id}}"
+                         selected>
+                {{$val.Id}}
+              </wa-option>
+              {{else}}
+              <wa-option value="{{$val.Id}}">
+                {{$val.Id}}
+              </wa-option>
+              {{end}}
+              {{end}}
+            </wa-select>
+            <wa-button size="xs"
+                       variant="neutral"
+                       appearance="accent"
+                       type="submit">
+              Go
+              </wa-icon>
+            </wa-button>
+          </div>
+        </form>
+        <wa-divider class="m-t-s p-b-0"></wa-divider>
       </div>
       <div class="flex-grow flex-fix">
         <div class="w-full wa-stack p-r-s">

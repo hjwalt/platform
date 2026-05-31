@@ -7,30 +7,6 @@ import (
 	"github.com/hjwalt/platform/state"
 )
 
-// constructor
-// func NewRepository(configurations ...runtime.Configuration[Repository]) stateful.Repository {
-// 	repository := Repository{}
-// 	for _, configuration := range configurations {
-// 		repository = configuration(repository)
-// 	}
-// 	return repository
-// }
-
-// // configuration
-// func WithConnection(connection runtime_bun.BunConnection) runtime.Configuration[Repository] {
-// 	return func(st Repository) Repository {
-// 		st.connection = connection
-// 		return st
-// 	}
-// }
-
-// func WithStateTableName(persistenceTableName string) runtime.Configuration[Repository] {
-// 	return func(st Repository) Repository {
-// 		st.stateTableName = persistenceTableName
-// 		return st
-// 	}
-// }
-
 // implementation
 type Repository struct {
 	stateTableName string

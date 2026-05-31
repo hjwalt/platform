@@ -86,6 +86,22 @@
     margin-bottom: 0;
 }
 
+.m-l-s {
+    padding-left: 0.5rem;
+}
+
+.m-r-s {
+    padding-right: 0.5rem;
+}
+
+.m-t-s {
+    padding-top: 0.5rem;
+}
+
+.m-b-s {
+    padding-bottom: 0.5rem;
+}
+
 /* CUSTOM */
 
 .layout-dashboard-body-left {
@@ -109,12 +125,21 @@
     flex-direction: column;
 }
 
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
 .flex-grow {
     flex-grow: 1;
 }
 
 .flex-align-items-stretch {
     align-items: stretch;
+}
+
+.flex-align-items-center {
+    align-items: center;
 }
 
 .scroll-y {

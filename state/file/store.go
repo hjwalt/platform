@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hjwalt/platform/state"
@@ -53,6 +54,22 @@ func (r *store) Write(ctx context.Context, state state.State) error {
 	}
 
 	return nil
+}
+
+func (r *store) Keys(ctx context.Context) ([]string, error) {
+	entries, err := os.ReadDir(r.Path)
+	if err != nil {
+		return []string{}, err
+	}
+
+	keys := make([]string, 0)
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			keys = append(keys, strings.TrimSuffix(entry.Name(), ".dat"))
+		}
+	}
+
+	return keys, nil
 }
 
 func (r *store) Start() error {

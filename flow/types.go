@@ -56,6 +56,7 @@ type MessageRuntime[M any] interface {
 type Store[V any] interface {
 	Read(ctx context.Context, id string) (State[V], error)
 	Write(ctx context.Context, s State[V]) error
+	Keys(ctx context.Context) ([]string, error)
 	Start() error
 	Stop()
 }

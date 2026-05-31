@@ -54,6 +54,10 @@ func (r *FlowStore[V]) Write(ctx context.Context, s flow.State[V]) error {
 	})
 }
 
+func (r *FlowStore[V]) Keys(ctx context.Context) ([]string, error) {
+	return r.Store.Keys(ctx)
+}
+
 func (r *FlowStore[V]) Start() error {
 	return r.Store.Start()
 }

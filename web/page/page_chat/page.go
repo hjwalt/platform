@@ -23,45 +23,44 @@ var files embed.FS
 var html = render.Embedded(files, "page.html")
 
 const (
-	path     = "/chat"
-	idPath   = "/chat/{chat_id}"
-	toolPath = "/chat/{chat_id}/tool"
+	path         = "/chat"
+	idPath       = "/chat/{chat_id}"
+	toolPath     = "/chat/{chat_id}/tool"
+	chatViewPath = "/chat-view"
 )
+
+type chat struct {
+	Id      string
+	Current bool
+}
 
 type model struct {
 	Context string
+	Chats   []chat
 }
 
-func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
-	state, _ := c.AgentHarnessStore.Read(c, "web")
+func view(c web.Context, w http.ResponseWriter, r *http.Request, chatId string) (render.View, error) {
+	state, _ := c.AgentHarnessStore.Read(c, chatId)
 
 	messageViews := make([]render.View, 0)
 	for _, message := range state.Value.Messages {
 		messageViews = append(messageViews, component_chat_item.ViewWithState(message, state.Value))
 	}
 
-	return layout.Dashboard(
-		component_sidebar.View(),
-		render.Component(
-			html,
-			model{
-				Context: "web",
-			},
-			map[string]render.View{
-				"chats": component_chat_list.View(messageViews),
-			},
-			[]render.View{},
-		)), nil
-}
+	chats := make([]chat, 0)
 
-func getWithId(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
-	chatId := chi.URLParam(r, "chat_id")
-
-	state, _ := c.AgentHarnessStore.Read(c, chatId)
-
-	messageViews := make([]render.View, 0)
-	for _, message := range state.Value.Messages {
-		messageViews = append(messageViews, component_chat_item.ViewWithState(message, state.Value))
+	keys, _ := c.AgentHarnessStore.Keys(c)
+	for _, key := range keys {
+		chats = append(chats, chat{
+			Id:      key,
+			Current: key == chatId,
+		})
+	}
+	if len(chats) == 0 {
+		chats = append(chats, chat{
+			Id:      "web",
+			Current: true,
+		})
 	}
 
 	return layout.Dashboard(
@@ -70,12 +69,36 @@ func getWithId(c web.Context, w http.ResponseWriter, r *http.Request) (render.Vi
 			html,
 			model{
 				Context: chatId,
+				Chats:   chats,
 			},
 			map[string]render.View{
 				"chats": component_chat_list.View(messageViews),
 			},
 			[]render.View{},
 		)), nil
+}
+
+func get(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	return view(c, w, r, "web")
+}
+
+func getWithId(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	chatId := chi.URLParam(r, "chat_id")
+	return view(c, w, r, chatId)
+}
+
+func postChatView(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error parsing form data", http.StatusBadRequest)
+		return nil, err
+	}
+	if id, exists := r.PostForm["chat_id"]; exists && len(id) > 0 {
+		http.Redirect(w, r, "/chat/"+id[0], http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/chat/", http.StatusSeeOther)
+	}
+	return nil, nil
 }
 
 func post(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
@@ -159,4 +182,5 @@ func Add(builder route.Builder[web.Context]) {
 	builder.Handle(idPath, http.MethodGet, render.Handle(getWithId, page_error_500.Error))
 	builder.Handle(idPath, http.MethodPost, render.Handle(post, page_error_500.Error))
 	builder.Handle(toolPath, http.MethodPost, render.Handle(postTool, page_error_500.Error))
+	builder.Handle(chatViewPath, http.MethodPost, render.Handle(postChatView, page_error_500.Error))
 }

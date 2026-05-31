@@ -28,6 +28,11 @@ func (h *handler[C]) Handle(ctx C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if view == nil {
+		// TODO: handle redirects better
+		return
+	}
+
 	rendered, renderErr := view.Render()
 	if renderErr != nil {
 		h.Error(ctx, w, r, pageErr)

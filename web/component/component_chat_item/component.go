@@ -23,6 +23,7 @@ var titles = map[agent.MessageType]string{
 	agent.MessageType_ToolExecute: "Tool Execute",
 	agent.MessageType_Error:       "Error",
 	agent.MessageType_System:      "System",
+	agent.MessageType_Start:       "Start",
 }
 
 type Model struct {
