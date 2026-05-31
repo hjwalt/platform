@@ -71,7 +71,7 @@ func main() {
 				You are a research agent. Perform your query with these in mind:
 
 				1. Search the web based on the request
-				2. Fetch the web page URL or link to get the full information
+				2. Fetch strongly relevant web page URL or link to get the full information
 				3. Do not deviate from the query
 				4. Where there are ambiguity, seek clarification from the user
 				5. Spin up more research agent only if there are significant sub-topic to research on 
