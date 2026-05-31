@@ -35,14 +35,21 @@ func main() {
 	config := configuration.Configuration{
 		Model: configuration.ModelConfiguration{
 			Parser: configuration.OpenAiConfiguration{
-				Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
-				Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
-				Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
+				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
+				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+				Model:    "gemini-3.5-flash",
+				Endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/",
+				Secret:   environment.GetString("GEMINI_TOKEN", "lemonade"),
 			},
 			Agent: configuration.OpenAiConfiguration{
-				Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
-				Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
-				Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
+				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
+				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+
+				Model:    "gemini-3.5-flash",
+				Endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/",
+				Secret:   environment.GetString("GEMINI_TOKEN", "lemonade"),
 			},
 		},
 		Tool: configuration.ToolConfiguration{
@@ -54,7 +61,7 @@ func main() {
 				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
 			},
 			ResearchAgent: agent_skill.Configuration{
-				Name:        "research-agent",
+				Name:        "research_agent",
 				Description: "Perform deep research on specific topics based on user prompt. Invoke when user mentions \"research\", \"find out more\".",
 				Skill: `
 				You are a research agent. Perform your query with these in mind:

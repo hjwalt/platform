@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	Name = "web search"
+	Name = "web_search"
 )
 
 type Configuration struct {

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Name = "web fetch"
+	Name = "web_fetch"
 )
 
 type Configuration struct {

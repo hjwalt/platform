@@ -31,8 +31,7 @@ type OpenAiModel struct {
 	Endpoint string
 	Secret   string
 	Tools    agent.ToolContainer
-	// Schemas  []openai.ChatCompletionToolUnionParam
-	client openai.Client
+	client   openai.Client
 }
 
 func (r *OpenAiModel) Start() error {
@@ -61,7 +60,22 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 			}
 		case agent.MessageType_ToolRequest:
 			{
-				modelMessage = append(modelMessage, openai.AssistantMessage(message.Message+" with tool call id "+message.Tool.Id))
+				param := openai.ChatCompletionMessageParamUnion{
+					OfAssistant: &openai.ChatCompletionAssistantMessageParam{
+						ToolCalls: []openai.ChatCompletionMessageToolCallUnionParam{
+							{
+								OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
+									ID: message.Tool.Id,
+									Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
+										Arguments: message.Tool.Arguments,
+										Name:      message.Tool.Name,
+									},
+								},
+							},
+						},
+					},
+				}
+				modelMessage = append(modelMessage, param)
 			}
 		case agent.MessageType_ToolResult:
 			{
@@ -72,9 +86,11 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 
 	params := openai.ChatCompletionNewParams{
 		Messages: modelMessage,
-		Seed:     openai.Int(0),
 		Model:    r.Model,
 		Tools:    r.Tools.OpenAiParamsFiltered(allowedTools),
+		// Seed:     openai.Int(0),
+		// ReasoningEffort: openai.ReasoningEffortMedium,
+		// Temperature:     openai.Float(0.1),
 	}
 
 	completion, err := r.client.Chat.Completions.New(ctx, params)
@@ -89,6 +105,7 @@ func (r *OpenAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 
 	outputMessages := make([]agent.Message, 0)
 	for _, choice := range completion.Choices {
+
 		switch choice.FinishReason {
 		case "stop":
 			{

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "linux shell"
+	Name = "linux_shell"
 )
 
 type Configuration struct {
