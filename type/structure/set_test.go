@@ -3,7 +3,7 @@ package structure_test
 import (
 	"testing"
 
-	"github.com/hjwalt/platform/commons/structure"
+	"github.com/hjwalt/platform/type/structure"
 	"github.com/stretchr/testify/assert"
 )
 

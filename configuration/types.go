@@ -18,8 +18,9 @@ type Configuration struct {
 }
 
 type ModelConfiguration struct {
-	Parser llm.ModelConfig
-	Agent  llm.ModelConfig
+	Configurations map[string]llm.ModelConfig
+	Parser         string
+	Agent          string
 }
 
 type ToolConfiguration struct {

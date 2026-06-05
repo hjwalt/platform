@@ -35,26 +35,28 @@ func main() {
 	instanceId := uuid.New().String()
 	config := configuration.Configuration{
 		Model: configuration.ModelConfiguration{
-			Parser: llm.ModelConfig{
-				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
-				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
-				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
-
-				Type:     llm.DeepSeek,
-				Model:    "deepseek-v4-flash",
-				Endpoint: "https://api.deepseek.com",
-				Secret:   environment.GetString("DEEPSEEK_TOKEN", "deepseek"),
+			Configurations: map[string]llm.ModelConfig{
+				"openai": llm.ModelConfig{
+					Type:     llm.OpenAi,
+					Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
+					Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
+					Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
+				},
+				"lemonade": llm.ModelConfig{
+					Type:     llm.OpenAi,
+					Model:    "gemma4-it-e4b-FLM",
+					Endpoint: "http://localhost:13305/api/v1",
+					Secret:   "lemonade",
+				},
+				"deepseek": llm.ModelConfig{
+					Type:     llm.DeepSeek,
+					Model:    "deepseek-v4-flash",
+					Endpoint: "https://api.deepseek.com",
+					Secret:   environment.GetString("DEEPSEEK_TOKEN", "deepseek"),
+				},
 			},
-			Agent: llm.ModelConfig{
-				// Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
-				// Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
-				// Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
-
-				Type:     llm.DeepSeek,
-				Model:    "deepseek-v4-flash",
-				Endpoint: "https://api.deepseek.com",
-				Secret:   environment.GetString("DEEPSEEK_TOKEN", "deepseek"),
-			},
+			Parser: "lemonade",
+			Agent:  "lemonade",
 		},
 		Tool: configuration.ToolConfiguration{
 			BraveSearch: brave_search_web_tool.Configuration{

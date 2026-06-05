@@ -1,8 +1,11 @@
 # Platform
 
-Async LLM / AI platform.
+Auditable AI harness
 
-Generally a way to avoid synchronous function calls by splitting out tool and model eval into message handlers.
+The purpose of building this is to gain more control on how tools and models gets executed, with more type safety and visibility.
+Tool calls and model eval are separated into message handlers.
+Extension points are not limited to golang based implementations, as long as the other integrations can listen to Kafka, this can be extended infinitely.
+
 Some of the packages can be used independently:
 
 - agent: general harness and tools built around OpenAI compatible endpoint and MCP sdk
@@ -10,8 +13,6 @@ Some of the packages can be used independently:
 - format: a collection of ways to convert to and from byte array and to mask and unmask / encrypt and decrypt byte array
 - reflect: a way to safely convert to and from types
 - web: simplifies the way to register pages, also serves as an example on how to build a good enough backend rendered UI with interactions via HTMX and design via web components
-
-The purpose of building this is to gain more control on how tools and models gets executed, with more type safety.
 
 ## Developing
 
@@ -139,73 +140,11 @@ The way to migrate stateful functions to a mirrored Kafka cluster are by:
 2. Clearing the internal column / field
 3. Starting the job
 
-Due to the fact that offset numbers are different in mirrored Kafka cluster, 
+Due to the fact that offset numbers are different in mirrored Kafka cluster,
 an additional application functionality side deduplication will be required to ensure that stateful operation does not get executed twice.
 Such deduplication can be peformed using a unique Kafka header identifier.
 
 However, if the application functionality can already tolerate at least once execution, then there will be no problems with migration.
-
-### Functions
-
-The functions are used as is, because function for pointer struct can be used as is.
-As proof, the following unit test will pass.
-
-```
-import (
-    "testing"
-
-    "github.com/stretchr/testify/assert"
-)
-
-type TestStruct struct {
-    Test int
-}
-
-func (t *TestStruct) Inc() {
-    t.Test += 1
-}
-
-type TestStructTwo struct {
-    Test int
-}
-
-func (t TestStructTwo) Get() int {
-    return t.Test
-}
-
-func Inc(fn func()) {
-    fn()
-}
-
-func Get(fn func() int) int {
-    return fn()
-}
-
-func TestPointerStuff(t *testing.T) {
-    assert := assert.New(t)
-    testOne := TestStruct{
-        Test: 1,
-    }
-    Inc(testOne.Inc)
-    assert.Equal(2, testOne.Test)
-
-    testTwo := &TestStruct{
-        Test: 4,
-    }
-    Inc(testTwo.Inc)
-    assert.Equal(5, testTwo.Test)
-
-    testThree := TestStructTwo{
-        Test: 100,
-    }
-    assert.Equal(100, Get(testThree.Get))
-
-    testFour := &TestStructTwo{
-        Test: 200,
-    }
-    assert.Equal(200, Get(testFour.Get))
-}
-```
 
 ### Why
 
@@ -217,9 +156,9 @@ Note that I have not tested things like Pulsar functions or NATS jetstream, thos
 The three I mentioned are heavyweight data engineering tools.
 It can continously process data flow with a special DSL, with exactly once semantics (at a cost) and very high throughput (also at a cost).
 
-However, in a complex backend data flow changes, constantly. 
-Often times, its just one step in the middle of the flow. 
-Sometimes its removing a step, sometimes its adding steps, sometimes its reusing steps. 
+However, in a complex backend data flow changes, constantly.
+Often times, its just one step in the middle of the flow.
+Sometimes its removing a step, sometimes its adding steps, sometimes its reusing steps.
 Heavyweight tools just doesn't work well with that kind of constant change.
 Deploy a flow that is too small its costly, deploy a flow that is too big it constantly changes.
 
@@ -254,7 +193,6 @@ Why is it important to standardise?
 Trusted is a collection of stuff that is practically impossible to test.
 Keeping this collection of untestable code as small as possible is a must.
 
-
 ## Credits
 
 The web page uses the free version of web-awesome. Check them out for a really well implemented web components.
@@ -264,3 +202,4 @@ The web page uses the free version of web-awesome. Check them out for a really w
 These code are an amalgamation of a few old repositories I have to create a more cohesive codebase. As it is going to be a constant work in progress for experiments, expect breaking interface changes.
 
 Do not use this for production use case, however, it may be helpful if you want your own fun little chatbot.
+This will also help you understand how general agent harnesses work under the hood.

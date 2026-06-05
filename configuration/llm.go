@@ -7,14 +7,14 @@ import (
 )
 
 func RegisterParserModel(holder Context, conf Configuration) {
-	model := llm.New(conf.Model.Parser, tool_container.New())
+	model := llm.New(conf.Model.Configurations[conf.Model.Parser], tool_container.New())
 	holder.Add(model)
 
 	holder.SetParserModel(model)
 }
 
 func RegisterAgentModel(holder Context, conf Configuration) {
-	model := llm.New(conf.Model.Agent, holder.GetToolContainer())
+	model := llm.New(conf.Model.Configurations[conf.Model.Agent], holder.GetToolContainer())
 	holder.Add(model)
 
 	holder.SetAgentModel(model)
