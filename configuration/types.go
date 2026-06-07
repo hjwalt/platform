@@ -4,7 +4,6 @@ import (
 	"github.com/hjwalt/platform/agent/llm"
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
-	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/message/kafka"
@@ -25,11 +24,10 @@ type ModelConfiguration struct {
 }
 
 type ToolConfiguration struct {
-	Shell         linux_shell_tool.Configuration
-	ResearchAgent skill_tool.Configuration
-	WebFetch      web_fetch_tool.Configuration
-	WebSearch     web_search_tool.Configuration
-	FxPrice       finance_fx_price_tool.Configuration
+	Shell     linux_shell_tool.Configuration
+	WebFetch  web_fetch_tool.Configuration
+	WebSearch web_search_tool.Configuration
+	FxPrice   finance_fx_price_tool.Configuration
 }
 
 type WebServerConfiguration struct {

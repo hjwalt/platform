@@ -7,8 +7,6 @@ import (
 	"github.com/hjwalt/platform/agent/llm"
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
-	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
-	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
@@ -69,23 +67,6 @@ func main() {
 			},
 			FxPrice: finance_fx_price_tool.Configuration{
 				Secret: environment.GetString("MASSIVE_TOKEN", ""),
-			},
-			ResearchAgent: skill_tool.Configuration{
-				Name:        "research_agent",
-				Description: "Perform deep research on specific topics based on user prompt. Invoke when user mentions \"research\", \"find out more\".",
-				Skill: `
-				You are a research agent. Perform your query with these in mind:
-
-				1. Search the web based on the request
-				2. Fetch strongly relevant web page URL or link to get the full information
-				3. Do not deviate from the query
-				4. Where there are ambiguity, seek clarification from the user
-				5. Spin up more research agent only if there are significant sub-topic to research on 
-				`,
-				AllowedTools: []string{
-					web_search_tool.Name,
-					web_fetch_tool.Name,
-				},
 			},
 		},
 		Server: configuration.WebServerConfiguration{

@@ -1,6 +1,10 @@
 package configuration
 
 import (
+	"log/slog"
+
+	"github.com/hjwalt/platform/agent"
+	agent_skill "github.com/hjwalt/platform/agent/skill"
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
 	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
@@ -12,11 +16,24 @@ import (
 func RegisterTools(holder Context, conf Configuration) {
 	container := tool_container.New()
 
+	// register tools
 	web_search_tool.AddToContainer(container, conf.Tool.WebSearch)
 	linux_shell_tool.AddToContainer(container, conf.Tool.Shell)
 	web_fetch_tool.AddToContainer(container, conf.Tool.WebFetch, holder.GetParserModel())
-	skill_tool.AddToContainer(container, conf.Tool.ResearchAgent, holder.GetAgentMessageProducer())
 	finance_fx_price_tool.AddToContainer(container, conf.Tool.FxPrice)
 
+	// register skills
+	TryRegisterSkill(holder, conf, container, "./skills/researcher-agent")
+
 	holder.SetToolContainer(container)
+}
+
+func TryRegisterSkill(holder Context, conf Configuration, container agent.ToolContainer, path string) {
+	properties, err := agent_skill.ReadProperties(path)
+	if err != nil {
+		slog.Error("failed to register skill", "path", path, "error", err)
+		return
+	}
+	slog.Info("registered skill", "path", path, "name", properties)
+	skill_tool.AddSkillToContainer(container, *properties, holder.GetAgentMessageProducer())
 }
