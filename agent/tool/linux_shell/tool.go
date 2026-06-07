@@ -1,4 +1,4 @@
-package shell_tool
+package linux_shell_tool
 
 import (
 	"context"

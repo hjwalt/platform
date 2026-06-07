@@ -1,4 +1,4 @@
-package brave_search_web_tool
+package web_search_tool
 
 import (
 	"context"

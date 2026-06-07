@@ -5,10 +5,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/hjwalt/platform/agent/harness"
 	"github.com/hjwalt/platform/agent/llm"
-	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
-	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
-	agent_skill "github.com/hjwalt/platform/agent/tool/skill"
+	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
+	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
+	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
+	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/flow/converter"
@@ -36,19 +37,19 @@ func main() {
 	config := configuration.Configuration{
 		Model: configuration.ModelConfiguration{
 			Configurations: map[string]llm.ModelConfig{
-				"openai": llm.ModelConfig{
+				"openai": {
 					Type:     llm.OpenAi,
 					Model:    environment.GetString("OPENAI_API_MODEL", "gemma4-it-e4b-FLM"),
 					Endpoint: environment.GetString("OPENAI_API_ENDPOINT", "http://localhost:13305/api/v1"),
 					Secret:   environment.GetString("OPENAI_API_KEY", "lemonade"),
 				},
-				"lemonade": llm.ModelConfig{
+				"lemonade": {
 					Type:     llm.OpenAi,
 					Model:    "gemma4-it-e4b-FLM",
 					Endpoint: "http://localhost:13305/api/v1",
 					Secret:   "lemonade",
 				},
-				"deepseek": llm.ModelConfig{
+				"deepseek": {
 					Type:     llm.DeepSeek,
 					Model:    "deepseek-v4-flash",
 					Endpoint: "https://api.deepseek.com",
@@ -59,14 +60,17 @@ func main() {
 			Agent:  "lemonade",
 		},
 		Tool: configuration.ToolConfiguration{
-			BraveSearch: brave_search_web_tool.Configuration{
+			WebSearch: web_search_tool.Configuration{
 				BaseUrl: environment.GetString("BRAVE_SEARCH_URL", "https://api.search.brave.com/res/v1/"),
 				Secret:  environment.GetString("BRAVE_TOKEN", ""),
 			},
-			Shell: shell_tool.Configuration{
+			Shell: linux_shell_tool.Configuration{
 				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
 			},
-			ResearchAgent: agent_skill.Configuration{
+			FxPrice: finance_fx_price_tool.Configuration{
+				Secret: environment.GetString("MASSIVE_TOKEN", ""),
+			},
+			ResearchAgent: skill_tool.Configuration{
 				Name:        "research_agent",
 				Description: "Perform deep research on specific topics based on user prompt. Invoke when user mentions \"research\", \"find out more\".",
 				Skill: `
@@ -79,7 +83,7 @@ func main() {
 				5. Spin up more research agent only if there are significant sub-topic to research on 
 				`,
 				AllowedTools: []string{
-					brave_search_web_tool.Name,
+					web_search_tool.Name,
 					web_fetch_tool.Name,
 				},
 			},

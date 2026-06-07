@@ -1,4 +1,4 @@
-package agent_skill
+package skill_tool
 
 import (
 	"context"

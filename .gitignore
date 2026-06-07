@@ -24,3 +24,6 @@ bin/
 .vscode/
 
 tmp/
+
+# Do not include for now
+skills/

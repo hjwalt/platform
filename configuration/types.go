@@ -2,10 +2,11 @@ package configuration
 
 import (
 	"github.com/hjwalt/platform/agent/llm"
-	brave_search_web_tool "github.com/hjwalt/platform/agent/tool/brave_search_web"
-	shell_tool "github.com/hjwalt/platform/agent/tool/shell"
-	agent_skill "github.com/hjwalt/platform/agent/tool/skill"
+	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
+	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
+	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
+	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/message/kafka"
 	file_store "github.com/hjwalt/platform/state/file"
 )
@@ -24,10 +25,11 @@ type ModelConfiguration struct {
 }
 
 type ToolConfiguration struct {
-	BraveSearch   brave_search_web_tool.Configuration
-	Shell         shell_tool.Configuration
-	ResearchAgent agent_skill.Configuration
+	Shell         linux_shell_tool.Configuration
+	ResearchAgent skill_tool.Configuration
 	WebFetch      web_fetch_tool.Configuration
+	WebSearch     web_search_tool.Configuration
+	FxPrice       finance_fx_price_tool.Configuration
 }
 
 type WebServerConfiguration struct {
