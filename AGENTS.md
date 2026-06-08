@@ -99,7 +99,15 @@ export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 
 1. Each specification must be created in its own folder
 2. The folder must be named in this pattern: `<type>-<index>-<short title>`
-3. Type can be one of the following: `agent`, `web-page`, `web-component`, `backend`, `tool`, `llm`, `flow`, `repository`. Suggest new type if the current set is not accurate enough
+3. Type can be one of the following:
+   - agent
+   - web-page
+   - web-component
+   - backend
+   - tool
+   - llm
+   - flow
+   - repository
 4. Index is five digit zero padded starting with 1 for every type
 5. Short title should include 1 to 5 words to help developers quickly know what the specification is about
 6. File templates are in `docs/templates`
