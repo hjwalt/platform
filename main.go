@@ -78,6 +78,14 @@ func main() {
 					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
 					Prefix:  "corrections",
 				},
+				{
+					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
+					Prefix:  "preferences",
+				},
+				{
+					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
+					Prefix:  "improvements",
+				},
 			},
 		},
 		Server: configuration.WebServerConfiguration{
