@@ -93,3 +93,37 @@ export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 - Container-based services are required for integration tests
 - Environment variables are loaded through the `environment` package
 - Ignore HTTP-related legacy `flows` components while refactoring to `flow`
+
+## Spec Driven Development
+
+### Rules
+
+1. Each specification must be created in its own folder
+2. The folder must be named in this pattern: `<type>-<index>-<short title>`
+3. Type can be one of the following: `agent`, `frontend`, `backend`, `tool`, `llm`. Suggest new type if the current set is not accurate enough
+4. Index is five digit zero padded starting with 1 for every type
+5. Short title should include 1 to 5 words to help developers quickly know what the specification is about
+
+### Files
+
+Each specification should contain these files:
+
+#### specs.md
+
+This file contains the specifications for the requirements. It must contain the following sections:
+
+1. Title
+2. High Level Description
+3. User Scenarios
+4. Functional Requirements
+5. Non-Functional Requirements
+6. Definition of Done
+7. Testing Methodology
+
+#### tasks.md
+
+This file contains the to-do list for the agents to complete to fully develop for the specifications
+
+#### ammendments.md
+
+This file contains the specfication ammendment history with numbered sequence
