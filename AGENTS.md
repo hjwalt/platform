@@ -3,14 +3,21 @@
 ## Repository Structure
 
 This is a Go monorepo with the following main packages:
-- `commons` - Core utilities and infrastructure
-- `routes` - HTTP routing and web components
-- `flows` - Dataflow processing with Kafka and RabbitMQ
-- `main` - Entry point for the web application
+
+- `agent` - LLM/tool harness and agent runtime components
+- `flow` - Current dataflow primitives and runtime integrations
+- `flows` - Legacy dataflow package (reference only for migration context)
+- `format` - Serialization and byte masking/encryption helpers
+- `reflect` - Safe dynamic type conversion helpers
+- `runtime` - Lifecycle management for long-running services
+- `state` - Key-value state interfaces and implementations
+- `web` - HTTP/web component utilities
+- `main.go` - Root entrypoint
 
 ## Key Commands
 
 ### Development
+
 - `make test` - Run tests
 - `make tidy` - Clean up go.mod
 - `make update` - Update dependencies
@@ -19,28 +26,43 @@ This is a Go monorepo with the following main packages:
 - `make cov` - Run coverage
 - `make htmlcov` - Generate HTML coverage report
 
+### Build and Runtime
+
+- `make build` - Build binary to `bin/platform`
+- `make run` - Run example application via script
+- `make reset` - Reset topics/tables and seed demo data
+
+### Local Services
+
+- `make up` - Start local dependencies with Docker Compose
+- `make down` - Stop local dependencies
+
 ### Running Examples
-- `docker-compose up -d` - Start required services (Kafka, Postgres)
+
+- `docker compose up -d` - Start required services (Kafka, Postgres)
 - `make reset` - Clean up topics and tables
 - `make run` - Start example application
 
 ## Architecture Notes
 
 ### Package Boundaries
-- `commons` is the core library package
-- `examples` package for adding examples on how to use the repository
+
+- `example` package contains runnable usage examples
 - `flow` implements dataflow processing
-- `flows` legacy package for dataflow processing, it can be used as a reference but no new code should be updated here
-- `format` contains the dataformat for serialisation, deserialisation, and encryption or byte masking
+- `flows` is a legacy package for older dataflow processing; avoid adding new code there
+- `format` contains data formats for serialization/deserialization and masking/encryption
 - `reflect` handles conversion of data types dynamically and safely
-- `routes` handles HTTP routing and web components
+- `web` handles HTTP routing and web components
 - `state` provides key value pair based state management for stateful functions
 
 ### Runtime Management
+
 The platform uses a runtime system for managing long-running services like HTTP servers and message queue consumers. Runtimes are started with `runtime.Start()` and waited for with `runtime.Wait()`.
 
 ### Dataflow Processing
-The `flows` package implements a Kappa Architecture approach with:
+
+Dataflow capabilities are centered in `flow` (current) and `flows` (legacy reference) and follow a Kappa Architecture style with:
+
 - Stateless functions for basic operations
 - Stateful functions for aggregations
 - Join patterns using intermediate topics
@@ -48,11 +70,13 @@ The `flows` package implements a Kappa Architecture approach with:
 - Task processing for long-running operations
 
 ### Environment Configuration
+
 Uses `github.com/hjwalt/platform/environment` for environment variable handling with default values.
 
 ## Testing
 
 Tests use `testcontainers-go` which requires rootless Podman setup. Configure with:
+
 ```
 export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 ```
@@ -65,7 +89,7 @@ export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 ## Special Considerations
 
 - The main entrypoint is in the `main.go` file at the root
-- Examples are in the `examples` directory
+- Examples are in the `example` directory
 - Container-based services are required for integration tests
-- Environment variables are loaded through the `commons/environment` package
-- Ignore http related components until we completely refactor the `flows` package to `flow` package
+- Environment variables are loaded through the `environment` package
+- Ignore HTTP-related legacy `flows` components while refactoring to `flow`
