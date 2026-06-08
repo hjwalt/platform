@@ -5,6 +5,7 @@ import (
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
 	finance_stock_price_tool "github.com/hjwalt/platform/agent/tool/finance_stock_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
+	memory_tool "github.com/hjwalt/platform/agent/tool/memory"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/message/kafka"
@@ -30,6 +31,7 @@ type ToolConfiguration struct {
 	WebSearch  web_search_tool.Configuration
 	FxPrice    finance_fx_price_tool.Configuration
 	StockPrice finance_stock_price_tool.Configuration
+	Memory     []memory_tool.Configuration
 }
 
 type WebServerConfiguration struct {

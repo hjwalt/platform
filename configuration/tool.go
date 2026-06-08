@@ -8,6 +8,7 @@ import (
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
 	finance_stock_price_tool "github.com/hjwalt/platform/agent/tool/finance_stock_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
+	memory_tool "github.com/hjwalt/platform/agent/tool/memory"
 	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
@@ -23,6 +24,12 @@ func RegisterTools(holder Context, conf Configuration) {
 	web_fetch_tool.AddToContainer(container, conf.Tool.WebFetch, holder.GetParserModel())
 	finance_fx_price_tool.AddToContainer(container, conf.Tool.FxPrice)
 	finance_stock_price_tool.AddToContainer(container, conf.Tool.StockPrice)
+	for _, memoryConfig := range conf.Tool.Memory {
+		memoryErr := memory_tool.AddToContainer(container, memoryConfig)
+		if memoryErr != nil {
+			slog.Error("failed to register memory tool set", "config", memoryConfig, "error", memoryErr)
+		}
+	}
 
 	// register skills
 	TryRegisterSkill(holder, conf, container, "./skills/researcher-agent")
