@@ -8,6 +8,7 @@ import (
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
 	finance_stock_price_tool "github.com/hjwalt/platform/agent/tool/finance_stock_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
+	memory_tool "github.com/hjwalt/platform/agent/tool/memory"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/configuration"
 	"github.com/hjwalt/platform/environment"
@@ -71,6 +72,12 @@ func main() {
 			},
 			StockPrice: finance_stock_price_tool.Configuration{
 				Secret: environment.GetString("MASSIVE_TOKEN", ""),
+			},
+			Memory: []memory_tool.Configuration{
+				{
+					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
+					Prefix:  "corrections",
+				},
 			},
 		},
 		Server: configuration.WebServerConfiguration{

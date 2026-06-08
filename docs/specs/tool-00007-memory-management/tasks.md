@@ -12,6 +12,7 @@
 - [x] Add implementation for `memory_update` writing `<root_path>/memory.md` with deterministic mode handling (FR-MEM-004).
 - [x] Add implementation for `memory_clear` applying deterministic clear behavior (FR-MEM-005).
 - [x] Add generic constructor for prefix-based tool instantiation and registration (FR-MEM-006).
+- [x] Update canonical file naming so prefixed instances use `<prefix>.md` and non-prefixed instances use `memory.md`.
 - [x] Add configuration validation and explicit error mapping for setup/runtime failures (FR-MEM-007).
 - [x] Add metadata and schema coverage for all tools (FR-MEM-008).
 

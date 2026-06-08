@@ -13,27 +13,50 @@ import (
 func TestCreateValidation(t *testing.T) {
 	assert := assert.New(t)
 
-	_, rootErr := Create(Configuration{RootPath: "", Prefix: "session"})
-	assert.ErrorIs(rootErr, ErrInvalidRootPath)
+	_, rootErr := Create(Configuration{BaseDir: "", Prefix: "session"})
+	assert.ErrorIs(rootErr, ErrInvalidBaseDir)
 
-	_, prefixErr := Create(Configuration{RootPath: "/tmp", Prefix: "bad-prefix"})
+	_, prefixErr := Create(Configuration{BaseDir: "/tmp", Prefix: "bad-prefix"})
 	assert.ErrorIs(prefixErr, ErrInvalidPrefix)
 }
 
 func TestCreateNames(t *testing.T) {
 	assert := assert.New(t)
 
-	withoutPrefix, withoutPrefixErr := Create(Configuration{RootPath: "/tmp"})
+	withoutPrefix, withoutPrefixErr := Create(Configuration{BaseDir: "/tmp"})
 	assert.NoError(withoutPrefixErr)
 	assert.Equal(MemoryGetName, withoutPrefix.Get.Name())
 	assert.Equal(MemoryUpdateName, withoutPrefix.Update.Name())
 	assert.Equal(MemoryClearName, withoutPrefix.Clear.Name())
 
-	withPrefix, withPrefixErr := Create(Configuration{RootPath: "/tmp", Prefix: "session"})
+	withPrefix, withPrefixErr := Create(Configuration{BaseDir: "/tmp", Prefix: "session"})
 	assert.NoError(withPrefixErr)
 	assert.Equal("session_"+MemoryGetName, withPrefix.Get.Name())
 	assert.Equal("session_"+MemoryUpdateName, withPrefix.Update.Name())
 	assert.Equal("session_"+MemoryClearName, withPrefix.Clear.Name())
+}
+
+func TestPrefixUsesFileName(t *testing.T) {
+	assert := assert.New(t)
+	ctx := context.Background()
+	root := t.TempDir()
+
+	tools, createErr := Create(Configuration{BaseDir: root, Prefix: "session"})
+	assert.NoError(createErr)
+
+	_, updateErr := tools.Update.Apply(ctx, UpdateRequest{Content: "hello"})
+	assert.NoError(updateErr)
+
+	getResponse, getErr := tools.Get.Apply(ctx, GetRequest{})
+	assert.NoError(getErr)
+	assert.Equal(filepath.Join(root, "session.md"), getResponse.Path)
+	assert.True(getResponse.Exists)
+	assert.Equal("hello", getResponse.Content)
+
+	clearResponse, clearErr := tools.Clear.Apply(ctx, ClearRequest{})
+	assert.NoError(clearErr)
+	assert.Equal(filepath.Join(root, "session.md"), clearResponse.Path)
+	assert.True(clearResponse.Cleared)
 }
 
 func TestGetMissingFile(t *testing.T) {
@@ -41,7 +64,7 @@ func TestGetMissingFile(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 
-	tools, createErr := Create(Configuration{RootPath: root})
+	tools, createErr := Create(Configuration{BaseDir: root})
 	assert.NoError(createErr)
 
 	result, getErr := tools.Get.Apply(ctx, GetRequest{})
@@ -57,7 +80,7 @@ func TestUpdateReplaceAndAppend(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 
-	tools, createErr := Create(Configuration{RootPath: root})
+	tools, createErr := Create(Configuration{BaseDir: root})
 	assert.NoError(createErr)
 
 	replaceResponse, replaceErr := tools.Update.Apply(ctx, UpdateRequest{
@@ -87,7 +110,7 @@ func TestUpdateDefaultModeReplace(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 
-	tools, createErr := Create(Configuration{RootPath: root})
+	tools, createErr := Create(Configuration{BaseDir: root})
 	assert.NoError(createErr)
 
 	_, firstErr := tools.Update.Apply(ctx, UpdateRequest{Content: "A"})
@@ -106,7 +129,7 @@ func TestUpdateInvalidMode(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 
-	tools, createErr := Create(Configuration{RootPath: root})
+	tools, createErr := Create(Configuration{BaseDir: root})
 	assert.NoError(createErr)
 
 	_, updateErr := tools.Update.Apply(ctx, UpdateRequest{
@@ -122,7 +145,7 @@ func TestClear(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 
-	tools, createErr := Create(Configuration{RootPath: root})
+	tools, createErr := Create(Configuration{BaseDir: root})
 	assert.NoError(createErr)
 
 	_, updateErr := tools.Update.Apply(ctx, UpdateRequest{Content: "content"})
@@ -143,9 +166,9 @@ func TestAddToContainerWithMultiplePrefixes(t *testing.T) {
 	assert := assert.New(t)
 	container := tool_container.New()
 
-	sessionAddErr := AddToContainer(container, Configuration{RootPath: t.TempDir(), Prefix: "session"})
-	repoAddErr := AddToContainer(container, Configuration{RootPath: t.TempDir(), Prefix: "repo"})
-	baseAddErr := AddToContainer(container, Configuration{RootPath: t.TempDir()})
+	sessionAddErr := AddToContainer(container, Configuration{BaseDir: t.TempDir(), Prefix: "session"})
+	repoAddErr := AddToContainer(container, Configuration{BaseDir: t.TempDir(), Prefix: "repo"})
+	baseAddErr := AddToContainer(container, Configuration{BaseDir: t.TempDir()})
 
 	assert.NoError(sessionAddErr)
 	assert.NoError(repoAddErr)

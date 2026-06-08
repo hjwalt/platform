@@ -18,7 +18,8 @@ const (
 )
 
 type Configuration struct {
-	RootPath string
+	BaseDir  string
+	FileName string
 	Name     string
 	Mutex    *sync.Mutex
 }
@@ -32,7 +33,8 @@ type Response struct {
 }
 
 type tool struct {
-	rootPath string
+	baseDir  string
+	fileName string
 	name     string
 	mutex    *sync.Mutex
 }
@@ -43,13 +45,19 @@ func Create(config Configuration) agent.SyncTool[Request, Response] {
 		name = DefaultName
 	}
 
+	fileName := config.FileName
+	if fileName == "" {
+		fileName = memoryFileName
+	}
+
 	mutex := config.Mutex
 	if mutex == nil {
 		mutex = &sync.Mutex{}
 	}
 
 	return &tool{
-		rootPath: config.RootPath,
+		baseDir:  config.BaseDir,
+		fileName: fileName,
 		name:     name,
 		mutex:    mutex,
 	}
@@ -63,7 +71,7 @@ func (t *tool) Apply(ctx context.Context, request Request) (Response, error) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	path := filepath.Join(t.rootPath, memoryFileName)
+	path := filepath.Join(t.baseDir, t.fileName)
 	bytes, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return Response{
@@ -88,7 +96,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Read markdown memory from the canonical memory.md file under the configured root path."
+	return "Read markdown memory from the configured canonical memory file under the configured root path."
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {

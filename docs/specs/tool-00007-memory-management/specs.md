@@ -11,13 +11,17 @@ This specification defines three tools for agent memory management as markdown f
 - `memory_clear`
 
 Each tool operates on a memory root path provided through tool configuration.
-The managed memory file name is always `memory.md` under the resolved root path.
+The managed memory file name is prefix-derived under the resolved root path:
+
+- no prefix: `memory.md`
+- prefix `X`: `X.md`
+
 The specification also requires a generic instantiation mechanism using a configurable prefix so multiple memory domains can coexist with isolated tool names and storage roots.
 
 # User Scenarios
 
 1. As an agent runtime integrator, I want to configure a root memory path so memory tools consistently read and write one canonical file.
-2. As an agent, I want to fetch current memory content from `memory.md` so I can reason over persisted context.
+2. As an agent, I want to fetch current memory content from the canonical prefix-derived memory file so I can reason over persisted context.
 3. As an agent, I want to update memory content deterministically so knowledge can be appended or replaced.
 4. As an agent, I want to clear memory quickly so stale context can be removed without deleting tool configuration.
 5. As a platform developer, I want to instantiate prefixed tool variants so multiple memory scopes (for example session, repo, user) can be used in the same runtime.
@@ -33,26 +37,28 @@ The specification also requires a generic instantiation mechanism using a config
 ## FR-MEM-002 Root Path And Canonical File
 
 - Tool configuration must require a root file path used as the memory base path.
-- The effective memory document path must always be `<root_path>/memory.md`.
-- Callers must not be allowed to override the memory file name.
+- The effective memory document path must be:
+  - `<root_path>/memory.md` when prefix is empty.
+  - `<root_path>/<prefix>.md` when prefix is provided.
+- Callers must not be allowed to override the derived memory file name directly.
 - If the root path does not exist, behavior must be explicit and deterministic (either create during update/clear or return a clear error, as defined by implementation).
 
 ## FR-MEM-003 memory_get Behavior
 
-- `memory_get` must read and return the full content of `<root_path>/memory.md`.
-- If `memory.md` does not exist, the result must be deterministic and documented (for example, empty string content with exists=false).
+- `memory_get` must read and return the full content of the derived canonical file.
+- If the derived canonical file does not exist, the result must be deterministic and documented (for example, empty string content with exists=false).
 - `memory_get` must not mutate filesystem state.
 
 ## FR-MEM-004 memory_update Behavior
 
-- `memory_update` must write content to `<root_path>/memory.md`.
+- `memory_update` must write content to the derived canonical file.
 - Update mode must be explicit and deterministic (for example, replace or append), and represented in request schema.
 - After successful update, a subsequent `memory_get` must return the updated content.
 - The operation must be atomic enough to avoid partial writes from process interruption where practical.
 
 ## FR-MEM-005 memory_clear Behavior
 
-- `memory_clear` must remove logical content of `<root_path>/memory.md`.
+- `memory_clear` must remove logical content of the derived canonical file.
 - Clear behavior must be deterministic and documented (truncate to empty file and/or recreate empty canonical file).
 - After successful clear, `memory_get` must return empty content.
 
@@ -77,7 +83,7 @@ The specification also requires a generic instantiation mechanism using a config
 ## FR-MEM-008 Metadata And Discoverability
 
 - Each tool must provide stable metadata (`Name`, request description, result description, and schemas).
-- Metadata must include enough information for runtime UIs to explain path semantics and canonical filename behavior.
+- Metadata must include enough information for runtime UIs to explain root path semantics and prefix-derived canonical filename behavior.
 
 # Non-Functional Requirements
 

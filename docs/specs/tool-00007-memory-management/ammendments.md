@@ -25,3 +25,15 @@
   - Added tests in `agent/tool/memory/tool_test.go` for validation, read/write/clear semantics, and multi-prefix container registration.
   - Updated configuration wiring in `configuration/types.go` and `configuration/tool.go` to support `ToolConfiguration.Memory`.
   - Ran `go test ./agent/tool/memory ./configuration` and `make test` successfully.
+
+## 3 memory-management-prefix-filename
+
+- Date: 2026-06-08
+- Author: GitHub Copilot
+- Summary: Updated tool-00007 to use prefix as the memory filename.
+- Changes:
+  - Updated canonical file behavior from fixed `memory.md` to prefix-derived naming.
+  - Added file name propagation in `agent/tool/memory` to `memory_get`, `memory_update`, and `memory_clear`.
+  - Added default backward-compatible filename behavior (`memory.md`) when prefix is empty.
+  - Added tests validating that prefix `session` reads/writes/clears `session.md`.
+  - Updated specification and implementation notes to reflect prefix-derived file semantics.
