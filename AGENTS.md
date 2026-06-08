@@ -103,6 +103,7 @@ export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 3. Type can be one of the following: `agent`, `frontend`, `backend`, `tool`, `llm`. Suggest new type if the current set is not accurate enough
 4. Index is five digit zero padded starting with 1 for every type
 5. Short title should include 1 to 5 words to help developers quickly know what the specification is about
+6. File templates are in `docs/templates`
 
 ### Files
 
@@ -122,8 +123,27 @@ This file contains the specifications for the requirements. It must contain the 
 
 #### tasks.md
 
-This file contains the to-do list for the agents to complete to fully develop for the specifications
+This file contains the to-do list for the agents to complete to fully develop for the specifications. It must contain the following sections:
+
+1. Preparation
+2. Implementation
+3. Validation
+
+Each task should follow the following format:
+
+- [ ] task description
+
+After tasks are performed, fill the [ ] with an x like [x].
 
 #### ammendments.md
 
 This file contains the specfication ammendment history with numbered sequence
+
+#### implementations.md
+
+This file contains the implemenation details for the feature. It must contain the following sections:
+
+1. Choices Made
+2. Libraries Used
+3. Implementation Preferences
+4. Caveats

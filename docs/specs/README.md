@@ -27,7 +27,7 @@ This directory defines executable, test-first specifications for the platform re
 - tool-00003-skill/: skill tool specification.
 - tool-00004-web-fetch/: web_fetch tool specification.
 - tool-00005-web-search/: web_search tool specification.
-- llm/: Language model adapter specification index.
+- tool-00006-finance-stock-price/: finance_stock_price tool specification.
 - template.spec.md: Template for new component or feature specs.
 
 ## Delivery Rules

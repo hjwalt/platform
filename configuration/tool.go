@@ -6,6 +6,7 @@ import (
 	"github.com/hjwalt/platform/agent"
 	agent_skill "github.com/hjwalt/platform/agent/skill"
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
+	finance_stock_price_tool "github.com/hjwalt/platform/agent/tool/finance_stock_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
 	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
@@ -21,6 +22,7 @@ func RegisterTools(holder Context, conf Configuration) {
 	linux_shell_tool.AddToContainer(container, conf.Tool.Shell)
 	web_fetch_tool.AddToContainer(container, conf.Tool.WebFetch, holder.GetParserModel())
 	finance_fx_price_tool.AddToContainer(container, conf.Tool.FxPrice)
+	finance_stock_price_tool.AddToContainer(container, conf.Tool.StockPrice)
 
 	// register skills
 	TryRegisterSkill(holder, conf, container, "./skills/researcher-agent")

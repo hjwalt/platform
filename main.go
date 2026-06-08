@@ -6,6 +6,7 @@ import (
 	"github.com/hjwalt/platform/agent/harness"
 	"github.com/hjwalt/platform/agent/llm"
 	finance_fx_price_tool "github.com/hjwalt/platform/agent/tool/finance_fx_price"
+	finance_stock_price_tool "github.com/hjwalt/platform/agent/tool/finance_stock_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	"github.com/hjwalt/platform/configuration"
@@ -66,6 +67,9 @@ func main() {
 				BaseDir: "/home/hjwalt/Projects/platform/tmp/cmd",
 			},
 			FxPrice: finance_fx_price_tool.Configuration{
+				Secret: environment.GetString("MASSIVE_TOKEN", ""),
+			},
+			StockPrice: finance_stock_price_tool.Configuration{
 				Secret: environment.GetString("MASSIVE_TOKEN", ""),
 			},
 		},
