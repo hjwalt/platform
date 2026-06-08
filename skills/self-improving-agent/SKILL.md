@@ -1,7 +1,7 @@
 ---
 name: self-improving-agent
 description: "Self-reflection + Self-criticism + Self-learning + Self-organizing memory. Agent evaluates its own work, catches mistakes, and improves permanently. Use when (1) a command, tool, API, or operation fails; (2) the user corrects you or rejects your work; (3) you realize your knowledge is outdated or incorrect; (4) you discover a better approach; (5) the user explicitly installs or references the skill for the current task."
-changelog: "Clarifies the setup flow for proactive follow-through and safer installation behavior."
+changelog: "Migrates to typed memory operations using corrections, preferences, and improvements with memory_get, memory_update, and memory_clear."
 metadata:
   {
     "clawdbot":
@@ -9,7 +9,7 @@ metadata:
         "emoji": "🧠",
         "requires": { "bins": [] },
         "os": ["linux", "darwin", "win32"],
-        "configPaths": ["~/self-improving/"],
+        "configPaths": [],
         "configPaths.optional": ["./AGENTS.md", "./SOUL.md", "./HEARTBEAT.md"],
       },
   }
@@ -21,47 +21,41 @@ User corrects you or points out mistakes. You complete significant work and want
 
 ## Architecture
 
-Memory lives in `~/self-improving/` with tiered structure. If `~/self-improving/` does not exist, run `setup.md`.
-Workspace setup should add the standard self-improving steering to the workspace AGENTS, SOUL, and `HEARTBEAT.md` files, with recurring maintenance routed through `heartbeat-rules.md`.
+Memory is stored in three typed buckets managed by memory operations:
 
-```
-~/self-improving/
-├── memory.md          # HOT: ≤100 lines, always loaded
-├── index.md           # Topic index with line counts
-├── heartbeat-state.md # Heartbeat state: last run, reviewed change, action notes
-├── projects/          # Per-project learnings
-├── domains/           # Domain-specific (code, writing, comms)
-├── archive/           # COLD: decayed patterns
-└── corrections.md     # Last 50 corrections log
-```
+- `corrections` - Explicit user corrections and error fixes
+- `preferences` - Confirmed user style and workflow preferences
+- `improvements` - Self-reflection lessons and process upgrades
+
+Always use the memory API operations instead of local markdown files:
+
+- `memory_get(type, query)` to read existing memory
+- `memory_update(type, operation, payload)` to insert/update/promote/demote entries
+- `memory_clear(type, filter)` to remove entries only when user requests forgetting
 
 ## Quick Reference
 
-| Topic                       | File                    |
-| --------------------------- | ----------------------- |
-| Setup guide                 | `setup.md`              |
-| Heartbeat state template    | `heartbeat-state.md`    |
-| Memory template             | `memory-template.md`    |
-| Workspace heartbeat snippet | `HEARTBEAT.md`          |
-| Heartbeat rules             | `heartbeat-rules.md`    |
-| Learning mechanics          | `learning.md`           |
-| Security boundaries         | `boundaries.md`         |
-| Scaling rules               | `scaling.md`            |
-| Memory operations           | `operations.md`         |
-| Self-reflection log         | `reflections.md`        |
-| OpenClaw HEARTBEAT seed     | `openclaw-heartbeat.md` |
+| Need                                    | Operation                                          |
+| --------------------------------------- | -------------------------------------------------- |
+| Read known corrections for context      | `memory_get("corrections", query)`                 |
+| Read user preferences before responding | `memory_get("preferences", query)`                 |
+| Read prior self-lessons before planning | `memory_get("improvements", query)`                |
+| Save a correction                       | `memory_update("corrections", "append", payload)`  |
+| Save a preference                       | `memory_update("preferences", "upsert", payload)`  |
+| Save a self-reflection lesson           | `memory_update("improvements", "append", payload)` |
+| Forget by request                       | `memory_clear(type, filter)`                       |
 
 ## Requirements
 
 - No credentials required
 - No extra binaries required
-- Optional installation of the `Proactivity` skill may require network access
+- Memory backend must support `memory_get`, `memory_update`, and `memory_clear`
 
 ## Learning Signals
 
 Log automatically when you notice these patterns:
 
-**Corrections** → add to `corrections.md`, evaluate for `memory.md`:
+**Corrections** → save in `corrections` with `memory_update`:
 
 - "No, that's not right..."
 - "Actually, it should be..."
@@ -72,13 +66,19 @@ Log automatically when you notice these patterns:
 - "Stop doing X"
 - "Why do you keep..."
 
-**Preference signals** → add to `memory.md` if explicit:
+**Preference signals** → save in `preferences` with `memory_update` when explicit:
 
 - "I like when you..."
 - "Always do X for me"
 - "Never do Y"
 - "My style is..."
 - "For [project], use..."
+
+**Improvement signals** → save in `improvements` with `memory_update`:
+
+- repeated rework after a task
+- preventable bug found in review
+- better workflow discovered and validated
 
 **Pattern candidates** → track, promote after 3x:
 
@@ -98,7 +98,7 @@ After completing significant work, pause and evaluate:
 
 1. **Did it meet expectations?** — Compare outcome vs intent
 2. **What could be better?** — Identify improvements for next time
-3. **Is this a pattern?** — If yes, log to `corrections.md`
+3. **Is this a pattern?** — If yes, log to `improvements` via `memory_update`
 
 **When to self-reflect:**
 
@@ -123,20 +123,17 @@ REFLECTION: Spacing looked off, had to redo
 LESSON: Check visual spacing before showing user
 ```
 
-Self-reflection entries follow the same promotion rules: 3x applied successfully → promote to HOT.
+Self-reflection entries follow the same promotion rule: 3x applied successfully -> strengthen the `improvements` entry via `memory_update`.
 
 ## Quick Queries
 
-| User says                   | Action                                 |
-| --------------------------- | -------------------------------------- |
-| "What do you know about X?" | Search all tiers for X                 |
-| "What have you learned?"    | Show last 10 from `corrections.md`     |
-| "Show my patterns"          | List `memory.md` (HOT)                 |
-| "Show [project] patterns"   | Load `projects/{name}.md`              |
-| "What's in warm storage?"   | List files in `projects/` + `domains/` |
-| "Memory stats"              | Show counts per tier                   |
-| "Forget X"                  | Remove from all tiers (confirm first)  |
-| "Export memory"             | ZIP all files                          |
+| User says                   | Action                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| "What do you know about X?" | `memory_get("corrections", X)` + `memory_get("preferences", X)` + `memory_get("improvements", X)` |
+| "What have you learned?"    | `memory_get("improvements", "recent")` + `memory_get("corrections", "recent")`                    |
+| "Show my patterns"          | `memory_get("preferences", "all")`                                                                |
+| "Memory stats"              | read counts from all three memory types                                                           |
+| "Forget X"                  | confirm then `memory_clear(type, filter)`                                                         |
 
 ## Memory Stats
 
@@ -145,30 +142,25 @@ On "memory stats" request, report:
 ```
 📊 Self-Improving Memory
 
-HOT (always loaded):
-  memory.md: X entries
-
-WARM (load on demand):
-  projects/: X files
-  domains/: X files
-
-COLD (archived):
-  archive/: X files
+Typed memory:
+  corrections: X entries
+  preferences: X entries
+  improvements: X entries
 
 Recent activity (7 days):
   Corrections logged: X
-  Promotions to HOT: X
-  Demotions to WARM: X
+  Preferences updated: X
+  Improvements added: X
 ```
 
 ## Common Traps
 
-| Trap                    | Why It Fails            | Better Move                                       |
-| ----------------------- | ----------------------- | ------------------------------------------------- |
-| Learning from silence   | Creates false rules     | Wait for explicit correction or repeated evidence |
-| Promoting too fast      | Pollutes HOT memory     | Keep new lessons tentative until repeated         |
-| Reading every namespace | Wastes context          | Load only HOT plus the smallest matching files    |
-| Compaction by deletion  | Loses trust and history | Merge, summarize, or demote instead               |
+| Trap                   | Why It Fails            | Better Move                                       |
+| ---------------------- | ----------------------- | ------------------------------------------------- |
+| Learning from silence  | Creates false rules     | Wait for explicit correction or repeated evidence |
+| Promoting too fast     | Pollutes preferences    | Keep new lessons tentative until repeated         |
+| Reading every type     | Wastes context          | Query only the needed memory type first           |
+| Clearing by assumption | Loses trust and history | Only use `memory_clear` after explicit request    |
 
 ## Core Rules
 
@@ -181,25 +173,23 @@ Recent activity (7 days):
 
 ### 2. Tiered Storage
 
-| Tier | Location            | Size Limit      | Behavior               |
-| ---- | ------------------- | --------------- | ---------------------- |
-| HOT  | memory.md           | ≤100 lines      | Always loaded          |
-| WARM | projects/, domains/ | ≤200 lines each | Load on context match  |
-| COLD | archive/            | Unlimited       | Load on explicit query |
+Use typed memory instead of file tiers:
+
+- `corrections` for explicit user fixes and wrong outputs
+- `preferences` for durable user-specific rules
+- `improvements` for self-reflection and process improvements
 
 ### 3. Automatic Promotion/Demotion
 
-- Pattern used 5x in 7 days → promote to HOT
-- Pattern unused 30 days → demote to WARM
-- Pattern unused 90 days → archive to COLD
-- Never delete without asking
+- Pattern repeated 3x with consistency → upsert stronger preference via `memory_update`
+- Pattern invalidated by user correction → revise or downgrade via `memory_update`
+- Never remove memory unless requested; use `memory_clear` only with explicit confirmation
 
 ### 4. Namespace Isolation
 
-- Project patterns stay in `projects/{name}.md`
-- Global preferences in HOT tier (memory.md)
-- Domain patterns (code, writing) in `domains/`
-- Cross-namespace inheritance: global → domain → project
+- Store optional scope metadata in each entry: `global`, `domain`, or `project`
+- Resolve by specificity: `project` > `domain` > `global`
+- Keep type boundaries intact: do not mix corrections into preferences
 
 ### 5. Conflict Resolution
 
@@ -211,29 +201,29 @@ When patterns contradict:
 
 ### 6. Compaction
 
-When file exceeds limit:
+When memory grows noisy:
 
-1. Merge similar corrections into single rule
-2. Archive unused patterns
+1. Merge duplicate entries with `memory_update`
+2. Mark stale entries as inactive with `memory_update`
 3. Summarize verbose entries
 4. Never lose confirmed preferences
 
 ### 7. Transparency
 
-- Every action from memory → cite source: "Using X (from projects/foo.md:12)"
-- Weekly digest available: patterns learned, demoted, archived
-- Full export on demand: all files as ZIP
+- Every action from memory should cite type and scope (for example: "Using preference: concise test output")
+- Weekly digest available: corrections, preferences, and improvements activity
+- On request, show memory contents by type using `memory_get`
 
 ### 8. Security Boundaries
 
-See `boundaries.md` — never store credentials, health data, third-party info.
+Never store credentials, secrets, health data, or third-party private data.
 
 ### 9. Graceful Degradation
 
 If context limit hit:
 
-1. Load only memory.md (HOT)
-2. Load relevant namespace on demand
+1. Load only `preferences` first
+2. Load `corrections` or `improvements` on demand
 3. Never fail silently — tell user what's not loaded
 
 ## Scope
@@ -241,28 +231,27 @@ If context limit hit:
 This skill ONLY:
 
 - Learns from user corrections and self-reflection
-- Stores preferences in local files (`~/self-improving/`)
-- Maintains heartbeat state in `~/self-improving/heartbeat-state.md` when the workspace integrates heartbeat
-- Reads its own memory files on activation
+- Uses `memory_get`, `memory_update`, and `memory_clear`
+- Stores learning in `corrections`, `preferences`, and `improvements`
+- Maintains optional heartbeat notes through `improvements` entries when needed
 
 This skill NEVER:
 
 - Accesses calendar, email, or contacts
 - Makes network requests
-- Reads files outside `~/self-improving/`
 - Infers preferences from silence or observation
-- Deletes or blindly rewrites self-improving memory during heartbeat cleanup
+- Clears memory without explicit user intent
 - Modifies its own SKILL.md
 
 ## Data Storage
 
-Local state lives in `~/self-improving/`:
+All state is managed through typed memory operations:
 
-- `memory.md` for HOT rules and confirmed preferences
-- `corrections.md` for explicit corrections and reusable lessons
-- `projects/` and `domains/` for scoped patterns
-- `archive/` for decayed or inactive patterns
-- `heartbeat-state.md` for recurring maintenance markers
+- `corrections` via `memory_update` for explicit fixes
+- `preferences` via `memory_update` for durable user preferences
+- `improvements` via `memory_update` for retrospective lessons
+- Retrieval through `memory_get`
+- Removal through `memory_clear` only after explicit user request
 
 ## Related Skills
 
