@@ -4,7 +4,7 @@ This directory defines executable, test-first specifications for the platform re
 
 ## How To Use
 
-1. Pick a target spec file.
+1. Pick a target spec file or SDD spec folder.
 2. Select one requirement ID not yet implemented.
 3. Write or update failing tests first.
 4. Implement only enough code to make tests pass.
@@ -19,16 +19,15 @@ This directory defines executable, test-first specifications for the platform re
 
 ## Spec Index
 
-- repository-foundation.spec.md: Repository-wide engineering constraints and delivery gates.
-- flow-runtime.spec.md: Dataflow and runtime lifecycle behavior.
-- agent-harness.spec.md: Agent tool-call, model execution, and safety behavior.
+- backend-00001-repository-foundation/: Repository-wide engineering constraints and delivery gates.
+- flow-00001-flow-runtime/: SDD template-based flow/runtime lifecycle specification.
+- agent-00001-harness-contracts/: SDD template-based agent harness contracts specification.
 - tool-00001-linux-shell/: linux_shell tool specification.
 - tool-00002-finance-fx-price/: finance_fx_price tool specification.
 - tool-00003-skill/: skill tool specification.
 - tool-00004-web-fetch/: web_fetch tool specification.
 - tool-00005-web-search/: web_search tool specification.
 - tool-00006-finance-stock-price/: finance_stock_price tool specification.
-- template.spec.md: Template for new component or feature specs.
 
 ## Delivery Rules
 
