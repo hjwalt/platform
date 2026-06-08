@@ -400,3 +400,13 @@
 {"level":"error","ts":1780928531.1095543,"caller":"logger/zap_test.go:43","msg":"test test 0"}
 {"level":"info","ts":1780928531.1095848,"caller":"logger/zap_test.go:45","msg":"test","key":"value"}
 {"level":"info","ts":1780928531.1096237,"caller":"logger/zap_test.go:48","msg":"test","attr":"attr-val","test.groupattr":"group-val","key":"value"}
+{"level":"debug","ts":1780928815.5671222,"caller":"logger/zap_test.go:35","msg":"test","test":"test"}
+{"level":"info","ts":1780928815.5671642,"caller":"logger/zap_test.go:36","msg":"test","test":"test"}
+{"level":"warn","ts":1780928815.567171,"caller":"logger/zap_test.go:37","msg":"test","test":"test"}
+{"level":"error","ts":1780928815.5671763,"caller":"logger/zap_test.go:38","msg":"test","test":"test"}
+{"level":"debug","ts":1780928815.567195,"caller":"logger/zap_test.go:40","msg":"test test 0"}
+{"level":"info","ts":1780928815.5672014,"caller":"logger/zap_test.go:41","msg":"test test 0"}
+{"level":"warn","ts":1780928815.5672064,"caller":"logger/zap_test.go:42","msg":"test test 0"}
+{"level":"error","ts":1780928815.567212,"caller":"logger/zap_test.go:43","msg":"test test 0"}
+{"level":"info","ts":1780928815.567226,"caller":"logger/zap_test.go:45","msg":"test","key":"value"}
+{"level":"info","ts":1780928815.5672398,"caller":"logger/zap_test.go:48","msg":"test","attr":"attr-val","test.groupattr":"group-val","key":"value"}

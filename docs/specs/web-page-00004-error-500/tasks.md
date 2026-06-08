@@ -13,6 +13,6 @@
 
 ## Validation
 
-- [ ] Run make test and confirm affected package tests pass.
+- [x] Run make test and confirm affected package tests pass.
 - [ ] Manually trigger a handler error path and verify fallback rendering.
 - [ ] Confirm no regressions in pages using page_error_500.Error.

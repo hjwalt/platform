@@ -18,7 +18,7 @@
 ## Validation
 
 - [ ] Run `make build` and confirm stable outcomes.
-- [ ] Run `make test` with required dependencies and resolve failures.
+- [x] Run `make test` with required dependencies and resolve failures.
 - [ ] Run `make tidy`, `make update`, `make mocks`, and `make proto`; verify clean compile/test state.
 - [ ] Run runtime baseline path with `make up`, `make reset`, and `make run`.
 - [ ] Update ammendments.md with implementation details and mark completed tasks.

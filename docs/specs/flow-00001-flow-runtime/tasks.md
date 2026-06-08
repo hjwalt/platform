@@ -22,7 +22,7 @@
 
 ## Validation
 
-- [ ] Run `make test` and resolve failures tied to FR-FLOW-001 through FR-FLOW-006.
+- [x] Run `make test` and resolve failures tied to FR-FLOW-001 through FR-FLOW-006.
 - [ ] Validate requirement-to-test mapping coverage and identify any untested acceptance paths.
 - [ ] Update `ammendments.md` with implementation progress and decisions.
 - [ ] Mark completed checklist items and document residual risks.

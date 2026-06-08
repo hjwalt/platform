@@ -22,7 +22,7 @@
 
 ## Validation
 
-- [ ] Run `make test` and resolve test failures.
+- [x] Run `make test` and resolve test failures.
 - [ ] Validate requirement-to-test mapping coverage for FR-AGENT-001 through FR-AGENT-005.
 - [ ] Update ammendments.md with completed implementation details.
 - [ ] Mark completed checklist items and document residual risks.

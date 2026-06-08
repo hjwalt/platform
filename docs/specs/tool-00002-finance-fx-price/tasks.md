@@ -15,6 +15,6 @@
 
 ## Validation
 
-- [ ] Run make test and fix failures.
+- [x] Run make test and fix failures.
 - [ ] Update ammendments.md with implemented changes and date.
 - [ ] Mark completed tasks and note residual risks.

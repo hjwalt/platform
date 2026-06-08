@@ -3,7 +3,7 @@
 ## Preparation
 
 - [ ] Confirm finance_stock_price requirement IDs and wording with maintainers.
-- [ ] Identify existing tests in agent/tool/finance_stock_price.
+- [x] Identify existing tests in agent/tool/finance_stock_price.
 
 ## Implementation
 
@@ -15,6 +15,6 @@
 
 ## Validation
 
-- [ ] Run make test and fix failures.
-- [ ] Update ammendments.md with implemented changes and date.
+- [x] Run make test and fix failures.
+- [x] Update ammendments.md with implemented changes and date.
 - [ ] Mark completed tasks and note residual risks.

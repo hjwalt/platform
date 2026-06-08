@@ -13,6 +13,6 @@
 
 ## Validation
 
-- [ ] Run make test and confirm package tests pass.
+- [x] Run make test and confirm package tests pass.
 - [ ] Manually verify GET / renders the dashboard home page.
 - [ ] Confirm page error fallback remains wired to page_error_500.Error.

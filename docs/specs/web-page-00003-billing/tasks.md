@@ -13,6 +13,6 @@
 
 ## Validation
 
-- [ ] Run make test and confirm affected package tests pass.
+- [x] Run make test and confirm affected package tests pass.
 - [ ] Perform manual GET /billing smoke validation.
 - [ ] Confirm error fallback behavior through render.Handle wrapper.

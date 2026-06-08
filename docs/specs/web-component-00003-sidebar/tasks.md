@@ -13,6 +13,6 @@
 
 ## Validation
 
-- [ ] Run make test and confirm package tests pass.
+- [x] Run make test and confirm package tests pass.
 - [ ] Validate rendered output in a composed page context.
 - [ ] Confirm no regressions in related web/component packages.

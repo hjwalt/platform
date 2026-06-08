@@ -17,6 +17,6 @@
 
 ## Validation
 
-- [ ] Run make test and fix failures.
+- [x] Run make test and fix failures.
 - [ ] Update amendment/changelog artifacts per repo process.
 - [ ] Mark completed tasks and document residual risks.
