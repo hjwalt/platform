@@ -28,6 +28,10 @@ This directory defines executable, test-first specifications for the platform re
 - tool-00004-web-fetch/: web_fetch tool specification.
 - tool-00005-web-search/: web_search tool specification.
 - tool-00006-finance-stock-price/: finance_stock_price tool specification.
+- web-page-00001-home/: page_home route and dashboard rendering specification.
+- web-page-00002-chat/: page_chat routing, posting, and tool-decision specification.
+- web-page-00003-billing/: page_billing route and dashboard rendering specification.
+- web-page-00004-error-500/: page_error_500 fallback rendering specification.
 
 ## Delivery Rules
 

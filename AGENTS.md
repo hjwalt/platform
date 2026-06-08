@@ -92,7 +92,6 @@ export DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
 - Examples are in the `example` directory
 - Container-based services are required for integration tests
 - Environment variables are loaded through the `environment` package
-- Ignore HTTP-related legacy `flows` components while refactoring to `flow`
 
 ## Spec Driven Development
 

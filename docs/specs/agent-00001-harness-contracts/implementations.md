@@ -1,6 +1,6 @@
 # Choices Made
 
-- Preserved requirement intent from the original agent harness spec and normalized IDs to FR-AGENT-* for template consistency.
+- Preserved requirement intent from the original agent harness spec and normalized IDs to FR-AGENT-\* for template consistency.
 - Kept acceptance scenarios embedded directly under each functional requirement for traceable test mapping.
 - Explicitly surfaced safety constraints (input validation, unknown-tool rejection, redaction) as implementation-driving requirements.
 
