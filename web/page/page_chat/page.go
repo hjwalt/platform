@@ -4,9 +4,12 @@ import (
 	"embed"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hjwalt/platform/agent"
+	"github.com/hjwalt/platform/agent/harness"
+	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/web"
 	"github.com/hjwalt/platform/web/component/component_chat_item"
 	"github.com/hjwalt/platform/web/component/component_chat_list"
@@ -27,6 +30,7 @@ const (
 	idPath         = "/chat/{chat_id}"
 	toolPath       = "/chat/{chat_id}/accept"
 	rejectToolPath = "/chat/{chat_id}/reject"
+	resetPath      = "/chat/{chat_id}/reset"
 	chatViewPath   = "/chat-view"
 )
 
@@ -99,6 +103,25 @@ func postChatView(c web.Context, w http.ResponseWriter, r *http.Request) (render
 	} else {
 		http.Redirect(w, r, "/chat/", http.StatusSeeOther)
 	}
+	return nil, nil
+}
+
+func postReset(c web.Context, w http.ResponseWriter, r *http.Request) (render.View, error) {
+	chatId := chi.URLParam(r, "chat_id")
+
+	if err := c.AgentHarnessStore.Write(c, flow.State[harness.ExecutionState]{
+		Id: chatId,
+		Value: harness.ExecutionState{
+			Context:    chatId,
+			Messages:   make([]agent.Message, 0),
+			ToolStates: make(map[string]harness.ToolState),
+		},
+		Timestamp: time.Now(),
+	}); err != nil {
+		return nil, err
+	}
+
+	http.Redirect(w, r, "/chat/"+chatId, http.StatusSeeOther)
 	return nil, nil
 }
 
@@ -241,5 +264,6 @@ func Add(builder route.Builder[web.Context]) {
 	builder.Handle(idPath, http.MethodPost, render.Handle(post, page_error_500.Error))
 	builder.Handle(toolPath, http.MethodPost, render.Handle(postTool, page_error_500.Error))
 	builder.Handle(rejectToolPath, http.MethodPost, render.Handle(rejectTool, page_error_500.Error))
+	builder.Handle(resetPath, http.MethodPost, render.Handle(postReset, page_error_500.Error))
 	builder.Handle(chatViewPath, http.MethodPost, render.Handle(postChatView, page_error_500.Error))
 }

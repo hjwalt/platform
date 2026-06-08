@@ -390,3 +390,13 @@
 {"level":"error","ts":1780927736.3045945,"caller":"logger/zap_test.go:43","msg":"test test 0"}
 {"level":"info","ts":1780927736.3046014,"caller":"logger/zap_test.go:45","msg":"test","key":"value"}
 {"level":"info","ts":1780927736.3046093,"caller":"logger/zap_test.go:48","msg":"test","attr":"attr-val","test.groupattr":"group-val","key":"value"}
+{"level":"debug","ts":1780928531.108692,"caller":"logger/zap_test.go:35","msg":"test","test":"test"}
+{"level":"info","ts":1780928531.109347,"caller":"logger/zap_test.go:36","msg":"test","test":"test"}
+{"level":"warn","ts":1780928531.1094334,"caller":"logger/zap_test.go:37","msg":"test","test":"test"}
+{"level":"error","ts":1780928531.1094525,"caller":"logger/zap_test.go:38","msg":"test","test":"test"}
+{"level":"debug","ts":1780928531.1094828,"caller":"logger/zap_test.go:40","msg":"test test 0"}
+{"level":"info","ts":1780928531.1095097,"caller":"logger/zap_test.go:41","msg":"test test 0"}
+{"level":"warn","ts":1780928531.109533,"caller":"logger/zap_test.go:42","msg":"test test 0"}
+{"level":"error","ts":1780928531.1095543,"caller":"logger/zap_test.go:43","msg":"test test 0"}
+{"level":"info","ts":1780928531.1095848,"caller":"logger/zap_test.go:45","msg":"test","key":"value"}
+{"level":"info","ts":1780928531.1096237,"caller":"logger/zap_test.go:48","msg":"test","attr":"attr-val","test.groupattr":"group-val","key":"value"}
