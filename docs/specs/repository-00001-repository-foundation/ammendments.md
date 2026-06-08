@@ -6,6 +6,6 @@
 - Author: GitHub Copilot
 - Summary: Refactored repository foundation requirements into SDD folder template structure.
 - Changes:
-  - Added `docs/specs/backend-00001-repository-foundation/specs.md` with template-required sections.
-  - Added `docs/specs/backend-00001-repository-foundation/tasks.md` with preparation, implementation, and validation checklists.
+  - Added `docs/specs/repository-00001-repository-foundation/specs.md` with template-required sections.
+  - Added `docs/specs/repository-00001-repository-foundation/tasks.md` with preparation, implementation, and validation checklists.
   - Added baseline amendment history entry for this migration.

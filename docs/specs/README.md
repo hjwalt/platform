@@ -19,7 +19,7 @@ This directory defines executable, test-first specifications for the platform re
 
 ## Spec Index
 
-- backend-00001-repository-foundation/: Repository-wide engineering constraints and delivery gates.
+- repository-00001-repository-foundation/: Repository-wide engineering constraints and delivery gates.
 - flow-00001-flow-runtime/: SDD template-based flow/runtime lifecycle specification.
 - agent-00001-harness-contracts/: SDD template-based agent harness contracts specification.
 - tool-00001-linux-shell/: linux_shell tool specification.
