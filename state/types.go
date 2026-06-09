@@ -14,6 +14,7 @@ type State struct {
 type Store interface {
 	Read(context.Context, string) (State, error)
 	Write(context.Context, State) error
+	Delete(context.Context, string) error
 	Keys(context.Context) ([]string, error)
 	Start() error
 	Stop()

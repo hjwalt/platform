@@ -56,6 +56,12 @@ func (r *store) Write(ctx context.Context, state state.State) error {
 	return nil
 }
 
+func (r *store) Delete(ctx context.Context, id string) error {
+	file := r.Path + id + ".dat"
+
+	return os.Remove(file)
+}
+
 func (r *store) Keys(ctx context.Context) ([]string, error) {
 	entries, err := os.ReadDir(r.Path)
 	if err != nil {

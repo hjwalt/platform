@@ -9,10 +9,10 @@ services:
     environment:
       CLUSTER_ID: "q1Sh-9_ISia_zwGINzRvyQ"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_SERVICE://kafka:29092,PLAINTEXT_ADDITIONAL://localhost:30092
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT_SERVICE'
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT_SERVICE"
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_SERVICE://kafka:29092,PLAINTEXT_ADDITIONAL://0.0.0.0:30092,CONTROLLER://kafka:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_SERVICE:PLAINTEXT,PLAINTEXT_ADDITIONAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_NODE_ID: 1
@@ -45,7 +45,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      
+
   neo4j:
     image: docker.io/library/neo4j:5.15.0
     ports:
@@ -58,6 +58,71 @@ services:
         source: neo4j
         target: /data
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    hostname: elasticsearch
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: "single-node"
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      # - discovery.type=single-node
+      # - xpack.security.enabled=false
+      # - xpack.security.http.ssl.enabled=false
+      ELASTIC_PASSWORD: "Elastic123"
+    volumes:
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+      - type: volume
+        source: certs
+        target: /usr/share/elasticsearch/config/certs
+
+  kibana:
+    # depends_on:
+    #   elasticsearch:
+    #     condition: service_healthy
+    image: docker.elastic.co/kibana/kibana:9.4.2
+    hostname: kibana
+    container_name: kibana
+    ports:
+      - 5601:5601
+    volumes:
+      - type: volume
+        source: kibana
+        target: /usr/share/kibana/data
+      # - type: volume
+      #   source: certs
+      #   target: /usr/share/kibana/config/certs
+    environment:
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      SERVERNAME: "kibana"
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      ELASTICSEARCH_USERNAME: "kibana_system"
+      ELASTICSEARCH_PASSWORD: "Elastic123"
+      # ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: "/usr/share/kibana/config/certs/ca/ca.crt"
+    # mem_limit: ${MEM_LIMIT}
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD-SHELL",
+    #       "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+    #     ]
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 120
+
 volumes:
   kafka:
   neo4j:
+  elasticsearch:
+  kibana:
+  certs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./tmp/certs # Must be a pre-existing local directory path

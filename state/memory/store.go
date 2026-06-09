@@ -64,6 +64,14 @@ func (s *store) Write(ctx context.Context, input state.State) error {
 	return nil
 }
 
+func (s *store) Delete(ctx context.Context, id string) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	delete(s.states, id)
+	return nil
+}
+
 func (s *store) Keys(ctx context.Context) ([]string, error) {
 	if err := ctx.Err(); err != nil {
 		return []string{}, err
