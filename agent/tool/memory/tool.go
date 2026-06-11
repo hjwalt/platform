@@ -2,7 +2,6 @@ package memory_tool
 
 import (
 	"errors"
-	"regexp"
 	"sync"
 
 	"github.com/hjwalt/platform/agent"
@@ -19,8 +18,6 @@ const (
 	MemoryUpdateName = "memory_update"
 	MemoryClearName  = "memory_clear"
 )
-
-var validPrefixPattern = regexp.MustCompile(`^[a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)*$`)
 
 type Configuration struct {
 	Key string

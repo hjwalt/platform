@@ -108,7 +108,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Write markdown memory to the configured canonical memory entry with deterministic replace or append mode."
+	return "update " + t.Name() + " memory entry in markdown format"
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {

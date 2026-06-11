@@ -75,7 +75,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Clear markdown memory by deleting the configured canonical memory entry from the store."
+	return "clear " + t.Name() + " memory entry"
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {

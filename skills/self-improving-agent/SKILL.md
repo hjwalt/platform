@@ -1,6 +1,16 @@
 ---
 name: self-improving-agent
 description: "Self-reflection + Self-criticism + Self-learning + Self-organizing memory. Agent evaluates its own work, catches mistakes, and improves permanently. Use when (1) a command, tool, API, or operation fails; (2) the user corrects you or rejects your work; (3) you realize your knowledge is outdated or incorrect; (4) you discover a better approach; (5) the user explicitly installs or references the skill for the current task."
+allowed-tools:
+  - improvements_memory_get
+  - improvements_memory_update
+  - improvements_memory_clear
+  - corrections_memory_get
+  - corrections_memory_update
+  - corrections_memory_clear
+  - preferences_memory_get
+  - preferences_memory_update
+  - preferences_memory_clear
 changelog: "Migrates to typed memory operations using corrections, preferences, and improvements with memory_get, memory_update, and memory_clear."
 metadata:
   {

@@ -127,8 +127,8 @@ func ReadProperties(skillDir string) (*Skill, error) {
 		props.Compatibility = optional.Of(compatibility)
 	}
 
-	if allowedTools, ok := metadata["allowed-tools"].(string); ok {
-		props.AllowedTools = strings.Split(allowedTools, ",")
+	if allowedTools, ok := metadata["allowed-tools"].([]string); ok {
+		props.AllowedTools = allowedTools
 	}
 
 	if meta, ok := metadata["metadata"].(map[string]string); ok {

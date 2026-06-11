@@ -56,8 +56,8 @@ func main() {
 					Secret:   environment.GetString("DEEPSEEK_TOKEN", "deepseek"),
 				},
 			},
-			Parser: "lemonade",
-			Agent:  "lemonade",
+			Parser: "deepseek",
+			Agent:  "deepseek",
 		},
 		Tool: configuration.ToolConfiguration{
 			WebSearch: web_search_tool.Configuration{
@@ -73,7 +73,7 @@ func main() {
 			StockPrice: finance_stock_price_tool.Configuration{
 				Secret: environment.GetString("MASSIVE_TOKEN", ""),
 			},
-			Memory: []memory_tool.Configuration{
+			Memory: []memory_tool.Configuration{ // TODO: rethink -- this doesn't work out of the box with models, it needs more to coerce it to use memory
 				{
 					Key: "corrections",
 				},
@@ -82,6 +82,9 @@ func main() {
 				},
 				{
 					Key: "improvements",
+				},
+				{
+					Key: "researcher",
 				},
 			},
 		},
@@ -132,6 +135,7 @@ func main() {
 	configuration.RegisterKafkaProducer(holder, config)
 	configuration.RegisterKafkaAgentMessageProducer(holder, config)
 	configuration.RegisterParserModel(holder, config)
+	configuration.RegisterMemoryStore(holder, config)
 	configuration.RegisterTools(holder, config)
 	configuration.RegisterAgentHarnessStore(holder, config)
 	configuration.RegisterAgentModel(holder, config)

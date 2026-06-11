@@ -81,7 +81,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Read markdown memory from the configured canonical memory file under the configured root path."
+	return "get " + t.Name() + " memory entry in markdown format"
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {

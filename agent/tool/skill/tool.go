@@ -81,7 +81,7 @@ func (t *tool) Auto() bool {
 
 func Create(config Configuration, producer flow.Producer[agent.Message]) agent.AsyncTool[Request] {
 	return &tool{
-		AgentName:        config.Name,
+		AgentName:        strings.ReplaceAll(config.Name, "-", "_"),
 		AgentDescription: config.Description,
 		SystemPrompt:     config.Skill,
 		AllowedTools:     config.AllowedTools,
