@@ -2,41 +2,36 @@ package memory_get_tool
 
 import (
 	"context"
-	"errors"
-	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/format"
+	"github.com/hjwalt/platform/state"
 )
 
-const (
-	DefaultName    = "memory_get"
-	memoryFileName = "memory.md"
-)
+const DefaultName = "memory_get"
 
 type Configuration struct {
-	BaseDir  string
-	FileName string
-	Name     string
-	Mutex    *sync.Mutex
+	Store state.Store
+	Key   string
+	Name  string
+	Mutex *sync.Mutex
 }
 
 type Request struct{}
 
 type Response struct {
-	Path    string `json:"path" jsonschema:"resolved canonical memory file path"`
-	Exists  bool   `json:"exists" jsonschema:"true when canonical memory file already exists"`
+	Key     string `json:"key" jsonschema:"storage key for the canonical memory entry"`
+	Exists  bool   `json:"exists" jsonschema:"true when memory entry exists and has content"`
 	Content string `json:"content" jsonschema:"full memory markdown content"`
 }
 
 type tool struct {
-	baseDir  string
-	fileName string
-	name     string
-	mutex    *sync.Mutex
+	store state.Store
+	key   string
+	name  string
+	mutex *sync.Mutex
 }
 
 func Create(config Configuration) agent.SyncTool[Request, Response] {
@@ -45,21 +40,16 @@ func Create(config Configuration) agent.SyncTool[Request, Response] {
 		name = DefaultName
 	}
 
-	fileName := config.FileName
-	if fileName == "" {
-		fileName = memoryFileName
-	}
-
 	mutex := config.Mutex
 	if mutex == nil {
 		mutex = &sync.Mutex{}
 	}
 
 	return &tool{
-		baseDir:  config.BaseDir,
-		fileName: fileName,
-		name:     name,
-		mutex:    mutex,
+		store: config.Store,
+		key:   config.Key,
+		name:  name,
+		mutex: mutex,
 	}
 }
 
@@ -71,23 +61,18 @@ func (t *tool) Apply(ctx context.Context, request Request) (Response, error) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	path := filepath.Join(t.baseDir, t.fileName)
-	bytes, err := os.ReadFile(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return Response{
-			Path:    path,
-			Exists:  false,
-			Content: "",
-		}, nil
-	}
+	s, err := t.store.Read(ctx, t.key)
 	if err != nil {
 		return Response{}, err
 	}
 
+	content := string(s.Value)
+	exists := len(s.Value) > 0
+
 	return Response{
-		Path:    path,
-		Exists:  true,
-		Content: string(bytes),
+		Key:     t.key,
+		Exists:  exists,
+		Content: content,
 	}, nil
 }
 
@@ -125,7 +110,7 @@ func (t *tool) ResultSchema() *jsonschema.Schema {
 
 func (t *tool) DescribeResult(response Response) string {
 	if !response.Exists {
-		return "memory file does not exist yet"
+		return "memory entry does not exist yet"
 	}
 	return response.Content
 }

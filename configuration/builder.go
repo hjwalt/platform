@@ -28,6 +28,8 @@ type Context interface {
 	GetAgentMessageProducer() flow.Producer[agent.Message]
 	SetAgentHarnessStore(state.Store)
 	GetAgentHarnessStore() state.Store
+	SetMemoryStore(state.Store)
+	GetMemoryStore() state.Store
 	Block()
 }
 
@@ -40,6 +42,7 @@ func ContextBuilder() Context {
 		KafkaProducer:        optional.Empty[message.Producer[kafka.KafkaMetadata]](),
 		AgentMessageProducer: optional.Empty[flow.Producer[agent.Message]](),
 		AgentHarnessStore:    optional.Empty[state.Store](),
+		MemoryStore:          optional.Empty[state.Store](),
 	}
 }
 
@@ -51,6 +54,7 @@ type holder struct {
 	KafkaProducer        optional.Optional[message.Producer[kafka.KafkaMetadata]]
 	AgentMessageProducer optional.Optional[flow.Producer[agent.Message]]
 	AgentHarnessStore    optional.Optional[state.Store]
+	MemoryStore          optional.Optional[state.Store]
 }
 
 func (r *holder) Add(runtimes ...runtime.Runtime) {
@@ -121,6 +125,17 @@ func (r *holder) GetAgentHarnessStore() state.Store {
 		r.Missing()
 	}
 	return r.AgentHarnessStore.Get()
+}
+
+func (r *holder) SetMemoryStore(value state.Store) {
+	r.MemoryStore = optional.Of(value)
+}
+
+func (r *holder) GetMemoryStore() state.Store {
+	if !r.MemoryStore.IsPresent() {
+		r.Missing()
+	}
+	return r.MemoryStore.Get()
 }
 
 func (r *holder) Missing() {

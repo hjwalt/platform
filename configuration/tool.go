@@ -25,10 +25,7 @@ func RegisterTools(holder Context, conf Configuration) {
 	finance_fx_price_tool.AddToContainer(container, conf.Tool.FxPrice)
 	finance_stock_price_tool.AddToContainer(container, conf.Tool.StockPrice)
 	for _, memoryConfig := range conf.Tool.Memory {
-		memoryErr := memory_tool.AddToContainer(container, memoryConfig)
-		if memoryErr != nil {
-			slog.Error("failed to register memory tool set", "config", memoryConfig, "error", memoryErr)
-		}
+		memory_tool.AddToContainer(container, memoryConfig, holder.GetMemoryStore())
 	}
 
 	// register skills

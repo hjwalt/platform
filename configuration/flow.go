@@ -55,6 +55,7 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 
 	chatConsumer := kafka.NewConsumer(
 		conf.Flow.Agent.Consumer,
+		conf.Flow.Agent.Topic,
 		converter.FlowToRuntimeHandler(
 			stateful.NewOperator(
 				"agent_handle",
@@ -80,6 +81,7 @@ func RegisterKafkaAgentFlow(holder Context, conf Configuration) {
 
 	resultConsumer := kafka.NewConsumer(
 		conf.Flow.Result.Consumer,
+		conf.Flow.Result.Topic,
 		converter.FlowToRuntimeHandler(
 			stateless.NewExploder(
 				"agent_explode",

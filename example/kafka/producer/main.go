@@ -9,6 +9,7 @@ import (
 	"github.com/hjwalt/platform/flow/flow_runtime_kafka"
 	"github.com/hjwalt/platform/flow/metadata"
 	"github.com/hjwalt/platform/format"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	"github.com/hjwalt/platform/message/kafka"
 )
 
@@ -20,7 +21,7 @@ type TestMessage struct {
 
 func main() {
 	kafkaProducer := kafka.NewProducer(
-		kafka.KafkaProducerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "test_consumer",
 		},

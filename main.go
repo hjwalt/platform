@@ -14,8 +14,8 @@ import (
 	"github.com/hjwalt/platform/environment"
 	"github.com/hjwalt/platform/flow/converter"
 	"github.com/hjwalt/platform/format"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	"github.com/hjwalt/platform/logger"
-	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
 	file_store "github.com/hjwalt/platform/state/file"
 	"github.com/hjwalt/platform/web"
@@ -75,16 +75,13 @@ func main() {
 			},
 			Memory: []memory_tool.Configuration{
 				{
-					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
-					Prefix:  "corrections",
+					Key: "corrections",
 				},
 				{
-					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
-					Prefix:  "preferences",
+					Key: "preferences",
 				},
 				{
-					BaseDir: "/home/hjwalt/Projects/platform/tmp/memory",
-					Prefix:  "improvements",
+					Key: "improvements",
 				},
 			},
 		},
@@ -93,34 +90,37 @@ func main() {
 			StaticResourcePath: "./web/static",
 		},
 		Flow: configuration.FlowConfiguration{
-			Store: file_store.Configuration{
-				Path: "/home/hjwalt/Projects/platform/tmp/agent/",
-			},
 			Agent: configuration.AgentFlowConfiguration{
 				Topic: "AGENT",
-				Producer: kafka.KafkaProducerConfiguration{
+				Producer: kafka_integration.Configuration{
 					Brokers:  "localhost:9092",
 					ClientId: "agent-producer-" + instanceId,
 				},
-				Consumer: kafka.KafkaConsumerConfiguration{
+				Consumer: kafka_integration.Configuration{
 					Brokers:  "localhost:9092",
 					ClientId: "agent-consumer-" + instanceId,
-					Topic:    "AGENT",
 					GroupId:  "agent-consumer",
 				},
 			},
 			Result: configuration.AgentFlowConfiguration{
 				Topic: "AGENT-RESULT",
-				Producer: kafka.KafkaProducerConfiguration{
+				Producer: kafka_integration.Configuration{
 					Brokers:  "localhost:9092",
 					ClientId: "result-producer-" + instanceId,
 				},
-				Consumer: kafka.KafkaConsumerConfiguration{
+				Consumer: kafka_integration.Configuration{
 					Brokers:  "localhost:9092",
 					ClientId: "result-consumer-" + instanceId,
-					Topic:    "AGENT-RESULT",
 					GroupId:  "result-consumer",
 				},
+			},
+		},
+		Store: configuration.StoreConfiguration{
+			Agent: file_store.Configuration{
+				Path: "/home/hjwalt/Projects/platform/tmp/agent/",
+			},
+			Memory: file_store.Configuration{
+				Path: "/home/hjwalt/Projects/platform/tmp/memory/",
 			},
 		},
 	}

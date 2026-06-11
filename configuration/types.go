@@ -8,7 +8,7 @@ import (
 	memory_tool "github.com/hjwalt/platform/agent/tool/memory"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
-	"github.com/hjwalt/platform/message/kafka"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	file_store "github.com/hjwalt/platform/state/file"
 )
 
@@ -17,6 +17,7 @@ type Configuration struct {
 	Model  ModelConfiguration
 	Server WebServerConfiguration
 	Flow   FlowConfiguration
+	Store  StoreConfiguration
 }
 
 type ModelConfiguration struct {
@@ -40,13 +41,17 @@ type WebServerConfiguration struct {
 }
 
 type FlowConfiguration struct {
-	Store  file_store.Configuration
 	Agent  AgentFlowConfiguration
 	Result AgentFlowConfiguration
 }
 
 type AgentFlowConfiguration struct {
 	Topic    string
-	Producer kafka.KafkaProducerConfiguration
-	Consumer kafka.KafkaConsumerConfiguration
+	Producer kafka_integration.Configuration
+	Consumer kafka_integration.Configuration
+}
+
+type StoreConfiguration struct {
+	Agent  file_store.Configuration
+	Memory file_store.Configuration
 }

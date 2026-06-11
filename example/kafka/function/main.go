@@ -11,6 +11,7 @@ import (
 	"github.com/hjwalt/platform/flow/stateful"
 	"github.com/hjwalt/platform/flow/stateless"
 	"github.com/hjwalt/platform/format"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
 	file_store "github.com/hjwalt/platform/state/file"
@@ -102,7 +103,7 @@ func LogMetric(ctx context.Context, in Metric) optional.Optional[TestError] {
 
 func main() {
 	kafkaProducer := kafka.NewProducer(
-		kafka.KafkaProducerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "output_producer",
 		},
@@ -145,12 +146,12 @@ func main() {
 	)
 
 	incrementConsumer := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "increment_consumer",
-			Topic:    "test",
 			GroupId:  "increment_consumer",
 		},
+		"test",
 		converter.FlowToRuntimeHandler(
 			stateless.NewOperator(
 				"Increment",
@@ -168,12 +169,12 @@ func main() {
 	)
 
 	completeNextConsumer := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "complete_consumer",
-			Topic:    "test",
 			GroupId:  "complete_consumer",
 		},
+		"test",
 		converter.FlowToRuntimeHandler(
 			stateless.NewOperator(
 				"Complete",
@@ -191,12 +192,12 @@ func main() {
 	)
 
 	completedConsumer := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "completed_consumer",
-			Topic:    "completed",
 			GroupId:  "completed_consumer",
 		},
+		"completed",
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
 				LogCompleted,
@@ -211,12 +212,12 @@ func main() {
 	)
 
 	errorConsumer := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "error_consumer",
-			Topic:    "error",
 			GroupId:  "error_consumer",
 		},
+		"error",
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
 				LogError,
@@ -231,12 +232,12 @@ func main() {
 	)
 
 	metricConsumer := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "metric_consumer",
-			Topic:    "metric",
 			GroupId:  "metric_consumer",
 		},
+		"metric",
 		converter.FlowToRuntimeHandler(
 			stateless.NewConsumer(
 				LogMetric,
@@ -258,12 +259,12 @@ func main() {
 	)
 
 	accumulator := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "accumulate_consumer",
-			Topic:    "test",
 			GroupId:  "accumulate_consumer",
 		},
+		"test",
 		converter.FlowToRuntimeHandler(
 			stateful.NewOperator(
 				"accumulate",

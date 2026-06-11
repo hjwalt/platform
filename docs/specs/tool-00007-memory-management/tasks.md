@@ -22,3 +22,10 @@
 - [x] Add tests for prefix collisions and multi-instance isolation.
 - [x] Run `make test` and resolve regressions.
 - [x] Update `ammendments.md` and mark completed tasks.
+- [x] Migrate storage from filesystem to `state.Store` interface.
+- [x] Update `memory_get`, `memory_update`, `memory_clear` sub-tools to accept `state.Store` and key.
+- [x] Update `memory_tool.Configuration` to accept `state.Store` instead of `BaseDir`.
+- [x] Add `MemoryConfiguration` to `configuration` package for file-backed wiring.
+- [x] Update `configuration/tool.go` to create file store from `MemoryConfiguration.BaseDir`.
+- [x] Update `main.go` to use `configuration.MemoryConfiguration`.
+- [x] Update tests to use in-memory store instead of `t.TempDir()`.

@@ -7,28 +7,25 @@ import (
 	"sync"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/message"
 	"github.com/hjwalt/platform/runtime"
 )
 
-func NewConsumer(configuration KafkaConsumerConfiguration, handler message.Handler[KafkaMetadata]) message.Consumer[KafkaMetadata] {
+func NewConsumer(configuration kafka_integration.Configuration, topic string, handler message.Handler[KafkaMetadata]) message.Consumer[KafkaMetadata] {
 	return runtime.NewLoop(&KafkaConsumer{
-		Brokers:  configuration.Brokers,
-		Topic:    configuration.Topic,
-		ClientId: configuration.ClientId,
-		GroupId:  configuration.GroupId,
-		Handler:  handler,
+		configuration: configuration,
+		topic:         topic,
+		handler:       handler,
 	})
 }
 
 type KafkaConsumer struct {
 	// required
-	Brokers  string
-	ClientId string
-	GroupId  string
-	Topic    string
-	Handler  message.Handler[KafkaMetadata]
+	configuration kafka_integration.Configuration
+	topic         string
+	handler       message.Handler[KafkaMetadata]
 
 	consumer *kafka.Consumer
 	mu       sync.Mutex
@@ -40,27 +37,15 @@ func (r *KafkaConsumer) Start() error {
 		return ErrKafkaConsumerNil
 	}
 
-	kafkaConfig := &kafka.ConfigMap{
-		"bootstrap.servers":        r.Brokers,
-		"client.id":                r.ClientId,
-		"group.id":                 r.GroupId,
-		"auto.offset.reset":        "smallest",
-		"allow.auto.create.topics": "true",
-		"max.poll.interval.ms":     "1800000",
-		// allows using async commit and manual offset storing
-		"enable.auto.commit":       "true",
-		"enable.auto.offset.store": "false",
-	}
-
 	slog.Debug("starting kafka consumer")
 
-	if consumer, err := kafka.NewConsumer(kafkaConfig); err != nil {
+	if consumer, err := kafka_integration.CreateConsumer(r.configuration); err != nil {
 		return errors.Join(err, ErrKafkaConsumerConnectFail)
 	} else {
 		r.consumer = consumer
 	}
 
-	if err := r.consumer.SubscribeTopics([]string{r.Topic}, nil); err != nil {
+	if err := r.consumer.SubscribeTopics([]string{r.topic}, nil); err != nil {
 		return errors.Join(err, ErrKafkaConsumerSubscribeFail)
 	}
 
@@ -116,7 +101,7 @@ func (r *KafkaConsumer) Loop(ctx context.Context, cancel context.CancelFunc) err
 		}
 
 		handlerCtx := logger.WithContext(ctx, "topic", *e.TopicPartition.Topic)
-		if err := r.Handler.Handle(handlerCtx, msg); err != nil {
+		if err := r.handler.Handle(handlerCtx, msg); err != nil {
 			return errors.Join(err, ErrKafkaConsumerConsume)
 		}
 

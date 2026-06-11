@@ -21,7 +21,13 @@ func RegisterAgentModel(holder Context, conf Configuration) {
 }
 
 func RegisterAgentHarnessStore(holder Context, conf Configuration) {
-	store := file_store.New(conf.Flow.Store)
+	store := file_store.New(conf.Store.Agent)
 	holder.Add(store)
 	holder.SetAgentHarnessStore(store)
+}
+
+func RegisterMemoryStore(holder Context, conf Configuration) {
+	store := file_store.New(conf.Store.Memory)
+	holder.Add(store)
+	holder.SetMemoryStore(store)
 }

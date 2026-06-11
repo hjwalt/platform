@@ -3,19 +3,16 @@ package memory_update_tool
 import (
 	"context"
 	"errors"
-	"os"
-	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/format"
+	"github.com/hjwalt/platform/state"
 )
 
-const (
-	DefaultName    = "memory_update"
-	memoryFileName = "memory.md"
-)
+const DefaultName = "memory_update"
 
 type UpdateMode string
 
@@ -25,10 +22,10 @@ const (
 )
 
 type Configuration struct {
-	BaseDir  string
-	FileName string
-	Name     string
-	Mutex    *sync.Mutex
+	Store state.Store
+	Key   string
+	Name  string
+	Mutex *sync.Mutex
 }
 
 type Request struct {
@@ -37,16 +34,16 @@ type Request struct {
 }
 
 type Response struct {
-	Path  string     `json:"path" jsonschema:"resolved canonical memory file path"`
+	Key   string     `json:"key" jsonschema:"storage key for the canonical memory entry"`
 	Mode  UpdateMode `json:"mode" jsonschema:"effective write mode used"`
-	Bytes int        `json:"bytes" jsonschema:"number of bytes in resulting memory file"`
+	Bytes int        `json:"bytes" jsonschema:"number of bytes in resulting memory entry"`
 }
 
 type tool struct {
-	baseDir  string
-	fileName string
-	name     string
-	mutex    *sync.Mutex
+	store state.Store
+	key   string
+	name  string
+	mutex *sync.Mutex
 }
 
 func Create(config Configuration) agent.SyncTool[Request, Response] {
@@ -55,21 +52,16 @@ func Create(config Configuration) agent.SyncTool[Request, Response] {
 		name = DefaultName
 	}
 
-	fileName := config.FileName
-	if fileName == "" {
-		fileName = memoryFileName
-	}
-
 	mutex := config.Mutex
 	if mutex == nil {
 		mutex = &sync.Mutex{}
 	}
 
 	return &tool{
-		baseDir:  config.BaseDir,
-		fileName: fileName,
-		name:     name,
-		mutex:    mutex,
+		store: config.Store,
+		key:   config.Key,
+		name:  name,
+		mutex: mutex,
 	}
 }
 
@@ -86,28 +78,26 @@ func (t *tool) Apply(ctx context.Context, request Request) (Response, error) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	path := filepath.Join(t.baseDir, t.fileName)
-	if mkdirErr := os.MkdirAll(t.baseDir, 0o755); mkdirErr != nil {
-		return Response{}, mkdirErr
-	}
-
 	content := request.Content
 	if mode == UpdateModeAppend {
-		existing, readErr := os.ReadFile(path)
-		if readErr != nil && !errors.Is(readErr, os.ErrNotExist) {
+		existing, readErr := t.store.Read(ctx, t.key)
+		if readErr != nil {
 			return Response{}, readErr
 		}
-		if readErr == nil {
-			content = string(existing) + request.Content
-		}
+		content = string(existing.Value) + request.Content
 	}
 
-	if writeErr := atomicWrite(path, []byte(content)); writeErr != nil {
+	writeErr := t.store.Write(ctx, state.State{
+		Id:        t.key,
+		Value:     []byte(content),
+		Timestamp: time.Now(),
+	})
+	if writeErr != nil {
 		return Response{}, writeErr
 	}
 
 	return Response{
-		Path:  path,
+		Key:   t.key,
 		Mode:  mode,
 		Bytes: len([]byte(content)),
 	}, nil
@@ -118,7 +108,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Write markdown memory to the configured canonical memory file with deterministic replace or append mode."
+	return "Write markdown memory to the configured canonical memory entry with deterministic replace or append mode."
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {
@@ -150,7 +140,7 @@ func (t *tool) ResultSchema() *jsonschema.Schema {
 }
 
 func (t *tool) DescribeResult(response Response) string {
-	return "updated memory file"
+	return "updated memory entry"
 }
 
 func (t *tool) Auto() bool {
@@ -165,36 +155,6 @@ func resolveUpdateMode(mode UpdateMode) (UpdateMode, error) {
 		return mode, nil
 	}
 	return "", ErrInvalidUpdateMode
-}
-
-func atomicWrite(path string, content []byte) error {
-	tempFile, createErr := os.CreateTemp(filepath.Dir(path), "memory-*.tmp")
-	if createErr != nil {
-		return createErr
-	}
-
-	tempName := tempFile.Name()
-	defer os.Remove(tempName)
-
-	if _, writeErr := tempFile.Write(content); writeErr != nil {
-		tempFile.Close()
-		return writeErr
-	}
-
-	if syncErr := tempFile.Sync(); syncErr != nil {
-		tempFile.Close()
-		return syncErr
-	}
-
-	if closeErr := tempFile.Close(); closeErr != nil {
-		return closeErr
-	}
-
-	if renameErr := os.Rename(tempName, path); renameErr != nil {
-		return renameErr
-	}
-
-	return nil
 }
 
 var ErrInvalidUpdateMode = errors.New("memory update mode must be replace or append")

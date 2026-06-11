@@ -26,7 +26,24 @@
   - Updated configuration wiring in `configuration/types.go` and `configuration/tool.go` to support `ToolConfiguration.Memory`.
   - Ran `go test ./agent/tool/memory ./configuration` and `make test` successfully.
 
-## 3 memory-management-prefix-filename
+## 4 memory-management-state-store-migration
+
+- Date: 2026-06-11
+- Author: GitHub Copilot
+- Summary: Migrated storage backend from direct filesystem to `state.Store` interface for dynamic memory wiring.
+- Changes:
+  - Replaced `BaseDir`/`FileName` configuration in `memory_get`, `memory_update`, and `memory_clear` sub-tools with `Store state.Store` and `Key string`.
+  - Replaced all `os`/`path/filepath` filesystem operations with `store.Read`, `store.Write`, and `store.Delete` calls.
+  - Removed `atomicWrite` helper functions from `memory_update` and `memory_clear`.
+  - Changed `memory_tool.Configuration` from `BaseDir string` to `Store state.Store`.
+  - Renamed `MemoryFileName` constant to `MemoryKey` (`"memory"`); key derivation now returns the prefix directly instead of `<prefix>.md`.
+  - Renamed `ErrInvalidBaseDir` to `ErrNilStore`.
+  - Response fields `Path string` replaced with `Key string` in all three tool responses.
+  - Added `configuration.MemoryConfiguration` (`BaseDir`, `Prefix`) to keep file-backed configuration serializable.
+  - Updated `configuration/tool.go` to construct a `file_store` from `MemoryConfiguration.BaseDir` and pass the `state.Store` to `memory_tool`.
+  - Updated `main.go` to use `configuration.MemoryConfiguration` instead of `memory_tool.Configuration`.
+  - Updated `tool_test.go` to use `memory_store.New()` in place of `t.TempDir()`.
+  - All 9 unit tests pass.
 
 - Date: 2026-06-08
 - Author: GitHub Copilot

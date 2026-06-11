@@ -6,35 +6,26 @@ import (
 	"log/slog"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	"github.com/hjwalt/platform/message"
 )
 
-func NewProducer(configuration KafkaProducerConfiguration) message.Producer[KafkaMetadata] {
+func NewProducer(configuration kafka_integration.Configuration) message.Producer[KafkaMetadata] {
 	return &KafkaProducer{
-		Brokers:  configuration.Brokers,
-		ClientId: configuration.ClientId,
+		configuration: configuration,
 	}
 }
 
 type KafkaProducer struct {
-	// required
-	Brokers  string
-	ClientId string
+	configuration kafka_integration.Configuration
 
-	// set in start
-	producer *kafka.Producer
+	producer *kafka_integration.Producer
 }
 
 func (r *KafkaProducer) Start() error {
 	slog.Debug("starting kafka producer")
 
-	kafkaConfig := &kafka.ConfigMap{
-		"bootstrap.servers": r.Brokers,
-		"client.id":         r.ClientId,
-		"acks":              "all",
-	}
-
-	if producer, err := kafka.NewProducer(kafkaConfig); err != nil {
+	if producer, err := kafka_integration.CreateProducer(r.configuration); err != nil {
 		return errors.Join(err, ErrKafkaProducerConnectFail)
 	} else {
 		r.producer = producer

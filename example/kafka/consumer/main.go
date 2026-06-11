@@ -9,6 +9,7 @@ import (
 	"github.com/hjwalt/platform/flow/converter"
 	"github.com/hjwalt/platform/flow/flow_runtime_kafka"
 	"github.com/hjwalt/platform/format"
+	kafka_integration "github.com/hjwalt/platform/integration/kafka"
 	"github.com/hjwalt/platform/message/kafka"
 	"github.com/hjwalt/platform/runtime"
 )
@@ -37,12 +38,12 @@ func main() {
 		),
 	)
 	consumer := kafka.NewConsumer(
-		kafka.KafkaConsumerConfiguration{
+		kafka_integration.Configuration{
 			Brokers:  "localhost:9092",
 			ClientId: "test_consumer",
-			Topic:    "test",
 			GroupId:  "test",
 		},
+		"test",
 		handler,
 	)
 

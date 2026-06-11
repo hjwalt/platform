@@ -2,39 +2,35 @@ package memory_clear_tool
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/format"
+	"github.com/hjwalt/platform/state"
 )
 
-const (
-	DefaultName    = "memory_clear"
-	memoryFileName = "memory.md"
-)
+const DefaultName = "memory_clear"
 
 type Configuration struct {
-	BaseDir  string
-	FileName string
-	Name     string
-	Mutex    *sync.Mutex
+	Store state.Store
+	Key   string
+	Name  string
+	Mutex *sync.Mutex
 }
 
 type Request struct{}
 
 type Response struct {
-	Path    string `json:"path" jsonschema:"resolved canonical memory file path"`
+	Key     string `json:"key" jsonschema:"storage key for the canonical memory entry"`
 	Cleared bool   `json:"cleared" jsonschema:"true when memory content was cleared"`
 }
 
 type tool struct {
-	baseDir  string
-	fileName string
-	name     string
-	mutex    *sync.Mutex
+	store state.Store
+	key   string
+	name  string
+	mutex *sync.Mutex
 }
 
 func Create(config Configuration) agent.SyncTool[Request, Response] {
@@ -43,21 +39,16 @@ func Create(config Configuration) agent.SyncTool[Request, Response] {
 		name = DefaultName
 	}
 
-	fileName := config.FileName
-	if fileName == "" {
-		fileName = memoryFileName
-	}
-
 	mutex := config.Mutex
 	if mutex == nil {
 		mutex = &sync.Mutex{}
 	}
 
 	return &tool{
-		baseDir:  config.BaseDir,
-		fileName: fileName,
-		name:     name,
-		mutex:    mutex,
+		store: config.Store,
+		key:   config.Key,
+		name:  name,
+		mutex: mutex,
 	}
 }
 
@@ -69,17 +60,12 @@ func (t *tool) Apply(ctx context.Context, request Request) (Response, error) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	path := filepath.Join(t.baseDir, t.fileName)
-	if mkdirErr := os.MkdirAll(t.baseDir, 0o755); mkdirErr != nil {
-		return Response{}, mkdirErr
-	}
-
-	if writeErr := atomicWrite(path, []byte("")); writeErr != nil {
-		return Response{}, writeErr
+	if deleteErr := t.store.Delete(ctx, t.key); deleteErr != nil {
+		return Response{}, deleteErr
 	}
 
 	return Response{
-		Path:    path,
+		Key:     t.key,
 		Cleared: true,
 	}, nil
 }
@@ -89,7 +75,7 @@ func (t *tool) Name() string {
 }
 
 func (t *tool) Description() string {
-	return "Clear markdown memory by truncating the configured canonical memory file under the configured root path."
+	return "Clear markdown memory by deleting the configured canonical memory entry from the store."
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {
@@ -122,34 +108,4 @@ func (t *tool) DescribeResult(response Response) string {
 
 func (t *tool) Auto() bool {
 	return false
-}
-
-func atomicWrite(path string, content []byte) error {
-	tempFile, createErr := os.CreateTemp(filepath.Dir(path), "memory-*.tmp")
-	if createErr != nil {
-		return createErr
-	}
-
-	tempName := tempFile.Name()
-	defer os.Remove(tempName)
-
-	if _, writeErr := tempFile.Write(content); writeErr != nil {
-		tempFile.Close()
-		return writeErr
-	}
-
-	if syncErr := tempFile.Sync(); syncErr != nil {
-		tempFile.Close()
-		return syncErr
-	}
-
-	if closeErr := tempFile.Close(); closeErr != nil {
-		return closeErr
-	}
-
-	if renameErr := os.Rename(tempName, path); renameErr != nil {
-		return renameErr
-	}
-
-	return nil
 }
