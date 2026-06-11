@@ -2,16 +2,10 @@
 name: self-improving-agent
 description: "Self-reflection + Self-criticism + Self-learning + Self-organizing memory. Agent evaluates its own work, catches mistakes, and improves permanently. Use when (1) a command, tool, API, or operation fails; (2) the user corrects you or rejects your work; (3) you realize your knowledge is outdated or incorrect; (4) you discover a better approach; (5) the user explicitly installs or references the skill for the current task."
 allowed-tools:
-  - improvements_memory_get
-  - improvements_memory_update
-  - improvements_memory_clear
-  - corrections_memory_get
-  - corrections_memory_update
-  - corrections_memory_clear
-  - preferences_memory_get
-  - preferences_memory_update
-  - preferences_memory_clear
-changelog: "Migrates to typed memory operations using corrections, preferences, and improvements with memory_get, memory_update, and memory_clear."
+  - improvements_memory
+  - corrections_memory
+  - preferences_memory
+changelog: "Uses one operation-based memory tool per type (`*_memory`) with operation=get|update|clear."
 metadata:
   {
     "clawdbot":
@@ -37,35 +31,35 @@ Memory is stored in three typed buckets managed by memory operations:
 - `preferences` - Confirmed user style and workflow preferences
 - `improvements` - Self-reflection lessons and process upgrades
 
-Always use the memory API operations instead of local markdown files:
+Always use the typed operation-based tools instead of local markdown files:
 
-- `memory_get(type, query)` to read existing memory
-- `memory_update(type, operation, payload)` to insert/update/promote/demote entries
-- `memory_clear(type, filter)` to remove entries only when user requests forgetting
+- `<type>_memory({"operation":"get"})` to read memory content
+- `<type>_memory({"operation":"update","mode":"append|replace","content":"..."})` to write memory
+- `<type>_memory({"operation":"clear"})` only when user explicitly requests forgetting
 
 ## Quick Reference
 
-| Need                                    | Operation                                          |
-| --------------------------------------- | -------------------------------------------------- |
-| Read known corrections for context      | `memory_get("corrections", query)`                 |
-| Read user preferences before responding | `memory_get("preferences", query)`                 |
-| Read prior self-lessons before planning | `memory_get("improvements", query)`                |
-| Save a correction                       | `memory_update("corrections", "append", payload)`  |
-| Save a preference                       | `memory_update("preferences", "upsert", payload)`  |
-| Save a self-reflection lesson           | `memory_update("improvements", "append", payload)` |
-| Forget by request                       | `memory_clear(type, filter)`                       |
+| Need                                    | Operation                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------- |
+| Read known corrections for context      | `corrections_memory({"operation":"get"})`                                       |
+| Read user preferences before responding | `preferences_memory({"operation":"get"})`                                       |
+| Read prior self-lessons before planning | `improvements_memory({"operation":"get"})`                                      |
+| Save a correction                       | `corrections_memory({"operation":"update","mode":"append","content":payload})`  |
+| Save a preference                       | `preferences_memory({"operation":"update","mode":"replace","content":payload})` |
+| Save a self-reflection lesson           | `improvements_memory({"operation":"update","mode":"append","content":payload})` |
+| Forget by request                       | `<type>_memory({"operation":"clear"})`                                          |
 
 ## Requirements
 
 - No credentials required
 - No extra binaries required
-- Memory backend must support `memory_get`, `memory_update`, and `memory_clear`
+- Memory backend must support typed `*_memory` tools with `operation=get|update|clear`
 
 ## Learning Signals
 
 Log automatically when you notice these patterns:
 
-**Corrections** → save in `corrections` with `memory_update`:
+**Corrections** → save in `corrections_memory` with `operation=update`:
 
 - "No, that's not right..."
 - "Actually, it should be..."
@@ -76,7 +70,7 @@ Log automatically when you notice these patterns:
 - "Stop doing X"
 - "Why do you keep..."
 
-**Preference signals** → save in `preferences` with `memory_update` when explicit:
+**Preference signals** → save in `preferences_memory` with `operation=update` when explicit:
 
 - "I like when you..."
 - "Always do X for me"
@@ -84,7 +78,7 @@ Log automatically when you notice these patterns:
 - "My style is..."
 - "For [project], use..."
 
-**Improvement signals** → save in `improvements` with `memory_update`:
+**Improvement signals** → save in `improvements_memory` with `operation=update`:
 
 - repeated rework after a task
 - preventable bug found in review
@@ -108,7 +102,7 @@ After completing significant work, pause and evaluate:
 
 1. **Did it meet expectations?** — Compare outcome vs intent
 2. **What could be better?** — Identify improvements for next time
-3. **Is this a pattern?** — If yes, log to `improvements` via `memory_update`
+3. **Is this a pattern?** — If yes, log to `improvements_memory` via `operation=update`
 
 **When to self-reflect:**
 
@@ -133,17 +127,17 @@ REFLECTION: Spacing looked off, had to redo
 LESSON: Check visual spacing before showing user
 ```
 
-Self-reflection entries follow the same promotion rule: 3x applied successfully -> strengthen the `improvements` entry via `memory_update`.
+Self-reflection entries follow the same promotion rule: 3x applied successfully -> strengthen the `improvements_memory` entry via `operation=update`.
 
 ## Quick Queries
 
-| User says                   | Action                                                                                            |
-| --------------------------- | ------------------------------------------------------------------------------------------------- |
-| "What do you know about X?" | `memory_get("corrections", X)` + `memory_get("preferences", X)` + `memory_get("improvements", X)` |
-| "What have you learned?"    | `memory_get("improvements", "recent")` + `memory_get("corrections", "recent")`                    |
-| "Show my patterns"          | `memory_get("preferences", "all")`                                                                |
-| "Memory stats"              | read counts from all three memory types                                                           |
-| "Forget X"                  | confirm then `memory_clear(type, filter)`                                                         |
+| User says                   | Action                                                                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| "What do you know about X?" | `corrections_memory({"operation":"get"})` + `preferences_memory({"operation":"get"})` + `improvements_memory({"operation":"get"})` |
+| "What have you learned?"    | `improvements_memory({"operation":"get"})` + `corrections_memory({"operation":"get"})`                                             |
+| "Show my patterns"          | `preferences_memory({"operation":"get"})`                                                                                          |
+| "Memory stats"              | read counts from all three memory types                                                                                            |
+| "Forget X"                  | confirm then `<type>_memory({"operation":"clear"})`                                                                                |
 
 ## Memory Stats
 
@@ -170,7 +164,7 @@ Recent activity (7 days):
 | Learning from silence  | Creates false rules     | Wait for explicit correction or repeated evidence |
 | Promoting too fast     | Pollutes preferences    | Keep new lessons tentative until repeated         |
 | Reading every type     | Wastes context          | Query only the needed memory type first           |
-| Clearing by assumption | Loses trust and history | Only use `memory_clear` after explicit request    |
+| Clearing by assumption | Loses trust and history | Only use `operation=clear` after explicit request |
 
 ## Core Rules
 
@@ -191,9 +185,9 @@ Use typed memory instead of file tiers:
 
 ### 3. Automatic Promotion/Demotion
 
-- Pattern repeated 3x with consistency → upsert stronger preference via `memory_update`
-- Pattern invalidated by user correction → revise or downgrade via `memory_update`
-- Never remove memory unless requested; use `memory_clear` only with explicit confirmation
+- Pattern repeated 3x with consistency → upsert stronger preference via `operation=update`
+- Pattern invalidated by user correction → revise or downgrade via `operation=update`
+- Never remove memory unless requested; use `operation=clear` only with explicit confirmation
 
 ### 4. Namespace Isolation
 
@@ -213,8 +207,8 @@ When patterns contradict:
 
 When memory grows noisy:
 
-1. Merge duplicate entries with `memory_update`
-2. Mark stale entries as inactive with `memory_update`
+1. Merge duplicate entries with `operation=update`
+2. Mark stale entries as inactive with `operation=update`
 3. Summarize verbose entries
 4. Never lose confirmed preferences
 
@@ -222,7 +216,7 @@ When memory grows noisy:
 
 - Every action from memory should cite type and scope (for example: "Using preference: concise test output")
 - Weekly digest available: corrections, preferences, and improvements activity
-- On request, show memory contents by type using `memory_get`
+- On request, show memory contents by type using `operation=get`
 
 ### 8. Security Boundaries
 
@@ -241,7 +235,7 @@ If context limit hit:
 This skill ONLY:
 
 - Learns from user corrections and self-reflection
-- Uses `memory_get`, `memory_update`, and `memory_clear`
+- Uses typed `*_memory` tools with `operation=get|update|clear`
 - Stores learning in `corrections`, `preferences`, and `improvements`
 - Maintains optional heartbeat notes through `improvements` entries when needed
 
@@ -257,11 +251,11 @@ This skill NEVER:
 
 All state is managed through typed memory operations:
 
-- `corrections` via `memory_update` for explicit fixes
-- `preferences` via `memory_update` for durable user preferences
-- `improvements` via `memory_update` for retrospective lessons
-- Retrieval through `memory_get`
-- Removal through `memory_clear` only after explicit user request
+- `corrections` via `corrections_memory` with `operation=update` for explicit fixes
+- `preferences` via `preferences_memory` with `operation=update` for durable user preferences
+- `improvements` via `improvements_memory` with `operation=update` for retrospective lessons
+- Retrieval through `<type>_memory` with `operation=get`
+- Removal through `<type>_memory` with `operation=clear` only after explicit user request
 
 ## Related Skills
 

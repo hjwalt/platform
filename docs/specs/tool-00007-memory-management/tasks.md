@@ -2,30 +2,24 @@
 
 ## Preparation
 
-- [x] Confirm final update semantics for `memory_update` (replace-only vs replace+append mode).
-- [x] Confirm clear semantics for `memory_clear` (truncate vs delete+recreate).
-- [x] Align prefix validation rules with existing tool naming constraints.
+- [x] Confirm operation enum for unified tool request: `get`, `update`, `clear`.
+- [x] Confirm request validation rules (`content` required for `update`, optional `mode` defaults).
+- [x] Align prefix validation rules with unified tool naming constraints.
 
 ## Implementation
 
-- [x] Add implementation for `memory_get` reading `<root_path>/memory.md` (FR-MEM-003).
-- [x] Add implementation for `memory_update` writing `<root_path>/memory.md` with deterministic mode handling (FR-MEM-004).
-- [x] Add implementation for `memory_clear` applying deterministic clear behavior (FR-MEM-005).
-- [x] Add generic constructor for prefix-based tool instantiation and registration (FR-MEM-006).
-- [x] Update canonical file naming so prefixed instances use `<prefix>.md` and non-prefixed instances use `memory.md`.
+- [x] Converge memory API surface from three tools to one `memory` tool (FR-MEM-001).
+- [x] Add operation-dispatch request schema using `operation` parameter (FR-MEM-001, FR-MEM-003..005).
+- [x] Ensure canonical key derivation is prefix-based (`memory` or `<prefix>`) (FR-MEM-002).
+- [x] Keep generic constructor for prefix-based instantiation and registration (`X_memory`) (FR-MEM-006).
 - [x] Add configuration validation and explicit error mapping for setup/runtime failures (FR-MEM-007).
-- [x] Add metadata and schema coverage for all tools (FR-MEM-008).
+- [x] Add metadata and schema coverage for unified tool discoverability (FR-MEM-008).
 
 ## Validation
 
-- [x] Add unit tests for missing file, existing file, update, and clear flows.
+- [x] Add unit tests for request validation across all operations.
+- [x] Add unit tests for get/update/clear behavior through one tool entrypoint.
 - [x] Add tests for prefix collisions and multi-instance isolation.
 - [x] Run `make test` and resolve regressions.
 - [x] Update `ammendments.md` and mark completed tasks.
-- [x] Migrate storage from filesystem to `state.Store` interface.
-- [x] Update `memory_get`, `memory_update`, `memory_clear` sub-tools to accept `state.Store` and key.
-- [x] Update `memory_tool.Configuration` to accept `state.Store` instead of `BaseDir`.
-- [x] Add `MemoryConfiguration` to `configuration` package for file-backed wiring.
-- [x] Update `configuration/tool.go` to create file store from `MemoryConfiguration.BaseDir`.
-- [x] Update `main.go` to use `configuration.MemoryConfiguration`.
-- [x] Update tests to use in-memory store instead of `t.TempDir()`.
+- [x] Keep store-backed wiring (`state.Store`) and validate canonical key semantics.

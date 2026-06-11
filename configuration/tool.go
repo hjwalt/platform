@@ -25,6 +25,10 @@ func RegisterTools(holder Context, conf Configuration) {
 	finance_fx_price_tool.AddToContainer(container, conf.Tool.FxPrice)
 	finance_stock_price_tool.AddToContainer(container, conf.Tool.StockPrice)
 	for _, memoryConfig := range conf.Tool.Memory {
+		if validateErr := memory_tool.Validate(memoryConfig, holder.GetMemoryStore()); validateErr != nil {
+			slog.Error("failed to register memory tool", "key", memoryConfig.Key, "error", validateErr)
+			continue
+		}
 		memory_tool.AddToContainer(container, memoryConfig, holder.GetMemoryStore())
 	}
 

@@ -1,5 +1,31 @@
 # Ammendments
 
+## 6 memory-tool-single-operation-implementation
+
+- Date: 2026-06-11
+- Author: GitHub Copilot
+- Summary: Implemented unified operation-based memory tool and registration updates.
+- Changes:
+  - Refactored `agent/tool/memory/tool.go` from three delegated tools into one tool (`memory`) with request `operation` dispatch (`get|update|clear`).
+  - Updated prefix naming behavior to register a single tool per prefix (`<prefix>_memory`).
+  - Added request/result model and runtime validation for operation and update mode.
+  - Added `Validate` integration in `configuration/tool.go` to surface invalid memory configuration during tool registration.
+  - Added unit tests in `agent/tool/memory/tool_test.go` covering unified flow, validation errors, and single-tool container registration.
+  - Updated `skills/self-improving-agent/SKILL.md` to use new `*_memory` operation-based calls.
+  - Updated `docs/specs/README.md` index entry for tool-00007.
+
+## 5 memory-tool-single-operation-convergence
+
+- Date: 2026-06-11
+- Author: GitHub Copilot
+- Summary: Converged tool-00007 specification from three memory tools to one operation-based memory tool.
+- Changes:
+  - Updated `specs.md` to define a single `memory` tool with required request parameter `operation` (`get|update|clear`).
+  - Replaced per-tool naming requirements (`memory_get`, `memory_update`, `memory_clear`) with single-tool naming (`memory`, prefixed as `X_memory`).
+  - Updated canonical storage semantics to operation-based behavior on a derived canonical key.
+  - Updated `tasks.md` to reflect convergence work items and validation for operation request schema.
+  - Updated `implementations.md` to align architectural notes with one tool entrypoint and operation dispatch.
+
 ## 1 memory-management-tools-initial-spec
 
 - Date: 2026-06-08
