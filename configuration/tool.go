@@ -9,7 +9,7 @@ import (
 	finance_stock_price_tool "github.com/hjwalt/platform/agent/tool/finance_stock_price"
 	linux_shell_tool "github.com/hjwalt/platform/agent/tool/linux_shell"
 	memory_tool "github.com/hjwalt/platform/agent/tool/memory"
-	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
+	subagent_tool "github.com/hjwalt/platform/agent/tool/subagent"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
 	tool_container "github.com/hjwalt/platform/agent/util/container"
@@ -45,5 +45,5 @@ func TryRegisterSkill(holder Context, conf Configuration, container agent.ToolCo
 		return
 	}
 	slog.Info("registered skill", "path", path, "name", properties)
-	skill_tool.AddSkillToContainer(container, *properties, holder.GetAgentMessageProducer())
+	subagent_tool.AddSubagentToContainer(container, *properties, holder.GetAgentMessageProducer())
 }

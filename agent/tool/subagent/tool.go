@@ -1,4 +1,4 @@
-package skill_tool
+package subagent_tool
 
 import (
 	"context"
@@ -89,7 +89,7 @@ func Create(config Configuration, producer flow.Producer[agent.Message]) agent.A
 	}
 }
 
-func FromSkill(config agent_skill.Skill, producer flow.Producer[agent.Message]) agent.AsyncTool[Request] {
+func FromSubagent(config agent_skill.Skill, producer flow.Producer[agent.Message]) agent.AsyncTool[Request] {
 	return &tool{
 		AgentName:        config.Name,
 		AgentDescription: config.Description,
@@ -103,6 +103,6 @@ func AddToContainer(container agent.ToolContainer, config Configuration, produce
 	container.AddAsync(tool_string_wrapper.StringWrapAsync(Create(config, producer)))
 }
 
-func AddSkillToContainer(container agent.ToolContainer, config agent_skill.Skill, producer flow.Producer[agent.Message]) {
-	container.AddAsync(tool_string_wrapper.StringWrapAsync(FromSkill(config, producer)))
+func AddSubagentToContainer(container agent.ToolContainer, config agent_skill.Skill, producer flow.Producer[agent.Message]) {
+	container.AddAsync(tool_string_wrapper.StringWrapAsync(FromSubagent(config, producer)))
 }

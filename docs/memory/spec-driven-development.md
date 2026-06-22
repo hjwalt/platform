@@ -87,7 +87,7 @@ This file contains the implemenation details for the feature. It must contain th
 - agent-00001-harness-contracts/: SDD template-based agent harness contracts specification.
 - tool-00001-linux-shell/: linux_shell tool specification.
 - tool-00002-finance-fx-price/: finance_fx_price tool specification.
-- tool-00003-skill/: skill tool specification.
+- tool-00003-subagent/: subagent tool specification.
 - tool-00004-web-fetch/: web_fetch tool specification.
 - tool-00005-web-search/: web_search tool specification.
 - tool-00006-finance-stock-price/: finance_stock_price tool specification.
