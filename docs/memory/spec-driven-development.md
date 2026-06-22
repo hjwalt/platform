@@ -82,9 +82,14 @@ This file contains the implemenation details for the feature. It must contain th
 
 ## Spec Index
 
-- repository-00001-repository-foundation/: Repository-wide engineering constraints and delivery gates.
-- flow-00001-flow-runtime/: SDD template-based flow/runtime lifecycle specification.
 - agent-00001-harness-contracts/: SDD template-based agent harness contracts specification.
+- backend-00001-state-file/: File State Store specification.
+- backend-00002-state-memory/: In-Memory State Store specification.
+- flow-00001-flow-runtime/: SDD template-based flow/runtime lifecycle specification.
+- llm-00001-deepseek/: DeepSeek LLM adapter specification.
+- llm-00002-openai/: OpenAI LLM adapter specification.
+- llm-00003-openai-embedding/: OpenAI Embedding adapter specification.
+- repository-00001-repository-foundation/: Repository-wide engineering constraints and delivery gates.
 - tool-00001-linux-shell/: linux_shell tool specification.
 - tool-00002-finance-fx-price/: finance_fx_price tool specification.
 - tool-00003-subagent/: subagent tool specification.
@@ -93,6 +98,14 @@ This file contains the implemenation details for the feature. It must contain th
 - tool-00006-finance-stock-price/: finance_stock_price tool specification.
 - tool-00007-memory-management/: unified memory tool specification with operation=get|update|clear.
 - tool-00008-tool-search/: tool_search tool specification — natural language search over registered tools.
+- web-component-00001-chat-item/: Chat Item web component specification.
+- web-component-00002-chat-list/: Chat List web component specification.
+- web-component-00003-sidebar/: Sidebar web component specification.
+- web-component-00004-sidebar-button/: Sidebar Button web component specification.
+- web-component-00005-sidebar-button-list/: Sidebar Button List web component specification.
+- web-component-00006-sidebar-item/: Sidebar Item web component specification.
+- web-component-00007-sidebar-item-header/: Sidebar Item Header web component specification.
+- web-component-00008-sidebar-item-list/: Sidebar Item List web component specification.
 - web-page-00001-home/: page_home route and dashboard rendering specification.
 - web-page-00002-chat/: page_chat routing, posting, and tool-decision specification.
 - web-page-00003-billing/: page_billing route and dashboard rendering specification.
