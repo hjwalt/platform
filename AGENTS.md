@@ -6,7 +6,6 @@ This is a Go monorepo with the following main packages:
 
 - `agent` - LLM/tool harness and agent runtime components
 - `flow` - Current dataflow primitives and runtime integrations
-- `flows` - Legacy dataflow package (reference only for migration context)
 - `format` - Serialization and byte masking/encryption helpers
 - `reflect` - Safe dynamic type conversion helpers
 - `runtime` - Lifecycle management for long-running services

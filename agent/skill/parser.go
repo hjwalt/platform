@@ -14,7 +14,7 @@ import (
 // It prefers SKILL.md (uppercase) but accepts skill.md (lowercase).
 // Returns the path to the file and true if found, empty string and false otherwise.
 func FindSkillMd(skillDir string) (string, bool) {
-	for _, name := range []string{"SKILL.md", "skill.md"} {
+	for _, name := range []string{"SKILL.md", "skill.md", "AGENTS.md", "agents.md"} {
 		path := filepath.Join(skillDir, name)
 		if _, err := os.Stat(path); err == nil {
 			return path, true

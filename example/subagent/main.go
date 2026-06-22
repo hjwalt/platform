@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	properties, err := agent_skill.ReadProperties("./skills/researcher-agent")
+	properties, err := agent_skill.ReadProperties("./docs/agents/researcher-agent")
 	slog.Info("parsed", "properties", properties, "error", err)
 }

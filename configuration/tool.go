@@ -33,17 +33,17 @@ func RegisterTools(holder Context, conf Configuration) {
 	}
 
 	// register skills
-	TryRegisterSkill(holder, conf, container, "./skills/researcher-agent")
+	TryRegisterSubAgent(holder, conf, container, "./docs/agents/researcher-agent")
 
 	holder.SetToolContainer(container)
 }
 
-func TryRegisterSkill(holder Context, conf Configuration, container agent.ToolContainer, path string) {
+func TryRegisterSubAgent(holder Context, conf Configuration, container agent.ToolContainer, path string) {
 	properties, err := agent_skill.ReadProperties(path)
 	if err != nil {
-		slog.Error("failed to register skill", "path", path, "error", err)
+		slog.Error("failed to register subagent", "path", path, "error", err)
 		return
 	}
-	slog.Info("registered skill", "path", path, "name", properties)
+	slog.Info("registered subagent", "path", path, "name", properties)
 	subagent_tool.AddSubagentToContainer(container, *properties, holder.GetAgentMessageProducer())
 }
