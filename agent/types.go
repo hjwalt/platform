@@ -109,6 +109,19 @@ type LanguageModel interface {
 	Chat(context.Context, []Message, []string) ([]Message, error)
 }
 
+type EmbeddingInput struct {
+	Text []string
+}
+
+type EmbeddingOutput struct {
+	Embedding [][]float64
+}
+
+type Embedding interface {
+	runtime.Runtime
+	Embed(ctx context.Context, inputs EmbeddingInput) (EmbeddingOutput, error)
+}
+
 var (
 	ToolDataFormat = format.Json[ToolCall]()
 )

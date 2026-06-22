@@ -21,13 +21,13 @@
 2. The folder must be named in this pattern: `<type>-<index>-<short title>`
 3. Type can be one of the following:
    - agent
-   - web-page
-   - web-component
    - backend
-   - tool
-   - llm
    - flow
+   - llm
    - repository
+   - tool
+   - web-component
+   - web-page
 4. Index is five digit zero padded starting with 1 for every type
 5. Short title should include 1 to 5 words to help developers quickly know what the specification is about
 6. File templates are in `/docs/templates`
@@ -92,6 +92,7 @@ This file contains the implemenation details for the feature. It must contain th
 - tool-00005-web-search/: web_search tool specification.
 - tool-00006-finance-stock-price/: finance_stock_price tool specification.
 - tool-00007-memory-management/: unified memory tool specification with operation=get|update|clear.
+- tool-00008-tool-search/: tool_search tool specification — natural language search over registered tools.
 - web-page-00001-home/: page_home route and dashboard rendering specification.
 - web-page-00002-chat/: page_chat routing, posting, and tool-decision specification.
 - web-page-00003-billing/: page_billing route and dashboard rendering specification.
