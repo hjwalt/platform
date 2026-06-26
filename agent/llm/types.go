@@ -26,3 +26,20 @@ func New(config ModelConfig, tools agent.ToolContainer) agent.LanguageModel {
 		return createOpenAi(config, tools)
 	}
 }
+
+type EmbeddingConfig struct {
+	Type       ModelType
+	Model      string
+	Endpoint   string
+	Secret     string
+	Dimensions int // 0 = use model default
+}
+
+func NewEmbedding(config EmbeddingConfig) agent.Embedding {
+	switch config.Type {
+	case OpenAi:
+		return createOpenAiEmbedding(config)
+	default:
+		return createOpenAiEmbedding(config)
+	}
+}

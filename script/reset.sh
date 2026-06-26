@@ -9,5 +9,6 @@ kafka-topics.sh --bootstrap-server $TARGET_BROKER --create --partitions 10 --top
 kafka-topics.sh --bootstrap-server $TARGET_BROKER --create --partitions 10 --topic AGENT-RESULT
 
 rm -f ./tmp/memory/*
+rm -f ./tmp/agent/*
 
 # PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -f script/create.sql

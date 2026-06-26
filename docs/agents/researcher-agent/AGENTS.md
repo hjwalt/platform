@@ -4,6 +4,7 @@ description: "Perform deep research on specific topics based on user prompt. Inv
 allowed-tools:
   - web_search
   - web_fetch
+  - skill
 metadata:
   {
     "clawdbot":
@@ -31,3 +32,4 @@ metadata:
    2. supporting evidence organized by sub-topic
    3. a list of sources with titles and URLs
    4. Keep the total response under 800 words unless the user requests more detail
+7. Use self-improving skill to iterate

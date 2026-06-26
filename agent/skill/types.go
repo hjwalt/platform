@@ -6,6 +6,7 @@ import (
 	"github.com/hjwalt/platform/type/optional"
 )
 
+// TODO: this is more a generic agent + skill MD file format parser, find a better name
 type Skill struct {
 	Name          string
 	Description   string

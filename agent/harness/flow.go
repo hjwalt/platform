@@ -136,9 +136,28 @@ func (r *Flow) mergeMessage(in agent.Message, st ExecutionState) either.Either[E
 }
 
 func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
-	// TODO: tidy up messages based on tool execution result
+	messagesToChat := make([]agent.Message, 0)
+	for _, message := range st.Messages {
+		switch message.Type {
+		case agent.MessageType_ToolExecute, agent.MessageType_ToolRequest, agent.MessageType_ToolResult:
+			{
+				if state, present := st.ToolStates[message.Tool.Id]; present {
+					switch state {
+					case ToolState_Executed:
+						{
+							messagesToChat = append(messagesToChat, message)
+						}
+					}
+				}
+			}
+		default:
+			{
+				messagesToChat = append(messagesToChat, message)
+			}
+		}
+	}
 
-	if result, err := r.Model.Chat(context.Background(), st.Messages, st.Parent.AllowedTools); err != nil {
+	if result, err := r.Model.Chat(context.Background(), messagesToChat, st.Parent.AllowedTools); err != nil {
 		st = st.SetNext(agent.SingleResult(agent.NewMessage(
 			in.Context,
 			agent.MessageType_Error,
