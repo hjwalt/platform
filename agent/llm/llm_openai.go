@@ -47,6 +47,10 @@ func (r *openAiModel) Chat(ctx context.Context, messages []agent.Message, allowe
 			{
 				modelMessage = append(modelMessage, OpenAiSystemMessage(message))
 			}
+		case agent.MessageType_Assistant:
+			{
+				modelMessage = append(modelMessage, OpenAiAssistantMessage(message))
+			}
 		case agent.MessageType_User:
 			{
 				modelMessage = append(modelMessage, OpenAiUserMessage(message))
@@ -137,6 +141,10 @@ func OpenAiFromJsonSchema(name string, description string, toolSchema *jsonschem
 
 func OpenAiSystemMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {
 	return openai.SystemMessage(message.Message)
+}
+
+func OpenAiAssistantMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {
+	return openai.AssistantMessage(message.Message)
 }
 
 func OpenAiUserMessage(message agent.Message) openai.ChatCompletionMessageParamUnion {

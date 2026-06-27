@@ -2,6 +2,7 @@ package web_search_tool
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -49,11 +50,13 @@ type tool struct {
 }
 
 func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
+	term := strings.ReplaceAll(params.Term, "\"", "")
+
 	success, err := brave_search.WebSearch(
 		context.Background(),
 		t.Brave,
 		[]brave_search.Param{
-			brave_search.WithTerm(params.Term),
+			brave_search.WithTerm(term),
 		},
 		[]brave_search.Header{
 			brave_search.WithSubscriptionToken(t.ApiKey),
@@ -62,6 +65,10 @@ func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
 
 	if err != nil {
 		return Response{Results: make([]SearchResult, 0)}, err
+	}
+
+	if success.Web == nil {
+		return Response{Results: make([]SearchResult, 0)}, errors.New("web result is empty")
 	}
 
 	results := make([]SearchResult, len(success.Web.Results))

@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
-	agent_skill "github.com/hjwalt/platform/agent/skill"
+	harness_container "github.com/hjwalt/platform/agent/util/container"
 	tool_string_wrapper "github.com/hjwalt/platform/agent/util/string_wrapper"
 	"github.com/hjwalt/platform/format"
 )
@@ -29,7 +29,7 @@ type Response struct {
 }
 
 type tool struct {
-	skills map[string]agent_skill.Skill
+	skills agent.SkillContainer
 }
 
 func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
@@ -42,7 +42,7 @@ func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
 	}
 
 	// Case-insensitive lookup
-	skill, found := t.lookupSkill(name)
+	skill, found := t.skills.Get(name)
 	if !found {
 		return Response{
 			Name:  params.Name,
@@ -59,17 +59,6 @@ func (t *tool) Apply(ctx context.Context, params Request) (Response, error) {
 	}, nil
 }
 
-// lookupSkill performs a case-insensitive exact match against the registry.
-func (t *tool) lookupSkill(name string) (agent_skill.Skill, bool) {
-	lower := strings.ToLower(name)
-	for k, v := range t.skills {
-		if strings.ToLower(k) == lower {
-			return v, true
-		}
-	}
-	return agent_skill.Skill{}, false
-}
-
 func (t *tool) Name() string {
 	return Name
 }
@@ -79,7 +68,7 @@ func (t *tool) Description() string {
 }
 
 func (t *tool) RequestFormat() format.Format[Request] {
-	return format.Json[Request]()
+	return RequestFormat
 }
 
 func (t *tool) RequestSchema() *jsonschema.Schema {
@@ -129,9 +118,9 @@ func (t *tool) Auto() bool {
 
 // Create constructs a new skill SyncTool from a skill registry.
 // The registry maps skill names to their parsed Skill definitions.
-func Create(skills map[string]agent_skill.Skill) agent.SyncTool[Request, Response] {
+func Create(skills agent.SkillContainer) agent.SyncTool[Request, Response] {
 	if skills == nil {
-		skills = make(map[string]agent_skill.Skill)
+		skills = harness_container.NewSkillContainer()
 	}
 	return &tool{
 		skills: skills,
@@ -139,6 +128,12 @@ func Create(skills map[string]agent_skill.Skill) agent.SyncTool[Request, Respons
 }
 
 // AddToContainer registers the skill tool as a sync tool in the container.
-func AddToContainer(container agent.ToolContainer, skills map[string]agent_skill.Skill) {
+func AddToContainer(container agent.ToolContainer, skills agent.SkillContainer) {
 	container.AddSync(tool_string_wrapper.StringWrapSync(Create(skills)))
 }
+
+func Parse(args string) (Request, error) {
+	return RequestFormat.Unmarshal([]byte(args))
+}
+
+var RequestFormat = format.Json[Request]()

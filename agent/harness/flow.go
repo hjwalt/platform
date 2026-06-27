@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/hjwalt/platform/agent"
+	skill_tool "github.com/hjwalt/platform/agent/tool/skill"
 	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/logger"
 	"github.com/hjwalt/platform/type/either"
@@ -43,8 +44,9 @@ func (r *FlowMetadata) MessageMetadata(ctx context.Context, pref flow.Metadata, 
 }
 
 type Flow struct {
-	Tools agent.ToolContainer
-	Model agent.LanguageModel
+	Tools  agent.ToolContainer
+	Skills agent.SkillContainer
+	Model  agent.LanguageModel
 }
 
 func (r *Flow) Update(inctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
@@ -137,7 +139,7 @@ func (r *Flow) mergeMessage(in agent.Message, st ExecutionState) either.Either[E
 
 func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionState) either.Either[ExecutionState, agent.Message] {
 	messagesToChat := make([]agent.Message, 0)
-	for _, message := range st.Messages {
+	for i, message := range st.Messages {
 		switch message.Type {
 		case agent.MessageType_ToolExecute, agent.MessageType_ToolRequest, agent.MessageType_ToolResult:
 			{
@@ -150,8 +152,18 @@ func (r *Flow) modelExecute(ctx context.Context, in agent.Message, st ExecutionS
 					}
 				}
 			}
+		case agent.MessageType_System:
+			{
+				messagesToChat = append(messagesToChat, message)
+				if i == 0 {
+					messagesToChat = append(messagesToChat, r.Skills.Assistant(in.Context))
+				}
+			}
 		default:
 			{
+				if i == 0 {
+					messagesToChat = append(messagesToChat, r.Skills.Assistant(in.Context))
+				}
 				messagesToChat = append(messagesToChat, message)
 			}
 		}
@@ -216,7 +228,40 @@ func (r *Flow) toolExecute(ctx context.Context, in agent.Message, st ExecutionSt
 			in.ReasoningContent,
 			toolData,
 		)))
-	} else if result, toolError := r.Tools.Execute(ctx, in, toolData); toolError == nil {
+
+		return either.Left[ExecutionState, agent.Message](st)
+	}
+
+	if toolData.Name == skill_tool.Name {
+		skillRequest, skillParseErr := skill_tool.Parse(toolData.Arguments)
+		if skillParseErr != nil {
+			st = st.UpdateToolState(in.Tool.Id, ToolState_Failed)
+			st = st.SetNext(agent.SingleResult(agent.NewMessage(
+				in.Context,
+				agent.MessageType_Error,
+				skillParseErr.Error(),
+				in.ReasoningContent,
+				toolData,
+			)))
+			return either.Left[ExecutionState, agent.Message](st)
+		}
+
+		if st.SkillLoaded(skillRequest.Name) {
+			st = st.UpdateToolState(in.Tool.Id, ToolState_Executed)
+			st = st.SetNext(agent.SingleResult(agent.NewMessage(
+				in.Context,
+				agent.MessageType_ToolResult,
+				"skill "+skillRequest.Name+" is already loaded",
+				in.ReasoningContent,
+				toolData,
+			)))
+			return either.Left[ExecutionState, agent.Message](st)
+		} else {
+			st.AppendSkillLoaded(skillRequest.Name)
+		}
+	}
+
+	if result, toolError := r.Tools.Execute(ctx, in, toolData); toolError == nil {
 		st = st.UpdateToolState(in.Tool.Id, ToolState_Executed)
 		if result.IsPresent() {
 			st = st.SetNext(agent.SingleResult(agent.NewMessage(

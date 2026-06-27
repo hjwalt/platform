@@ -6,27 +6,27 @@ import (
 	"testing"
 
 	"github.com/hjwalt/platform/agent"
-	agent_skill "github.com/hjwalt/platform/agent/skill"
 	harness_container "github.com/hjwalt/platform/agent/util/container"
 	"github.com/stretchr/testify/assert"
 )
 
 // testRegistry returns a skill registry with two skills for testing.
-func testRegistry() map[string]agent_skill.Skill {
-	return map[string]agent_skill.Skill{
-		"code-review": {
-			Name:         "code-review",
-			Description:  "Review code for bugs and improvements",
-			Body:         "## Code Review Playbook\n\n1. Check for correctness\n2. Check for performance\n",
-			AllowedTools: []string{"linux_shell", "web_fetch"},
-		},
-		"deep-research": {
-			Name:         "deep-research",
-			Description:  "Perform deep research on a topic",
-			Body:         "## Deep Research Playbook\n\n1. Search the web\n2. Fetch sources\n3. Synthesize findings\n",
-			AllowedTools: []string{"web_search", "web_fetch"},
-		},
-	}
+func testRegistry() agent.SkillContainer {
+	skillcontainer := harness_container.NewSkillContainer()
+	skillcontainer.Add(agent.Instruction{
+		Name:         "code-review",
+		Description:  "Review code for bugs and improvements",
+		Body:         "## Code Review Playbook\n\n1. Check for correctness\n2. Check for performance\n",
+		AllowedTools: []string{"linux_shell", "web_fetch"},
+	})
+	skillcontainer.Add(agent.Instruction{
+		Name:         "deep-research",
+		Description:  "Perform deep research on a topic",
+		Body:         "## Deep Research Playbook\n\n1. Search the web\n2. Fetch sources\n3. Synthesize findings\n",
+		AllowedTools: []string{"web_search", "web_fetch"},
+	})
+
+	return skillcontainer
 }
 
 // --- FR-SKILL-002, FR-SKILL-003: Successful skill lookup ---
@@ -180,7 +180,7 @@ func TestSkillEmptyRegistry(t *testing.T) {
 	assert := assert.New(t)
 	ctx := context.Background()
 
-	skill := Create(make(map[string]agent_skill.Skill))
+	skill := Create(harness_container.NewSkillContainer())
 
 	resp, err := skill.Apply(ctx, Request{Name: "any-skill"})
 	assert.NoError(err)

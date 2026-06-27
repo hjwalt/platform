@@ -14,10 +14,14 @@ import (
 	"github.com/hjwalt/platform/type/optional"
 )
 
+// This typed structure is better for configuration wiring because it prevents random runtime failures
+
 type Context interface {
 	Add(runtimes ...runtime.Runtime)
 	SetToolContainer(agent.ToolContainer)
 	GetToolContainer() agent.ToolContainer
+	SetSkillContainer(agent.SkillContainer)
+	GetSkillContainer() agent.SkillContainer
 	SetAgentModel(agent.LanguageModel)
 	GetAgentModel() agent.LanguageModel
 	SetParserModel(agent.LanguageModel)
@@ -37,6 +41,7 @@ func ContextBuilder() Context {
 	return &holder{
 		Runtimes:             make([]runtime.Runtime, 0),
 		ToolContainer:        optional.Empty[agent.ToolContainer](),
+		SkillContainer:       optional.Empty[agent.SkillContainer](),
 		AgentModel:           optional.Empty[agent.LanguageModel](),
 		ParserModel:          optional.Empty[agent.LanguageModel](),
 		KafkaProducer:        optional.Empty[message.Producer[kafka.KafkaMetadata]](),
@@ -49,6 +54,7 @@ func ContextBuilder() Context {
 type holder struct {
 	Runtimes             []runtime.Runtime
 	ToolContainer        optional.Optional[agent.ToolContainer]
+	SkillContainer       optional.Optional[agent.SkillContainer]
 	AgentModel           optional.Optional[agent.LanguageModel]
 	ParserModel          optional.Optional[agent.LanguageModel]
 	KafkaProducer        optional.Optional[message.Producer[kafka.KafkaMetadata]]
@@ -70,6 +76,17 @@ func (r *holder) GetToolContainer() agent.ToolContainer {
 		r.Missing()
 	}
 	return r.ToolContainer.Get()
+}
+
+func (r *holder) SetSkillContainer(value agent.SkillContainer) {
+	r.SkillContainer = optional.Of(value)
+}
+
+func (r *holder) GetSkillContainer() agent.SkillContainer {
+	if !r.SkillContainer.IsPresent() {
+		r.Missing()
+	}
+	return r.SkillContainer.Get()
 }
 
 func (r *holder) SetAgentModel(value agent.LanguageModel) {

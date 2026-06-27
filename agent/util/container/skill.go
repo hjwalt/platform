@@ -1,19 +1,20 @@
 package harness_container
 
 import (
+	"strings"
+
 	"github.com/hjwalt/platform/agent"
-	agent_skill "github.com/hjwalt/platform/agent/skill"
 	"github.com/hjwalt/platform/type/optional"
 )
 
 func NewSkillContainer() agent.SkillContainer {
 	return &skillContainer{
-		skills: make(map[string]agent_skill.Skill),
+		skills: make(map[string]agent.Instruction),
 	}
 }
 
 type skillContainer struct {
-	skills map[string]agent_skill.Skill
+	skills map[string]agent.Instruction
 }
 
 func (r *skillContainer) Add(in agent.Instruction) {
@@ -25,7 +26,7 @@ func (r *skillContainer) Add(in agent.Instruction) {
 	if compatibility == nil {
 		compatibility = optional.Empty[string]()
 	}
-	r.skills[in.Name] = agent_skill.Skill{
+	r.skills[strings.ToLower(in.Name)] = agent.Instruction{
 		Name:          in.Name,
 		Description:   in.Description,
 		License:       license,
@@ -37,7 +38,7 @@ func (r *skillContainer) Add(in agent.Instruction) {
 }
 
 func (r *skillContainer) Get(name string) (agent.Instruction, bool) {
-	s, ok := r.skills[name]
+	s, ok := r.skills[strings.ToLower(name)]
 	if !ok {
 		return agent.Instruction{}, false
 	}
@@ -50,4 +51,27 @@ func (r *skillContainer) Get(name string) (agent.Instruction, bool) {
 		Metadata:      s.Metadata,
 		Body:          s.Body,
 	}, true
+}
+
+func (r *skillContainer) Assistant(ctx string) agent.Message {
+	outputBuilder := strings.Builder{}
+	outputBuilder.WriteString("available skills:")
+	outputBuilder.WriteString("\n")
+	outputBuilder.WriteString("\n")
+	for _, instruction := range r.skills {
+
+		outputBuilder.WriteString("name:\n")
+		outputBuilder.WriteString(instruction.Name)
+		outputBuilder.WriteString("\n")
+		outputBuilder.WriteString("description:\n")
+		outputBuilder.WriteString(instruction.Description)
+		outputBuilder.WriteString("\n\n")
+	}
+	return agent.NewMessage(
+		ctx,
+		agent.MessageType_Assistant,
+		outputBuilder.String(),
+		"",
+		agent.ToolCall{},
+	)
 }

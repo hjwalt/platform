@@ -73,7 +73,7 @@ func main() {
 			StockPrice: finance_stock_price_tool.Configuration{
 				Secret: environment.GetString("MASSIVE_TOKEN", ""),
 			},
-			Memory: []memory_tool.Configuration{ // TODO: rethink -- this doesn't work out of the box with models, it needs more to coerce it to use memory
+			Memory: []memory_tool.Configuration{ // TODO: rethink -- this sort of works, but need a planner skill to embed more "thinking" in the flow
 				{
 					Key: "corrections",
 				},
@@ -130,12 +130,13 @@ func main() {
 
 	holder := configuration.ContextBuilder()
 
-	// Runtimes
+	// Runtimes, this sequence is sensitive due to dependencies held using the configuration holder
 
 	configuration.RegisterKafkaProducer(holder, config)
 	configuration.RegisterKafkaAgentMessageProducer(holder, config)
 	configuration.RegisterParserModel(holder, config)
 	configuration.RegisterMemoryStore(holder, config)
+	configuration.RegisterSkills(holder, config)
 	configuration.RegisterTools(holder, config)
 	configuration.RegisterAgentHarnessStore(holder, config)
 	configuration.RegisterAgentModel(holder, config)

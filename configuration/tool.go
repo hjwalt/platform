@@ -24,6 +24,7 @@ func RegisterTools(holder Context, conf Configuration) {
 	web_fetch_tool.AddToContainer(container, conf.Tool.WebFetch, holder.GetParserModel())
 	finance_fx_price_tool.AddToContainer(container, conf.Tool.FxPrice)
 	finance_stock_price_tool.AddToContainer(container, conf.Tool.StockPrice)
+	skill_tool.AddToContainer(container, holder.GetSkillContainer())
 
 	for _, memoryConfig := range conf.Tool.Memory {
 		if validateErr := memory_tool.Validate(memoryConfig, holder.GetMemoryStore()); validateErr != nil {
@@ -32,14 +33,6 @@ func RegisterTools(holder Context, conf Configuration) {
 		}
 		memory_tool.AddToContainer(container, memoryConfig, holder.GetMemoryStore())
 	}
-
-	// register skill tool for on-demand context injection
-	registerSkills(
-		holder,
-		conf,
-		container,
-		"./docs/skills/self-improving",
-	)
 
 	// register subagents (async delegation)
 	registerSubAgents(
@@ -52,23 +45,6 @@ func RegisterTools(holder Context, conf Configuration) {
 	holder.SetToolContainer(container)
 }
 
-// registerSkills reads skill properties from the given directories
-// and returns a name-indexed registry for the skill tool.
-// Directories that fail to load are logged and skipped.
-func registerSkills(holder Context, conf Configuration, container agent.ToolContainer, dirs ...string) {
-	registry := make(map[string]agent_skill.Skill)
-	for _, dir := range dirs {
-		props, err := agent_skill.ReadProperties(dir)
-		if err != nil {
-			slog.Warn("failed to load skill for registry", "dir", dir, "error", err)
-			continue
-		}
-		registry[props.Name] = *props
-		slog.Info("loaded skill into registry", "name", props.Name, "dir", dir)
-	}
-	skill_tool.AddToContainer(container, registry)
-}
-
 func registerSubAgents(holder Context, conf Configuration, container agent.ToolContainer, dirs ...string) {
 	for _, path := range dirs {
 		properties, err := agent_skill.ReadProperties(path)
@@ -76,7 +52,7 @@ func registerSubAgents(holder Context, conf Configuration, container agent.ToolC
 			slog.Error("failed to register subagent", "path", path, "error", err)
 			return
 		}
-		slog.Info("registered subagent", "path", path, "name", properties)
-		subagent_tool.AddSubagentToContainer(container, *properties, holder.GetAgentMessageProducer())
+		slog.Info("registered subagent", "path", path, "name", properties.Name)
+		subagent_tool.AddSubagentToContainer(container, properties, holder.GetAgentMessageProducer())
 	}
 }

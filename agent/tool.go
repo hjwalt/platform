@@ -65,5 +65,6 @@ type Instruction struct {
 
 type SkillContainer interface {
 	Add(Instruction)
-	Get(string) (Instruction, bool)
+	Get(name string) (Instruction, bool)
+	Assistant(ctx string) Message
 }

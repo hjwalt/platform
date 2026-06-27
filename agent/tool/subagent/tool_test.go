@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hjwalt/platform/agent"
-	agent_skill "github.com/hjwalt/platform/agent/skill"
 	harness_container "github.com/hjwalt/platform/agent/util/container"
 	"github.com/hjwalt/platform/flow"
 	"github.com/stretchr/testify/assert"
@@ -167,7 +166,7 @@ func TestSubagentCreateReturnsAsyncTool(t *testing.T) {
 func TestSubagentFromSubagent(t *testing.T) {
 	assert := assert.New(t)
 
-	skill := agent_skill.Skill{
+	skill := agent.Instruction{
 		Name:         "code-review",
 		Description:  "Review code for bugs",
 		Body:         "## Playbook\n\n1. Check correctness",
@@ -184,7 +183,7 @@ func TestSubagentFromSubagent(t *testing.T) {
 func TestSubagentFromSubagentNamePreserved(t *testing.T) {
 	assert := assert.New(t)
 
-	skill := agent_skill.Skill{
+	skill := agent.Instruction{
 		Name:         "my-skill-name",
 		Description:  "A skill with hyphens in name",
 		Body:         "## Playbook",
@@ -272,7 +271,7 @@ func TestAddSubagentToContainer(t *testing.T) {
 	assert := assert.New(t)
 	container := harness_container.NewToolContainer()
 
-	skill := agent_skill.Skill{
+	skill := agent.Instruction{
 		Name:         "deploy",
 		Description:  "Deploy services",
 		Body:         "## Deploy Playbook",

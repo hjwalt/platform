@@ -42,6 +42,10 @@ func (r *deepSeekModel) Chat(ctx context.Context, messages []agent.Message, allo
 			{
 				modelMessage = append(modelMessage, DeepSeekSystemMessage(message))
 			}
+		case agent.MessageType_Assistant:
+			{
+				modelMessage = append(modelMessage, DeepSeekAssistantMessage(message))
+			}
 		case agent.MessageType_User:
 			{
 				modelMessage = append(modelMessage, DeepSeekUserMessage(message))
@@ -130,6 +134,14 @@ func DeepSeekToolFromJsonSchema(name string, description string, toolSchema *jso
 func DeepSeekSystemMessage(message agent.Message) deepseek.ChatCompletionMessage {
 	return deepseek.ChatCompletionMessage{
 		Role:             deepseek.ChatMessageRoleSystem,
+		Content:          message.Message,
+		ReasoningContent: message.ReasoningContent,
+	}
+}
+
+func DeepSeekAssistantMessage(message agent.Message) deepseek.ChatCompletionMessage {
+	return deepseek.ChatCompletionMessage{
+		Role:             deepseek.ChatMessageRoleAssistant,
 		Content:          message.Message,
 		ReasoningContent: message.ReasoningContent,
 	}

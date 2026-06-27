@@ -19,6 +19,7 @@ const (
 	MessageType_Agent       MessageType = "AGENT"
 	MessageType_Error       MessageType = "ERROR"
 	MessageType_Start       MessageType = "FORK"
+	MessageType_Assistant   MessageType = "ASSISTANT"
 )
 
 type Message struct {

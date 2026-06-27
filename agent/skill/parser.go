@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hjwalt/platform/agent"
 	"github.com/hjwalt/platform/type/optional"
 	"github.com/stretchr/testify/assert/yaml"
 )
@@ -75,44 +76,44 @@ func ParseFrontmatter(content string) (map[string]interface{}, string, error) {
 //
 // Returns a ParseError if the file is missing or has invalid YAML,
 // or a ValidationError if required fields are missing or invalid.
-func ReadProperties(skillDir string) (*Skill, error) {
+func ReadProperties(skillDir string) (agent.Instruction, error) {
 	skillMd, found := FindSkillMd(skillDir)
 	if !found {
-		return nil, NewParseErrorf("SKILL.md not found in %s", skillDir)
+		return agent.Instruction{}, NewParseErrorf("SKILL.md not found in %s", skillDir)
 	}
 
 	content, err := os.ReadFile(skillMd)
 	if err != nil {
-		return nil, NewParseErrorf("Failed to read SKILL.md: %v", err)
+		return agent.Instruction{}, NewParseErrorf("Failed to read SKILL.md: %v", err)
 	}
 
 	metadata, body, err := ParseFrontmatter(string(content))
 	if err != nil {
-		return nil, err
+		return agent.Instruction{}, err
 	}
 
 	// Check required fields
 	nameVal, hasName := metadata["name"]
 	if !hasName {
-		return nil, NewValidationError("Missing required field in frontmatter: name")
+		return agent.Instruction{}, NewValidationError("Missing required field in frontmatter: name")
 	}
 
 	descVal, hasDesc := metadata["description"]
 	if !hasDesc {
-		return nil, NewValidationError("Missing required field in frontmatter: description")
+		return agent.Instruction{}, NewValidationError("Missing required field in frontmatter: description")
 	}
 
 	name, ok := nameVal.(string)
 	if !ok || strings.TrimSpace(name) == "" {
-		return nil, NewValidationError("Field 'name' must be a non-empty string")
+		return agent.Instruction{}, NewValidationError("Field 'name' must be a non-empty string")
 	}
 
 	description, ok := descVal.(string)
 	if !ok || strings.TrimSpace(description) == "" {
-		return nil, NewValidationError("Field 'description' must be a non-empty string")
+		return agent.Instruction{}, NewValidationError("Field 'description' must be a non-empty string")
 	}
 
-	props := &Skill{
+	props := agent.Instruction{
 		Name:        strings.TrimSpace(name),
 		Description: strings.TrimSpace(description),
 		Body:        body,

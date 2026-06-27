@@ -1,6 +1,8 @@
 package harness
 
 import (
+	"strings"
+
 	"github.com/hjwalt/platform/agent"
 )
 
@@ -20,6 +22,7 @@ type ExecutionState struct {
 	Messages       []agent.Message
 	ToolStates     map[string]ToolState
 	Next           agent.Result
+	LoadedSkills   map[string]bool
 }
 
 func (st ExecutionState) SetContext(ctx string) ExecutionState {
@@ -51,5 +54,21 @@ func (st ExecutionState) AppendMessage(message agent.Message) ExecutionState {
 		st.Messages = make([]agent.Message, 0)
 	}
 	st.Messages = append(st.Messages, message)
+	return st
+}
+
+func (st ExecutionState) SkillLoaded(skill string) bool {
+	if st.LoadedSkills == nil {
+		return false
+	}
+	loaded, present := st.LoadedSkills[strings.ToLower(skill)]
+	return present && loaded
+}
+
+func (st ExecutionState) AppendSkillLoaded(skill string) ExecutionState {
+	if st.LoadedSkills == nil {
+		st.LoadedSkills = make(map[string]bool, 0)
+	}
+	st.LoadedSkills[strings.ToLower(skill)] = true
 	return st
 }

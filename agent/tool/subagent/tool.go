@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hjwalt/platform/agent"
-	agent_skill "github.com/hjwalt/platform/agent/skill"
 	tool_string_wrapper "github.com/hjwalt/platform/agent/util/string_wrapper"
 	"github.com/hjwalt/platform/flow"
 	"github.com/hjwalt/platform/format"
@@ -89,7 +88,7 @@ func Create(config Configuration, producer flow.Producer[agent.Message]) agent.A
 	}
 }
 
-func FromSubagent(config agent_skill.Skill, producer flow.Producer[agent.Message]) agent.AsyncTool[Request] {
+func FromSubagent(config agent.Instruction, producer flow.Producer[agent.Message]) agent.AsyncTool[Request] {
 	return &tool{
 		AgentName:        config.Name,
 		AgentDescription: config.Description,
@@ -103,6 +102,6 @@ func AddToContainer(container agent.ToolContainer, config Configuration, produce
 	container.AddAsync(tool_string_wrapper.StringWrapAsync(Create(config, producer)))
 }
 
-func AddSubagentToContainer(container agent.ToolContainer, config agent_skill.Skill, producer flow.Producer[agent.Message]) {
+func AddSubagentToContainer(container agent.ToolContainer, config agent.Instruction, producer flow.Producer[agent.Message]) {
 	container.AddAsync(tool_string_wrapper.StringWrapAsync(FromSubagent(config, producer)))
 }
