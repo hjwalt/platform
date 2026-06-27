@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/hjwalt/platform/agent"
-	tool_container "github.com/hjwalt/platform/agent/util/container"
+	harness_container "github.com/hjwalt/platform/agent/util/container"
 	memory_store "github.com/hjwalt/platform/state/memory"
 	"github.com/stretchr/testify/assert"
 )
@@ -96,7 +96,7 @@ func TestMemoryToolValidationAndErrors(t *testing.T) {
 
 func TestAddToContainerRegistersSingleMemoryTool(t *testing.T) {
 	assert := assert.New(t)
-	container := tool_container.New()
+	container := harness_container.NewToolContainer()
 
 	AddToContainer(container, Configuration{Key: "improvements"}, memory_store.New())
 

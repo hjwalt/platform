@@ -7,7 +7,7 @@ import (
 
 	"github.com/hjwalt/platform/agent"
 	agent_skill "github.com/hjwalt/platform/agent/skill"
-	tool_container "github.com/hjwalt/platform/agent/util/container"
+	harness_container "github.com/hjwalt/platform/agent/util/container"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,15 +15,15 @@ import (
 func testRegistry() map[string]agent_skill.Skill {
 	return map[string]agent_skill.Skill{
 		"code-review": {
-			Name:        "code-review",
-			Description: "Review code for bugs and improvements",
-			Body:        "## Code Review Playbook\n\n1. Check for correctness\n2. Check for performance\n",
+			Name:         "code-review",
+			Description:  "Review code for bugs and improvements",
+			Body:         "## Code Review Playbook\n\n1. Check for correctness\n2. Check for performance\n",
 			AllowedTools: []string{"linux_shell", "web_fetch"},
 		},
 		"deep-research": {
-			Name:        "deep-research",
-			Description: "Perform deep research on a topic",
-			Body:        "## Deep Research Playbook\n\n1. Search the web\n2. Fetch sources\n3. Synthesize findings\n",
+			Name:         "deep-research",
+			Description:  "Perform deep research on a topic",
+			Body:         "## Deep Research Playbook\n\n1. Search the web\n2. Fetch sources\n3. Synthesize findings\n",
 			AllowedTools: []string{"web_search", "web_fetch"},
 		},
 	}
@@ -203,7 +203,7 @@ func TestSkillNilRegistry(t *testing.T) {
 
 func TestAddToContainerRegistersSkillTool(t *testing.T) {
 	assert := assert.New(t)
-	container := tool_container.New()
+	container := harness_container.NewToolContainer()
 
 	AddToContainer(container, testRegistry())
 

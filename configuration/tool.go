@@ -12,11 +12,11 @@ import (
 	subagent_tool "github.com/hjwalt/platform/agent/tool/subagent"
 	web_fetch_tool "github.com/hjwalt/platform/agent/tool/web_fetch"
 	web_search_tool "github.com/hjwalt/platform/agent/tool/web_search"
-	tool_container "github.com/hjwalt/platform/agent/util/container"
+	harness_container "github.com/hjwalt/platform/agent/util/container"
 )
 
 func RegisterTools(holder Context, conf Configuration) {
-	container := tool_container.New()
+	container := harness_container.NewToolContainer()
 
 	// register tools
 	web_search_tool.AddToContainer(container, conf.Tool.WebSearch)

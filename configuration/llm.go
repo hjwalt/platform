@@ -2,12 +2,12 @@ package configuration
 
 import (
 	"github.com/hjwalt/platform/agent/llm"
-	tool_container "github.com/hjwalt/platform/agent/util/container"
+	harness_container "github.com/hjwalt/platform/agent/util/container"
 	file_store "github.com/hjwalt/platform/state/file"
 )
 
 func RegisterParserModel(holder Context, conf Configuration) {
-	model := llm.New(conf.Model.Configurations[conf.Model.Parser], tool_container.New())
+	model := llm.New(conf.Model.Configurations[conf.Model.Parser], harness_container.NewToolContainer())
 	holder.Add(model)
 
 	holder.SetParserModel(model)

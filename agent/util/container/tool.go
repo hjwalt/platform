@@ -1,4 +1,4 @@
-package tool_container
+package harness_container
 
 import (
 	"context"
@@ -11,31 +11,31 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
-func New() agent.ToolContainer {
-	return &container{
+func NewToolContainer() agent.ToolContainer {
+	return &toolContainer{
 		tools: make([]string, 0),
 		sync:  make(map[string]agent.SyncToolWrapper),
 		async: make(map[string]agent.AsyncToolWrapper),
 	}
 }
 
-type container struct {
+type toolContainer struct {
 	tools []string
 	sync  map[string]agent.SyncToolWrapper
 	async map[string]agent.AsyncToolWrapper
 }
 
-func (r *container) AddSync(tool agent.SyncToolWrapper) {
+func (r *toolContainer) AddSync(tool agent.SyncToolWrapper) {
 	r.tools = append(r.tools, tool.Name())
 	r.sync[tool.Name()] = tool
 }
 
-func (r *container) AddAsync(tool agent.AsyncToolWrapper) {
+func (r *toolContainer) AddAsync(tool agent.AsyncToolWrapper) {
 	r.tools = append(r.tools, tool.Name())
 	r.async[tool.Name()] = tool
 }
 
-func (r *container) OpenAiParamsFiltered(allowed []string) []openai.ChatCompletionToolUnionParam {
+func (r *toolContainer) OpenAiParamsFiltered(allowed []string) []openai.ChatCompletionToolUnionParam {
 	if len(allowed) == 0 {
 		allowed = append(allowed, r.tools...)
 	}
@@ -51,7 +51,7 @@ func (r *container) OpenAiParamsFiltered(allowed []string) []openai.ChatCompleti
 	return tools
 }
 
-func (r *container) DeepSeekParams(allowed []string) []deepseek.Tool {
+func (r *toolContainer) DeepSeekParams(allowed []string) []deepseek.Tool {
 	if len(allowed) == 0 {
 		allowed = append(allowed, r.tools...)
 	}
@@ -67,7 +67,7 @@ func (r *container) DeepSeekParams(allowed []string) []deepseek.Tool {
 	return tools
 }
 
-func (r *container) Execute(ctx context.Context, in agent.Message, call agent.ToolCall) (optional.Optional[string], error) {
+func (r *toolContainer) Execute(ctx context.Context, in agent.Message, call agent.ToolCall) (optional.Optional[string], error) {
 	if tool, exists := r.sync[call.Name]; exists {
 		response, internalErr := tool.Apply(ctx, call.Arguments)
 		if internalErr != nil {
@@ -85,7 +85,7 @@ func (r *container) Execute(ctx context.Context, in agent.Message, call agent.To
 	}
 }
 
-func (r *container) DescribeRequest(call agent.ToolCall) (string, error) {
+func (r *toolContainer) DescribeRequest(call agent.ToolCall) (string, error) {
 	if tool, exists := r.sync[call.Name]; exists {
 		return tool.DescribeRequest(call.Arguments), nil
 	} else if asyncTool, exists := r.async[call.Name]; exists {
@@ -95,7 +95,7 @@ func (r *container) DescribeRequest(call agent.ToolCall) (string, error) {
 	}
 }
 
-func (r *container) Exists(call agent.ToolCall) bool {
+func (r *toolContainer) Exists(call agent.ToolCall) bool {
 	if _, exists := r.sync[call.Name]; exists {
 		return true
 	} else if _, exists := r.async[call.Name]; exists {
@@ -105,7 +105,7 @@ func (r *container) Exists(call agent.ToolCall) bool {
 	}
 }
 
-func (r *container) Auto(call agent.ToolCall) bool {
+func (r *toolContainer) Auto(call agent.ToolCall) bool {
 	if tool, exists := r.sync[call.Name]; exists {
 		return tool.Auto()
 	} else if asyncTool, exists := r.async[call.Name]; exists {

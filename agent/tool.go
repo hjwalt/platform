@@ -51,3 +51,19 @@ type ToolContainer interface {
 	OpenAiParamsFiltered([]string) []openai.ChatCompletionToolUnionParam
 	DeepSeekParams([]string) []deepseek.Tool
 }
+
+// common structure for AGENTS.md and SKILLS.md
+type Instruction struct {
+	Name          string
+	Description   string
+	License       optional.Optional[string]
+	Compatibility optional.Optional[string]
+	AllowedTools  []string
+	Metadata      map[string]string
+	Body          string
+}
+
+type SkillContainer interface {
+	Add(Instruction)
+	Get(string) (Instruction, bool)
+}
