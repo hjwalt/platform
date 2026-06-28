@@ -53,6 +53,14 @@ This file contains the specifications for the requirements. It must contain the 
 6. Definition of Done
 7. Testing Methodology
 
+#### Functional Requirements
+
+1. Functional requirements numbering should follow `FR-<type>-<spec index>-<functional requirement index>-<short title>`
+
+#### Non-Functional Requirements
+
+1. Non-Functional requirements numbering should follow `NFR-<type>-<spec index>-<functional requirement index>-<short title>`
+
 ### tasks.md
 
 This file contains the to-do list for the agents to complete to fully develop for the specifications. It must contain the following sections:
@@ -86,6 +94,7 @@ This file contains the implemenation details for the feature. It must contain th
 - backend-00001-state-file/: File State Store specification.
 - backend-00002-state-memory/: In-Memory State Store specification.
 - flow-00001-flow-runtime/: SDD template-based flow/runtime lifecycle specification.
+- flow-00002-stateful-operator/: Stateful operator specification — generic key-scoped stateful handler with state-update short-circuit and handler output/error semantics.
 - llm-00001-deepseek/: DeepSeek LLM adapter specification.
 - llm-00002-openai/: OpenAI LLM adapter specification.
 - llm-00003-openai-embedding/: OpenAI Embedding adapter specification.
