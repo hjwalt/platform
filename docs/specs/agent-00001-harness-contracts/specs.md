@@ -17,31 +17,31 @@ It standardizes typed interfaces and failure handling so harness behavior is pre
 
 # Functional Requirements
 
-## FR-AGENT-001 Typed Tool Invocation
+## FR-AGENT-00001-001 Typed Tool Invocation
 
 - Tool execution must enforce request and response typing contracts.
 - Given valid tool input payload, harness execution must return typed output that is serializable.
 - Given invalid input payload, harness validation must reject execution with structured error details.
 
-## FR-AGENT-002 Tool Failure Isolation
+## FR-AGENT-00001-002 Tool Failure Isolation
 
 - A failing tool call must not corrupt overall harness state.
 - Given one failing tool invocation in a multi-step sequence, subsequent steps must follow explicit policy instead of undefined behavior.
 - Given a tool panic or transport error, the harness must contain the failure and convert it into an explicit failure result.
 
-## FR-AGENT-003 Skill Parsing Contract
+## FR-AGENT-00001-003 Skill Parsing Contract
 
 - Skill metadata and content must parse consistently from expected formats.
 - Given valid frontmatter and body sections, parser execution must return a structured skill object.
 - Given malformed frontmatter delimiters, parser execution must return a descriptive parse error.
 
-## FR-AGENT-004 Model Call Robustness
+## FR-AGENT-00001-004 Model Call Robustness
 
 - Model execution must expose clear outcomes for success, timeout, and provider failure.
 - Given provider success response, model execution must return content and metadata in a normalized shape.
 - Given provider timeout or transport failure, model execution must apply configured retry policy or return terminal error behavior explicitly.
 
-## FR-AGENT-005 Auditability
+## FR-AGENT-00001-005 Auditability
 
 - Harness execution must capture enough information to reconstruct tool and model interaction order.
 - Given a successful run, logs must include traceable entries for each major step.
@@ -49,15 +49,24 @@ It standardizes typed interfaces and failure handling so harness behavior is pre
 
 # Non-Functional Requirements
 
-1. Safety: Tool input derived from model output must be validated before runtime dispatch.
-2. Security: Sensitive values must be omitted from logs or explicitly redacted.
-3. Reliability: Panic and transport-level failures must be contained and represented as explicit failures.
-4. Observability: Logs must allow execution-sequence reconstruction in both success and failure paths.
-5. Maintainability: Requirement IDs and acceptance statements must remain stable and test-mapped.
+## NFR-AGENT-00001-001 Safety
+- Tool input derived from model output must be validated before runtime dispatch.
+
+## NFR-AGENT-00001-002 Security
+- Sensitive values must be omitted from logs or explicitly redacted.
+
+## NFR-AGENT-00001-003 Reliability
+- Panic and transport-level failures must be contained and represented as explicit failures.
+
+## NFR-AGENT-00001-004 Observability
+- Logs must allow execution-sequence reconstruction in both success and failure paths.
+
+## NFR-AGENT-00001-005 Maintainability
+- Requirement IDs and acceptance statements must remain stable and test-mapped.
 
 # Definition of Done
 
-1. FR-AGENT-001 through FR-AGENT-005 are covered by automated tests.
+1. FR-AGENT-00001-001 through FR-AGENT-00001-005 are covered by automated tests.
 2. Tests cover both happy paths and failure paths defined in acceptance scenarios.
 3. Unknown tool names are rejected before runtime dispatch.
 4. Logging behavior is validated to ensure traceability and redaction requirements.

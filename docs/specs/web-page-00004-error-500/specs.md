@@ -14,19 +14,19 @@ Define the rendering and fallback contract for web/page/page_error_500, which pr
 
 ## Functional Requirements
 
-### FR-ERR500-001 Error View Contract
+### FR-WEB-PAGE-00004-001 Error View Contract
 
 1. The package exposes Error with signature compatible with render.Handle error callbacks.
 2. Error returns a render.View based on embedded page.html.
 3. Error accepts context, response writer, request, and error parameters without panicking.
 
-### FR-ERR500-002 Rendering Composition
+### FR-WEB-PAGE-00004-002 Rendering Composition
 
 1. The package embeds page.html via go:embed and renders through Html.
 2. The error page is produced using render.Component.
 3. The component model and child collections remain valid for template execution.
 
-### FR-ERR500-003 Reusability Across Pages
+### FR-WEB-PAGE-00004-003 Reusability Across Pages
 
 1. The package remains import-safe for all page packages requiring fallback rendering.
 2. The Error function avoids dependencies on specific page state.
@@ -34,9 +34,14 @@ Define the rendering and fallback contract for web/page/page_error_500, which pr
 
 # Non-Functional Requirements
 
-1. Error rendering is deterministic for equivalent runtime conditions.
-2. The package has minimal dependencies and low maintenance overhead.
-3. Implementation remains idiomatic and aligned with web/page conventions.
+## NFR-WEB-PAGE-00004-001 Determinism
+- Error rendering is deterministic for equivalent runtime conditions.
+
+## NFR-WEB-PAGE-00004-002 Minimal Dependencies
+- The package has minimal dependencies and low maintenance overhead.
+
+## NFR-WEB-PAGE-00004-003 Idiomatic Go
+- Implementation remains idiomatic and aligned with web/page conventions.
 
 # Definition of Done
 

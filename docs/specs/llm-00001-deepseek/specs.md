@@ -16,13 +16,13 @@ The adapter must implement the shared agent.LanguageModel lifecycle and chat con
 
 # Functional Requirements
 
-## FR-DEEPSEEK-001 Model Construction And Startup
+## FR-LLM-00001-001 Model Construction And Startup
 
 - createDeepSeek must map ModelConfig fields into the adapter instance.
 - Start must create and store a DeepSeek client with configured secret.
 - Stop must be safe to call and must not panic.
 
-## FR-DEEPSEEK-002 Input Message Mapping
+## FR-LLM-00001-002 Input Message Mapping
 
 - Chat must map each platform message type to DeepSeek message payloads.
 - SYSTEM must map via DeepSeekSystemMessage.
@@ -30,44 +30,49 @@ The adapter must implement the shared agent.LanguageModel lifecycle and chat con
 - TOOL_REQUEST must map via DeepSeekToolRequestMessage.
 - TOOL_RESULT must map via DeepSeekToolResultMessage.
 
-## FR-DEEPSEEK-003 Allowed Tool Filtering
+## FR-LLM-00001-003 Allowed Tool Filtering
 
 - Chat must pass allowedTools to ToolContainer.DeepSeekParams.
 - The completion request must include only tool definitions resolved through that filter call.
 
-## FR-DEEPSEEK-004 Stop Completion Handling
+## FR-LLM-00001-004 Stop Completion Handling
 
 - For each choice with finish_reason=stop, Chat must emit an AGENT message.
 - AGENT output must preserve context and include response content.
 - AGENT output must include reasoning content from DeepSeek choice message.
 
-## FR-DEEPSEEK-005 Tool Call Completion Handling
+## FR-LLM-00001-005 Tool Call Completion Handling
 
 - For each choice with finish_reason=tool_calls, Chat must emit TOOL_REQUEST messages.
 - Each TOOL_REQUEST must include tool id, name, and arguments from DeepSeek tool call payload.
 - TOOL_REQUEST output must use ToolContainer.DescribeRequest when description succeeds.
 - TOOL_REQUEST output must include reasoning content from DeepSeek choice message.
 
-## FR-DEEPSEEK-006 Completion Error Handling
+## FR-LLM-00001-006 Completion Error Handling
 
 - If CreateChatCompletion fails, Chat must return a non-nil error.
 - On failure, Chat must return at least one ERROR message including the original error string.
 - The ERROR message must preserve the input context.
 
-## FR-DEEPSEEK-007 Schema Conversion Helper
+## FR-LLM-00001-007 Schema Conversion Helper
 
 - DeepSeekToolFromJsonSchema must convert a jsonschema.Schema into DeepSeek function parameters.
 - Returned DeepSeek tool definition must include type=function plus function name and description.
 
 # Non-Functional Requirements
 
-1. Reliability: Chat must tolerate mixed histories and empty allowed tool lists without panic.
-2. Determinism: Conversion helper and message mappers must return stable payloads for equivalent inputs.
-3. Maintainability: Lifecycle, mapping, and conversion logic must remain independently testable.
+## NFR-LLM-00001-001 Reliability
+- Chat must tolerate mixed histories and empty allowed tool lists without panic.
+
+## NFR-LLM-00001-002 Determinism
+- Conversion helper and message mappers must return stable payloads for equivalent inputs.
+
+## NFR-LLM-00001-003 Maintainability
+- Lifecycle, mapping, and conversion logic must remain independently testable.
 
 # Definition of Done
 
-1. FR-DEEPSEEK-001 through FR-DEEPSEEK-007 are covered by automated tests.
+1. FR-LLM-00001-001 through FR-LLM-00001-007 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. Any behavior changes are recorded in repository amendment/changelog process.

@@ -55,11 +55,20 @@ It formalizes start/wait semantics, graceful shutdown, retry boundaries, determi
 
 # Non-Functional Requirements
 
-1. Determinism: Equivalent stateless inputs and configuration must yield equivalent outputs.
-2. Reliability: Runtime start, wait, and shutdown paths must be race-safe and leak-free.
-3. Consistency: Stateful updates must maintain key isolation and logical correctness under at-least-once delivery.
-4. Operability: Logging and metrics must support production diagnosis without debug-only instrumentation.
-5. Maintainability: New behavior must target `flow` and runtime packages; `flows` remains compatibility-only.
+## NFR-FLOW-00001-001 Determinism
+- Equivalent stateless inputs and configuration must yield equivalent outputs.
+
+## NFR-FLOW-00001-002 Reliability
+- Runtime start, wait, and shutdown paths must be race-safe and leak-free.
+
+## NFR-FLOW-00001-003 Consistency
+- Stateful updates must maintain key isolation and logical correctness under at-least-once delivery.
+
+## NFR-FLOW-00001-004 Operability
+- Logging and metrics must support production diagnosis without debug-only instrumentation.
+
+## NFR-FLOW-00001-005 Maintainability
+- New behavior must target `flow` and runtime packages; `flows` remains compatibility-only.
 
 # Definition of Done
 

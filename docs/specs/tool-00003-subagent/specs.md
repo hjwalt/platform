@@ -15,41 +15,46 @@ The tool delegates work by producing a start message for a sub-agent with constr
 
 # Functional Requirements
 
-## FR-SUBAGENT-001 Async Delegation
+## FR-TOOL-00003-001 Async Delegation
 
 - Send must produce exactly one agent start message per call.
 - Produced message must include toolCall.Id.
 
-## FR-SUBAGENT-002 Delegated Context Propagation
+## FR-TOOL-00003-002 Delegated Context Propagation
 
 - Delegated context must carry ParentContext from parent agent context.
 - Delegated context must set SystemMessage from configured subagent prompt.
 - Delegated context must include configured AllowedTools.
 
-## FR-SUBAGENT-003 Constructor Behavior
+## FR-TOOL-00003-003 Constructor Behavior
 
 - Create must configure Name, Description, Subagent body, and AllowedTools from Configuration.
 - FromSubagent must configure Name, Description, Subagent body, and AllowedTools from subagent definition.
 
-## FR-SUBAGENT-004 Metadata And Schema
+## FR-TOOL-00003-004 Metadata And Schema
 
 - RequestSchema must be non-nil.
 - Name and Description must be deterministic for configured values.
 - DescribeRequest must include tool name and prompt content.
 
-## FR-SUBAGENT-005 Auto Policy
+## FR-TOOL-00003-005 Auto Policy
 
 - Auto must return true.
 
 # Non-Functional Requirements
 
-1. Reliability: Send must not panic on valid producer invocation paths.
-2. Testability: Producer interactions must be verifiable with fakes or mocks.
-3. Determinism: Metadata output must remain stable for stable input.
+## NFR-TOOL-00003-001 Reliability
+- Send must not panic on valid producer invocation paths.
+
+## NFR-TOOL-00003-002 Testability
+- Producer interactions must be verifiable with fakes or mocks.
+
+## NFR-TOOL-00003-003 Determinism
+- Metadata output must remain stable for stable input.
 
 # Definition of Done
 
-1. FR-SUBAGENT-001 to FR-SUBAGENT-005 are covered by automated tests.
+1. FR-TOOL-00003-001 to FR-TOOL-00003-005 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. ammendments.md includes an update entry.

@@ -59,7 +59,7 @@ This file contains the specifications for the requirements. It must contain the 
 
 #### Non-Functional Requirements
 
-1. Non-Functional requirements numbering should follow `NFR-<type>-<spec index>-<functional requirement index>`
+1. Non-Functional requirements numbering should follow `NFR-<type>-<spec index>-<non-functional requirement index>`
 
 ### tasks.md
 

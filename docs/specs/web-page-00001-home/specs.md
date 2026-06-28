@@ -14,19 +14,19 @@ Define the behavior, rendering contract, and routing expectations for the web/pa
 
 ## Functional Requirements
 
-### FR-HOME-001 Route Registration
+### FR-WEB-PAGE-00001-001 Route Registration
 
 1. The package registers a GET handler for path / through Add.
 2. Route wiring uses render.Handle with page_error_500.Error as the error view.
 3. The route registration remains isolated within web/page/page_home.
 
-### FR-HOME-002 Rendering Contract
+### FR-WEB-PAGE-00001-002 Rendering Contract
 
 1. The page is rendered through layout.Dashboard.
 2. The sidebar uses component_sidebar.View as the primary navigation region.
 3. Main content is rendered from embedded page.html using the package Html view.
 
-### FR-HOME-003 Model and Template Stability
+### FR-WEB-PAGE-00001-003 Model and Template Stability
 
 1. The page model remains explicit and compatible with page.html bindings.
 2. Rendering uses render.Component with deterministic component maps and child views.
@@ -34,9 +34,14 @@ Define the behavior, rendering contract, and routing expectations for the web/pa
 
 # Non-Functional Requirements
 
-1. The home page render path is deterministic for identical inputs.
-2. Page handler logic remains side-effect free for GET requests.
-3. The package follows idiomatic Go and existing web/page conventions.
+## NFR-WEB-PAGE-00001-001 Determinism
+- The home page render path is deterministic for identical inputs.
+
+## NFR-WEB-PAGE-00001-002 Side-Effect Free
+- Page handler logic remains side-effect free for GET requests.
+
+## NFR-WEB-PAGE-00001-003 Idiomatic Go
+- The package follows idiomatic Go and existing web/page conventions.
 
 # Definition of Done
 

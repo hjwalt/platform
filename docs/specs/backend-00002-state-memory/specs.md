@@ -16,40 +16,40 @@ The store keeps state in process memory and is safe for simultaneous access by m
 
 ## Functional Requirements
 
-## FR-STATE-MEM-001 Store Placement And Packaging
+## FR-BACKEND-00002-001 Store Placement And Packaging
 
 - The implementation must live under the folder `state/memory`.
 - The package declaration must be `package memory_store`.
 - The exported store type must satisfy the `state.Store` interface from `state/types.go`.
 
-## FR-STATE-MEM-002 In-Memory Persistence Semantics
+## FR-BACKEND-00002-002 In-Memory Persistence Semantics
 
 - The store must hold values in memory only and must not persist state to disk or external systems.
 - Given `Write(ctx, state.State{Id: X, Value: V})`, when the call succeeds, then subsequent `Read(ctx, X)` returns `Value` equal to `V`.
 - Given multiple writes for the same `Id`, when `Read` is called, then the latest successfully written value for that `Id` is returned.
 - Given a write with an empty `Id`, when `Write` is called, then the operation returns an explicit validation error.
 
-## FR-STATE-MEM-003 Concurrent Safety
+## FR-BACKEND-00002-003 Concurrent Safety
 
 - The store must be safe for simultaneous `Read`, `Write`, and `Keys` calls from multiple goroutines.
 - Given concurrent writes to distinct keys, when operations complete, then all successfully written keys are present and readable.
 - Given concurrent writes to the same key, when operations complete, then no race, panic, or partial byte corruption occurs.
 - Given concurrent `Keys` and `Write` operations, when `Keys` returns, then it returns a valid snapshot and does not panic.
 
-## FR-STATE-MEM-004 Read And Keys Behavior
+## FR-BACKEND-00002-004 Read And Keys Behavior
 
 - Given an existing key, when `Read` is called, then the returned state has matching `Id`, stored `Value`, and a populated `Timestamp`.
 - Given a missing key, when `Read` is called, then it returns `state.State{Id: requestedId, Value: []byte{}}` and no not-found error.
 - When `Keys` is called, it must return all known key identifiers in deterministic order.
 - Returned key slices and value bytes must not expose mutable internal storage that can corrupt store state when modified by callers.
 
-## FR-STATE-MEM-005 Lifecycle Behavior
+## FR-BACKEND-00002-005 Lifecycle Behavior
 
 - `Start()` must initialize internal structures needed for operation and be safe to call once during runtime startup.
 - `Stop()` must complete without panic and release in-memory references so the store can be garbage-collected.
 - Lifecycle behavior must be documented for caller expectations (for example, whether operations before `Start` are allowed).
 
-## FR-STATE-MEM-006 Error Surface
+## FR-BACKEND-00002-006 Error Surface
 
 - The store must return stable, actionable errors for invalid inputs and internal misuse.
 - Validation failures (for example empty key) must be distinguishable from operational failures.
@@ -57,17 +57,26 @@ The store keeps state in process memory and is safe for simultaneous access by m
 
 # Non-Functional Requirements
 
-1. Concurrency safety: No data races or unsafe memory access under concurrent test workloads.
-2. Performance: Common operations (`Read`, `Write`) should remain amortized constant time for key lookup and update.
-3. Predictability: `Keys` output ordering must be deterministic for repeatable tests.
-4. Isolation: No filesystem, network, or external dependency is required.
-5. Testability: Behavior must be fully verifiable with unit tests, including race-enabled test runs.
+## NFR-BACKEND-00002-001 Concurrency Safety
+- No data races or unsafe memory access under concurrent test workloads.
+
+## NFR-BACKEND-00002-002 Performance
+- Common operations (`Read`, `Write`) should remain amortized constant time for key lookup and update.
+
+## NFR-BACKEND-00002-003 Predictability
+- `Keys` output ordering must be deterministic for repeatable tests.
+
+## NFR-BACKEND-00002-004 Isolation
+- No filesystem, network, or external dependency is required.
+
+## NFR-BACKEND-00002-005 Testability
+- Behavior must be fully verifiable with unit tests, including race-enabled test runs.
 
 # Definition of Done
 
 1. A store implementation exists in `state/memory` with package name `memory_store`.
 2. The implementation satisfies `state.Store` and compiles with the repository.
-3. Functional requirements FR-STATE-MEM-001 through FR-STATE-MEM-006 are covered by automated tests.
+3. Functional requirements FR-BACKEND-00002-001 through FR-BACKEND-00002-006 are covered by automated tests.
 4. Concurrency tests pass under race detection for simultaneous reads/writes/keys operations.
 5. Missing-key read, deterministic key ordering, and copy-on-read/copy-on-keys behavior are validated.
 6. `make test` passes without regressions.

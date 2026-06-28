@@ -15,43 +15,48 @@ The tool fetches HTML from a URL and attempts to parse it through a language mod
 
 # Functional Requirements
 
-## FR-FETCH-001 URL Retrieval
+## FR-TOOL-00004-001 URL Retrieval
 
 - Apply must fetch response body from Request.Link.
 - On success, raw body must be returned in Response.Html.
 - If HTTP request fails, Apply must return an error.
 
-## FR-FETCH-002 Model Parse Attempt
+## FR-TOOL-00004-002 Model Parse Attempt
 
 - Apply must submit fetched HTML to configured language model.
 - If model returns valid agent message, Response.Parsed must equal returned message text.
 
-## FR-FETCH-003 Parse Failure Handling
+## FR-TOOL-00004-003 Parse Failure Handling
 
 - If model call fails, Response.Parsed must contain failure reason text.
 - If model result is empty, Response.Parsed must state empty result failure.
 - If first model message type is not agent, Response.Parsed must state invalid response failure.
 
-## FR-FETCH-004 Metadata And Schema
+## FR-TOOL-00004-004 Metadata And Schema
 
 - Name must be web_fetch.
 - RequestSchema and ResultSchema must be non-nil.
 - DescribeRequest must include link.
 - DescribeResult must return parsed text.
 
-## FR-FETCH-005 Auto Policy
+## FR-TOOL-00004-005 Auto Policy
 
 - Auto must return false.
 
 # Non-Functional Requirements
 
-1. Reliability: Expected network or model failures must return clear outcomes.
-2. Testability: HTTP and model interactions must be mockable for local unit tests.
-3. Determinism: Metadata methods must be stable for stable inputs.
+## NFR-TOOL-00004-001 Reliability
+- Expected network or model failures must return clear outcomes.
+
+## NFR-TOOL-00004-002 Testability
+- HTTP and model interactions must be mockable for local unit tests.
+
+## NFR-TOOL-00004-003 Determinism
+- Metadata methods must be stable for stable inputs.
 
 # Definition of Done
 
-1. FR-FETCH-001 to FR-FETCH-005 are covered by automated tests.
+1. FR-TOOL-00004-001 to FR-TOOL-00004-005 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. ammendments.md includes an update entry.

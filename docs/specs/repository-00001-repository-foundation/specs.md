@@ -17,31 +17,31 @@ It is intended to protect delivery quality across all packages by requiring expl
 
 ## Functional Requirements
 
-## FR-FOUNDATION-001 Build Reproducibility
+## FR-REPOSITORY-00001-001 Build Reproducibility
 
 - The repository must build a runnable binary via `make build` on supported development environments.
 - Given clean dependencies, when `make build` is executed, then `bin/platform` is produced with zero build errors.
 - Given no source changes, when `make build` runs repeatedly, then output is stable and no unexpected file modifications occur outside build artifacts.
 
-## FR-FOUNDATION-002 Test Gate
+## FR-REPOSITORY-00001-002 Test Gate
 
 - All merged changes must pass repository tests.
 - Given default local environment, when `make test` is run, then unit tests pass for all packages.
 - Given integration dependencies are available, when `make test` is run, then integration tests pass.
 
-## FR-FOUNDATION-003 Formatting And Module Hygiene
+## FR-REPOSITORY-00001-003 Formatting And Module Hygiene
 
 - Formatting and module state must remain clean after maintenance commands.
 - Given valid source files, when `make tidy` runs, then `go.mod` and `go.sum` remain consistent and source formatting is normalized.
 - Given dependency updates, when `make update` runs, then dependencies are upgraded without introducing unresolved imports.
 
-## FR-FOUNDATION-004 Generated Code Consistency
+## FR-REPOSITORY-00001-004 Generated Code Consistency
 
 - Generated mocks and protobuf outputs must match source definitions.
 - Given interface changes under mock targets, when `make mocks` runs, then generated files compile and tests pass.
 - Given proto schema updates, when `make proto` runs, then generated outputs compile and downstream packages continue to pass tests.
 
-## FR-FOUNDATION-005 Example Runtime Baseline
+## FR-REPOSITORY-00001-005 Example Runtime Baseline
 
 - The example runtime path must remain operational for local verification.
 - Given local services started, when `make reset` followed by `make run` is executed, then application startup completes without fatal runtime errors.
@@ -49,15 +49,24 @@ It is intended to protect delivery quality across all packages by requiring expl
 
 # Non-Functional Requirements
 
-1. Determinism: Build and maintenance outcomes are repeatable when inputs are unchanged.
-2. Reliability: Repository tests provide consistent pass/fail signals across supported development environments.
-3. Maintainability: Formatting, modules, and generated artifacts remain synchronized with source intent.
-4. Operability: Example runtime failures remain diagnosable via explicit error paths.
-5. Traceability: Requirement IDs and test mappings are visible in implementation and review workflows.
+## NFR-REPOSITORY-00001-001 Determinism
+- Build and maintenance outcomes are repeatable when inputs are unchanged.
+
+## NFR-REPOSITORY-00001-002 Reliability
+- Repository tests provide consistent pass/fail signals across supported development environments.
+
+## NFR-REPOSITORY-00001-003 Maintainability
+- Formatting, modules, and generated artifacts remain synchronized with source intent.
+
+## NFR-REPOSITORY-00001-004 Operability
+- Example runtime failures remain diagnosable via explicit error paths.
+
+## NFR-REPOSITORY-00001-005 Traceability
+- Requirement IDs and test mappings are visible in implementation and review workflows.
 
 # Definition of Done
 
-1. FR-FOUNDATION-001 through FR-FOUNDATION-005 are represented in tests or explicit manual validation procedures.
+1. FR-REPOSITORY-00001-001 through FR-REPOSITORY-00001-005 are represented in tests or explicit manual validation procedures.
 2. `make build` reproducibility is verified and `bin/platform` is produced without build errors.
 3. `make test` passes for unit and integration contexts when required dependencies are available.
 4. `make tidy`, `make update`, `make mocks`, and `make proto` produce consistent and compilable repository state.
@@ -66,8 +75,8 @@ It is intended to protect delivery quality across all packages by requiring expl
 
 # Testing Methodology
 
-1. Build validation: run `make build` and verify successful binary output and stable repeated execution (FR-FOUNDATION-001).
-2. Test gate validation: run `make test` in default and integration-ready environments (FR-FOUNDATION-002).
-3. Hygiene validation: run `make tidy` and `make update` then re-run `make test` for consistency (FR-FOUNDATION-003).
-4. Generated artifact validation: run `make mocks` and `make proto` then verify compile/test success (FR-FOUNDATION-004).
-5. Runtime baseline validation: run `make up`, `make reset`, and `make run`; confirm successful startup or actionable failure logs (FR-FOUNDATION-005).
+1. Build validation: run `make build` and verify successful binary output and stable repeated execution (FR-REPOSITORY-00001-001).
+2. Test gate validation: run `make test` in default and integration-ready environments (FR-REPOSITORY-00001-002).
+3. Hygiene validation: run `make tidy` and `make update` then re-run `make test` for consistency (FR-REPOSITORY-00001-003).
+4. Generated artifact validation: run `make mocks` and `make proto` then verify compile/test success (FR-REPOSITORY-00001-004).
+5. Runtime baseline validation: run `make up`, `make reset`, and `make run`; confirm successful startup or actionable failure logs (FR-REPOSITORY-00001-005).

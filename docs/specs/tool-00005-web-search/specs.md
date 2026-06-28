@@ -15,44 +15,49 @@ The tool performs a web query and maps provider results into structured response
 
 # Functional Requirements
 
-## FR-SEARCH-001 Query Execution
+## FR-TOOL-00005-001 Query Execution
 
 - Apply must execute a web search using Request.Term.
 - On provider success, Apply must return mapped results in Response.Results.
 
-## FR-SEARCH-002 Error Handling
+## FR-TOOL-00005-002 Error Handling
 
 - If provider call fails, Apply must return an error.
 - On provider failure, Response.Results must be an empty array.
 
-## FR-SEARCH-003 Result Mapping
+## FR-TOOL-00005-003 Result Mapping
 
 - Each mapped result must include title, url, description, language, content_type, and extra_snippets from provider data.
 
-## FR-SEARCH-004 Result Description Formatting
+## FR-TOOL-00005-004 Result Description Formatting
 
 - DescribeResult must format each result with readable sections.
 - DescribeResult must include snippets as individual list-style lines.
 
-## FR-SEARCH-005 Metadata And Schema
+## FR-TOOL-00005-005 Metadata And Schema
 
 - Name must be web_search.
 - RequestSchema and ResultSchema must be non-nil.
 - DescribeRequest must include search term.
 
-## FR-SEARCH-006 Auto Policy
+## FR-TOOL-00005-006 Auto Policy
 
 - Auto must return true.
 
 # Non-Functional Requirements
 
-1. Reliability: Provider errors must surface with explicit error returns.
-2. Testability: Provider behavior must be mockable for unit tests.
-3. Determinism: Metadata methods must return stable values.
+## NFR-TOOL-00005-001 Reliability
+- Provider errors must surface with explicit error returns.
+
+## NFR-TOOL-00005-002 Testability
+- Provider behavior must be mockable for unit tests.
+
+## NFR-TOOL-00005-003 Determinism
+- Metadata methods must return stable values.
 
 # Definition of Done
 
-1. FR-SEARCH-001 to FR-SEARCH-006 are covered by automated tests.
+1. FR-TOOL-00005-001 to FR-TOOL-00005-006 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. ammendments.md includes an update entry.

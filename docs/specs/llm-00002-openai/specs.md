@@ -16,13 +16,13 @@ The adapter must implement the shared agent.LanguageModel lifecycle and chat con
 
 # Functional Requirements
 
-## FR-OPENAI-001 Model Construction And Startup
+## FR-LLM-00002-001 Model Construction And Startup
 
 - createOpenAi must map ModelConfig fields into the adapter instance.
 - Start must create an OpenAI client using endpoint and secret from config.
 - Stop must be safe to call and must not panic.
 
-## FR-OPENAI-002 Input Message Mapping
+## FR-LLM-00002-002 Input Message Mapping
 
 - Chat must map each platform message type to OpenAI message params.
 - SYSTEM must map via OpenAiSystemMessage.
@@ -30,29 +30,29 @@ The adapter must implement the shared agent.LanguageModel lifecycle and chat con
 - TOOL_REQUEST must map via OpenAiToolRequestMessage.
 - TOOL_RESULT must map via OpenAiToolResultMessage.
 
-## FR-OPENAI-003 Allowed Tool Filtering
+## FR-LLM-00002-003 Allowed Tool Filtering
 
 - Chat must pass allowedTools to ToolContainer.OpenAiParamsFiltered.
 - The completion request must include only filtered tool definitions.
 
-## FR-OPENAI-004 Stop Completion Handling
+## FR-LLM-00002-004 Stop Completion Handling
 
 - For each choice with finish_reason=stop, Chat must emit an AGENT message.
 - Emitted AGENT messages must preserve input context and include assistant text content.
 
-## FR-OPENAI-005 Tool Call Completion Handling
+## FR-LLM-00002-005 Tool Call Completion Handling
 
 - For each choice with finish_reason=tool_calls, Chat must emit TOOL_REQUEST messages.
 - Each TOOL_REQUEST must include tool id, name, and arguments from OpenAI tool call payload.
 - TOOL_REQUEST message body must be generated through ToolContainer.DescribeRequest when description succeeds.
 
-## FR-OPENAI-006 Completion Error Handling
+## FR-LLM-00002-006 Completion Error Handling
 
 - If the OpenAI completion request fails, Chat must return a non-nil error.
 - On failure, Chat must return at least one ERROR message including the original error string.
 - The ERROR message must preserve the input context.
 
-## FR-OPENAI-007 Schema Conversion Helpers
+## FR-LLM-00002-007 Schema Conversion Helpers
 
 - OpenAiToolSchema must derive JSON schema from generic request type M and forward it through OpenAiFromJsonSchema.
 - OpenAiFromJsonSchema must convert schema payloads into OpenAI function parameter format.
@@ -60,13 +60,18 @@ The adapter must implement the shared agent.LanguageModel lifecycle and chat con
 
 # Non-Functional Requirements
 
-1. Reliability: Chat must tolerate mixed message histories and empty tool lists without panics.
-2. Determinism: Mapping helpers must produce stable output for equivalent inputs.
-3. Maintainability: Message and schema conversion functions must remain independently unit-testable.
+## NFR-LLM-00002-001 Reliability
+- Chat must tolerate mixed message histories and empty tool lists without panics.
+
+## NFR-LLM-00002-002 Determinism
+- Mapping helpers must produce stable output for equivalent inputs.
+
+## NFR-LLM-00002-003 Maintainability
+- Message and schema conversion functions must remain independently unit-testable.
 
 # Definition of Done
 
-1. FR-OPENAI-001 through FR-OPENAI-007 are covered by automated tests.
+1. FR-LLM-00002-001 through FR-LLM-00002-007 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. Any behavior changes are recorded in repository amendment/changelog process.

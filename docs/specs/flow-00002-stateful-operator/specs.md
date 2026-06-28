@@ -80,11 +80,20 @@ The package defines three function type contracts — `StateKey`, `StateUpdate`,
 
 # Non-Functional Requirements
 
-1. Correctness: Every code path through `Handle` must be deterministic — given the same inputs, store state, and function implementations, the same outcomes and message productions must occur.
-2. Safety: No nil-pointer dereferences — `StateKey`, `StateUpdate`, `HandlerFunction`, `OutputMetadata`, `ErrorMetadata`, `OutputProducer`, `ErrorProducer`, and `StateStore` must all be non-nil for correct operation.
-3. Generality: The operator must accept any types for input, output, state, and error without casting — all wiring is through generic parameters.
-4. Observability: The operator name must be propagated into logging context so all log lines from a given operator instance are attributable.
-5. Testability: Every function type is independently testable — `StateKey`, `StateUpdate`, and `Operate` are plain functions, not interfaces, so they can be tested in isolation before integration.
+## NFR-FLOW-00002-001 Correctness
+- Every code path through `Handle` must be deterministic — given the same inputs, store state, and function implementations, the same outcomes and message productions must occur.
+
+## NFR-FLOW-00002-002 Safety
+- No nil-pointer dereferences — `StateKey`, `StateUpdate`, `HandlerFunction`, `OutputMetadata`, `ErrorMetadata`, `OutputProducer`, `ErrorProducer`, and `StateStore` must all be non-nil for correct operation.
+
+## NFR-FLOW-00002-003 Generality
+- The operator must accept any types for input, output, state, and error without casting — all wiring is through generic parameters.
+
+## NFR-FLOW-00002-004 Observability
+- The operator name must be propagated into logging context so all log lines from a given operator instance are attributable.
+
+## NFR-FLOW-00002-005 Testability
+- Every function type is independently testable — `StateKey`, `StateUpdate`, and `Operate` are plain functions, not interfaces, so they can be tested in isolation before integration.
 
 # Definition of Done
 

@@ -15,18 +15,18 @@ The tool executes shell commands from a configured base directory and returns co
 
 # Functional Requirements
 
-## FR-LINUX-001 Command Execution
+## FR-TOOL-00001-001 Command Execution
 
 - Apply must split Request.Command into executable and args.
 - Apply must execute command in configured BaseDir.
 - On success, combined output must be returned in Response.Result.
 
-## FR-LINUX-002 Failure Propagation
+## FR-TOOL-00001-002 Failure Propagation
 
 - If command binary is missing, Apply must return an error.
 - If command exits with non-zero status, Apply must return an error.
 
-## FR-LINUX-003 Metadata And Schema
+## FR-TOOL-00001-003 Metadata And Schema
 
 - Name must be linux_shell.
 - Description must remain deterministic.
@@ -34,19 +34,24 @@ The tool executes shell commands from a configured base directory and returns co
 - DescribeRequest must include command text.
 - DescribeResult must return response result text.
 
-## FR-LINUX-004 Auto Policy
+## FR-TOOL-00001-004 Auto Policy
 
 - Auto must return false.
 
 # Non-Functional Requirements
 
-1. Reliability: Expected error paths must return errors without panic.
-2. Determinism: Metadata methods must return stable values for stable inputs.
-3. Testability: Behavior must be verifiable with unit tests that run locally.
+## NFR-TOOL-00001-001 Reliability
+- Expected error paths must return errors without panic.
+
+## NFR-TOOL-00001-002 Determinism
+- Metadata methods must return stable values for stable inputs.
+
+## NFR-TOOL-00001-003 Testability
+- Behavior must be verifiable with unit tests that run locally.
 
 # Definition of Done
 
-1. FR-LINUX-001 to FR-LINUX-004 are covered by automated tests.
+1. FR-TOOL-00001-001 to FR-TOOL-00001-004 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. ammendments.md includes an update entry.

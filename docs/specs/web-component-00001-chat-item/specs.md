@@ -14,19 +14,19 @@ Define the behavior, rendering contract, and composition boundaries for the web/
 
 ## Functional Requirements
 
-### FR-CHATITEM-001 Rendering Contract
+### FR-WEB-COMPONENT-00001-001 Rendering Contract
 
 1. The component exposes a View function with a stable signature for this package.
 2. The rendered output is produced from component.html embedded in the package.
 3. The output is a valid render.View consumable by parent components.
 
-### FR-CHATITEM-002 Model and Composition
+### FR-WEB-COMPONENT-00001-002 Model and Composition
 
 1. Component model fields used by component.html are explicitly defined in component.go.
 2. Optional child views or named slots are passed through the existing render contract when applicable.
 3. Component behavior does not require package-global mutable state.
 
-### FR-CHATITEM-003 Error and Edge Handling
+### FR-WEB-COMPONENT-00001-003 Error and Edge Handling
 
 1. Missing optional model values do not cause runtime panics.
 2. The component handles empty child element lists where supported.
@@ -34,9 +34,14 @@ Define the behavior, rendering contract, and composition boundaries for the web/
 
 # Non-Functional Requirements
 
-1. Rendering remains deterministic for identical input models.
-2. Component implementation remains idiomatic Go and aligned with neighboring web components.
-3. Unit tests for the package execute with make test and do not require external services.
+## NFR-WEB-COMPONENT-00001-001 Determinism
+- Rendering remains deterministic for identical input models.
+
+## NFR-WEB-COMPONENT-00001-002 Idiomatic Go
+- Component implementation remains idiomatic Go and aligned with neighboring web components.
+
+## NFR-WEB-COMPONENT-00001-003 Testability
+- Unit tests for the package execute with make test and do not require external services.
 
 # Definition of Done
 

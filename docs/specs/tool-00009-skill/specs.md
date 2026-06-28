@@ -20,68 +20,77 @@ Unlike the `subagent` tool (which spawns a new asynchronous agent execution), th
 
 # Functional Requirements
 
-## FR-SKILL-001 Tool Naming And Interface
+## FR-TOOL-00009-001 Tool Naming And Interface
 
 - The tool must be named `skill`.
 - The tool must be exposed through the standard `SyncTool` interface used by the agent runtime.
 - The request schema must include a required `name` field of type `string`.
 - The result schema must include `name` (string), `description` (string), `body` (string), and `allowed_tools` (array of strings).
 
-## FR-SKILL-002 Skill Lookup
+## FR-TOOL-00009-002 Skill Lookup
 
 - The tool must look up skills by exact name match in a skill registry provided at construction time.
 - Name matching must be case-insensitive after trimming whitespace.
 - The skill registry must be a map-like structure keyed by skill name.
 - Lookup must be O(1) — no linear scan or fuzzy matching.
 
-## FR-SKILL-003 Response Content
+## FR-TOOL-00009-003 Response Content
 
 - On a successful lookup, the result must include the skill's `name`, `description`, `body` (the full markdown playbook), and `allowed_tools`.
 - `body` must contain the complete markdown content from the skill's source file (the portion after the YAML frontmatter).
 - `allowed_tools` must reflect the skill's declared allowed tools from its frontmatter.
 - `DescribeResult` must format the response to clearly separate the skill description from the body content.
 
-## FR-SKILL-004 Missing Skill Handling
+## FR-TOOL-00009-004 Missing Skill Handling
 
 - When a skill name is not found in the registry, the tool must return an error result (not panic).
 - The error must include the requested name so the agent can report it to the user.
 - An empty or whitespace-only `name` must be treated as not-found.
 
-## FR-SKILL-005 Auto Policy
+## FR-TOOL-00009-005 Auto Policy
 
 - `Auto()` must return `true` — skill loading is read-only with no side effects.
 
-## FR-SKILL-006 Metadata And Schemas
+## FR-TOOL-00009-006 Metadata And Schemas
 
 - `Name()` must return `"skill"`.
 - `RequestSchema()` and `ResultSchema()` must be non-nil and valid JSON Schema.
 - `RequestFormat()` and `ResultFormat()` must use the standard format pipeline (`format.Json[T]()`).
 - `DescribeRequest` must include the skill name being requested.
 
-## FR-SKILL-007 Skill Registry Access
+## FR-TOOL-00009-007 Skill Registry Access
 
 - The tool must receive a skill registry (map of skill name to `agent_skill.Skill`) at construction time.
 - The tool must not mutate the registry or any registered skills.
 - The tool must handle an empty registry gracefully (return a not-found error for any lookup).
 
-## FR-SKILL-008 Registration
+## FR-TOOL-00009-008 Registration
 
 - An `AddToContainer` function must register the tool into a `ToolContainer` as a sync tool.
 - A `Create` constructor must accept a skill registry and return a `SyncTool[Request, Response]`.
 
 # Non-Functional Requirements
 
-1. Safety: The tool must be read-only — it must not modify skill registrations, configuration, or state.
-2. Performance: Lookup must complete in O(1) time with no external service calls or file I/O (skills are pre-loaded at startup).
-3. Determinism: Identical lookups against an unchanged registry must return identical results.
-4. Testability: The tool must accept a skill registry as a constructor parameter, enabling fully mocked unit tests.
-5. Memory: The tool must not retain or cache request data beyond the scope of a single `Apply` call.
+## NFR-TOOL-00009-001 Safety
+- The tool must be read-only — it must not modify skill registrations, configuration, or state.
+
+## NFR-TOOL-00009-002 Performance
+- Lookup must complete in O(1) time with no external service calls or file I/O (skills are pre-loaded at startup).
+
+## NFR-TOOL-00009-003 Determinism
+- Identical lookups against an unchanged registry must return identical results.
+
+## NFR-TOOL-00009-004 Testability
+- The tool must accept a skill registry as a constructor parameter, enabling fully mocked unit tests.
+
+## NFR-TOOL-00009-005 Memory
+- The tool must not retain or cache request data beyond the scope of a single `Apply` call.
 
 # Definition of Done
 
 1. A specification-compliant implementation exists at `agent/tool/skill/`.
 2. The tool is registered via `AddToContainer()` in `configuration/tool.go`.
-3. FR-SKILL-001 through FR-SKILL-008 are covered by automated tests.
+3. FR-TOOL-00009-001 through FR-TOOL-00009-008 are covered by automated tests.
 4. `make test` passes without regressions.
 5. `tasks.md` is fully checked.
 6. `ammendments.md` includes an initial entry.

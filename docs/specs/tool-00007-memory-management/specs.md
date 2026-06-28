@@ -32,13 +32,13 @@ The specification also requires a generic instantiation mechanism using a config
 
 ## Functional Requirements
 
-## FR-MEM-001 Single Tool And Naming
+## FR-TOOL-00007-001 Single Tool And Naming
 
 - The memory tool surface must be exactly one tool name per instance: `memory`.
 - The tool must be exposed through the standard tool interface used by the agent runtime.
 - The request schema must include a required `operation` field with enum values: `get`, `update`, `clear`.
 
-## FR-MEM-002 Canonical Key Derivation
+## FR-TOOL-00007-002 Canonical Key Derivation
 
 - Tool configuration must provide the backing memory store and optional prefix.
 - The effective canonical key must be:
@@ -46,26 +46,26 @@ The specification also requires a generic instantiation mechanism using a config
   - `<prefix>` when prefix is provided.
 - Callers must not be allowed to override the derived canonical key directly.
 
-## FR-MEM-003 `operation=get` Behavior
+## FR-TOOL-00007-003 `operation=get` Behavior
 
 - The tool must read and return the full content of the derived canonical key.
 - If the canonical key does not exist, the result must be deterministic and documented (for example, empty content with `exists=false`).
 - `operation=get` must not mutate store state.
 
-## FR-MEM-004 `operation=update` Behavior
+## FR-TOOL-00007-004 `operation=update` Behavior
 
 - The tool must write content to the derived canonical key.
 - Update mode must be explicit and deterministic (for example `replace` or `append`) and represented in request schema.
 - `content` is required when `operation=update`.
 - After successful update, a subsequent `operation=get` must return the updated content.
 
-## FR-MEM-005 `operation=clear` Behavior
+## FR-TOOL-00007-005 `operation=clear` Behavior
 
 - The tool must remove logical content for the derived canonical key.
 - Clear behavior must be deterministic and documented (for example delete key and/or write empty value).
 - After successful clear, `operation=get` must return empty content according to the chosen existence semantics.
 
-## FR-MEM-006 Prefix-Based Generic Instantiation
+## FR-TOOL-00007-006 Prefix-Based Generic Instantiation
 
 - The implementation must provide a generic constructor that accepts at minimum:
   - tool prefix
@@ -74,31 +74,40 @@ The specification also requires a generic instantiation mechanism using a config
 - Prefix handling must allow multiple independent instances to be registered simultaneously without name collisions.
 - Prefix normalization and validation rules must be documented (for example allowed characters and separator policy).
 
-## FR-MEM-007 Validation And Error Surface
+## FR-TOOL-00007-007 Validation And Error Surface
 
 - Invalid configuration (for example nil store or invalid prefix) must return actionable errors during setup.
 - Runtime store operation failures must return stable, human-readable errors.
 - Errors must distinguish configuration failures from runtime operation failures.
 
-## FR-MEM-008 Metadata And Discoverability
+## FR-TOOL-00007-008 Metadata And Discoverability
 
 - The tool must provide stable metadata (`Name`, request description, result description, and schemas).
 - Metadata must include enough information for runtime UIs to explain operation-based behavior and prefix-derived canonical key semantics.
 
 # Non-Functional Requirements
 
-1. Safety: The tool must only operate against configured store/key scope.
-2. Predictability: Read, write, and clear semantics must be deterministic across repeated runs.
-3. Testability: Store behavior and prefix instantiation must be fully unit-testable without external services.
-4. Isolation: Multiple prefixed instances must not interfere with each other.
-5. Simplicity: Implementation should rely on Go standard library for filesystem operations where possible.
+## NFR-TOOL-00007-001 Safety
+- The tool must only operate against configured store/key scope.
+
+## NFR-TOOL-00007-002 Predictability
+- Read, write, and clear semantics must be deterministic across repeated runs.
+
+## NFR-TOOL-00007-003 Testability
+- Store behavior and prefix instantiation must be fully unit-testable without external services.
+
+## NFR-TOOL-00007-004 Isolation
+- Multiple prefixed instances must not interfere with each other.
+
+## NFR-TOOL-00007-005 Simplicity
+- Implementation should rely on Go standard library for filesystem operations where possible.
 
 # Definition of Done
 
 1. A specification-compliant implementation exists for one `memory` tool with operation-dispatch behavior.
 2. Canonical key derivation semantics are enforced.
 3. Prefix-based instantiation supports at least two concurrent memory domains in tests.
-4. FR-MEM-001 through FR-MEM-008 are covered by automated tests.
+4. FR-TOOL-00007-001 through FR-TOOL-00007-008 are covered by automated tests.
 5. `make test` passes without regressions.
 
 # Testing Methodology

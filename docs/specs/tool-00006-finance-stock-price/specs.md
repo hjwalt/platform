@@ -15,41 +15,46 @@ The tool retrieves stock price information for a ticker symbol using the configu
 
 # Functional Requirements
 
-## FR-STOCK-001 Quote Retrieval
+## FR-TOOL-00006-001 Quote Retrieval
 
 - Apply must request provider data for the requested symbol.
 - On successful response with values, Apply must return Symbol, Currency, and first value in Response.Value.
 
-## FR-STOCK-002 HTTP Status Handling
+## FR-TOOL-00006-002 HTTP Status Handling
 
 - If provider returns a non-200 status, Apply must return an error.
 - On non-200 status, Response must echo request Symbol.
 
-## FR-STOCK-003 Empty Data Handling
+## FR-TOOL-00006-003 Empty Data Handling
 
 - If result values are missing, Apply must return an error.
 - On missing values, Response must echo request Symbol.
 
-## FR-STOCK-004 Metadata And Schema
+## FR-TOOL-00006-004 Metadata And Schema
 
 - Name must be finance_stock_price.
 - RequestSchema and ResultSchema must be non-nil.
 - DescribeRequest must include symbol.
 - DescribeResult must include symbol and formatted value.
 
-## FR-STOCK-005 Auto Policy
+## FR-TOOL-00006-005 Auto Policy
 
 - Auto must return false.
 
 # Non-Functional Requirements
 
-1. Reliability: Provider failure paths must return explicit errors.
-2. Testability: Provider behavior must be validated with mocks/fakes.
-3. Determinism: Metadata methods must return stable values.
+## NFR-TOOL-00006-001 Reliability
+- Provider failure paths must return explicit errors.
+
+## NFR-TOOL-00006-002 Testability
+- Provider behavior must be validated with mocks/fakes.
+
+## NFR-TOOL-00006-003 Determinism
+- Metadata methods must return stable values.
 
 # Definition of Done
 
-1. FR-STOCK-001 to FR-STOCK-005 are covered by automated tests.
+1. FR-TOOL-00006-001 to FR-TOOL-00006-005 are covered by automated tests.
 2. make test passes.
 3. tasks.md is fully checked.
 4. ammendments.md includes an update entry.

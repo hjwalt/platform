@@ -16,29 +16,29 @@ The adapter must implement the shared `agent.Embedding` lifecycle and embed cont
 
 # Functional Requirements
 
-## FR-EMB-001 Model Construction And Startup
+## FR-LLM-00003-001 Model Construction And Startup
 
 - createOpenAiEmbedding must map EmbeddingConfig fields into the adapter instance.
 - Start must create an OpenAI client using endpoint and secret from config.
 - Stop must be safe to call and must not panic.
 
-## FR-EMB-002 Model Selection
+## FR-LLM-00003-002 Model Selection
 
 - Embed must use the model name from EmbeddingConfig when constructing the API request.
 - The adapter must support model override through configuration without code changes.
 
-## FR-EMB-003 Dimension Configuration
+## FR-LLM-00003-003 Dimension Configuration
 
 - When EmbeddingConfig.Dimensions is set, Embed must pass it to the API request.
 - When Dimensions is zero, Embed must omit the parameter and rely on the model default.
 
-## FR-EMB-004 Error Handling
+## FR-LLM-00003-004 Error Handling
 
 - If the embedding API request fails, Embed must return a non-nil error.
 - On failure, the returned `EmbeddingOutput` must be zero-valued.
 - The error must wrap the underlying API or transport error for upstream handling.
 
-## FR-EMB-005 Interface Compliance
+## FR-LLM-00003-005 Interface Compliance
 
 - The adapter must implement `agent.Embedding` (extending `runtime.Runtime`).
 - Embed must accept `context.Context` and honor context cancellation or deadline.
@@ -46,14 +46,21 @@ The adapter must implement the shared `agent.Embedding` lifecycle and embed cont
 
 # Non-Functional Requirements
 
-1. Reliability: Embed must tolerate empty inputs without panic and return empty results cleanly.
-2. Determinism: Identical inputs against the same model must produce identical vectors (API-dependent).
-3. Maintainability: The adapter constructor and mapping logic must remain independently unit-testable.
-4. Observability: API-level errors must be logged or wrapped in a way that supports upstream diagnosis.
+## NFR-LLM-00003-001 Reliability
+- Embed must tolerate empty inputs without panic and return empty results cleanly.
+
+## NFR-LLM-00003-002 Determinism
+- Identical inputs against the same model must produce identical vectors (API-dependent).
+
+## NFR-LLM-00003-003 Maintainability
+- The adapter constructor and mapping logic must remain independently unit-testable.
+
+## NFR-LLM-00003-004 Observability
+- API-level errors must be logged or wrapped in a way that supports upstream diagnosis.
 
 # Definition of Done
 
-1. FR-EMB-001 through FR-EMB-007 are covered by automated tests.
+1. FR-LLM-00003-001 through FR-LLM-00003-007 are covered by automated tests.
 2. `make test` passes.
 3. `tasks.md` is fully checked.
 4. Any behavior changes are recorded in repository amendment/changelog process.
