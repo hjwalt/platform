@@ -55,11 +55,11 @@ This file contains the specifications for the requirements. It must contain the 
 
 #### Functional Requirements
 
-1. Functional requirements numbering should follow `FR-<type>-<spec index>-<functional requirement index>-<short title>`
+1. Functional requirements numbering should follow `FR-<type>-<spec index>-<functional requirement index>`
 
 #### Non-Functional Requirements
 
-1. Non-Functional requirements numbering should follow `NFR-<type>-<spec index>-<functional requirement index>-<short title>`
+1. Non-Functional requirements numbering should follow `NFR-<type>-<spec index>-<functional requirement index>`
 
 ### tasks.md
 
