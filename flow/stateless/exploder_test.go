@@ -45,10 +45,10 @@ func TestExploderHandleSingleEntry(t *testing.T) {
 	assert.False(produced[0].Timestamp.IsZero())
 }
 
-// TestExploderHandleMultipleEntries pins down the CURRENT behaviour: the
-// implementation returns from inside the result loop, so only the first entry
-// of a multi-entry result is ever produced. The remaining entries are dropped.
-func TestExploderHandleMultipleEntriesOnlyFirstProduced(t *testing.T) {
+// TestExploderHandleMultipleEntriesAllProduced pins down the fixed behaviour:
+// every entry of a multi-entry result is produced as its own message, in
+// order, and no error is emitted when the handler returned none.
+func TestExploderHandleMultipleEntriesAllProduced(t *testing.T) {
 	assert := assert.New(t)
 
 	outputProducer := newMockProducer[string](nil)
@@ -71,11 +71,17 @@ func TestExploderHandleMultipleEntriesOnlyFirstProduced(t *testing.T) {
 	})
 
 	assert.NoError(err)
-	// actual behaviour: one call, one message, only the first entry
-	assert.Len(outputProducer.produced, 1)
-	assert.Len(outputProducer.produced[0], 1)
-	assert.Equal("first", outputProducer.produced[0][0].Value)
+	assert.Len(outputProducer.produced, 3)
 	assert.Empty(errorProducer.produced)
+
+	wantValues := []string{"first", "second", "third"}
+	for i, want := range wantValues {
+		assert.Len(outputProducer.produced[i], 1)
+		assert.Equal(want, outputProducer.produced[i][0].Value)
+		assert.Equal(want, outputProducer.produced[i][0].Metadata.Group)
+		assert.Equal("id-1", outputProducer.produced[i][0].Metadata.Id)
+		assert.False(outputProducer.produced[i][0].Timestamp.IsZero())
+	}
 }
 
 func TestExploderHandleErrorPresent(t *testing.T) {
@@ -169,8 +175,8 @@ func TestExploderHandleEmptyResultWithError(t *testing.T) {
 }
 
 // TestExploderHandleEntriesAndError: when the result slice is non-empty AND an
-// error is present, the result branch is taken first and the error is dropped
-// after the first entry is produced.
+// error is present, all entries are produced and the error branch is then
+// reached as well, so the error message is emitted after the entries.
 func TestExploderHandleEntriesAndError(t *testing.T) {
 	assert := assert.New(t)
 
@@ -194,9 +200,11 @@ func TestExploderHandleEntriesAndError(t *testing.T) {
 	})
 
 	assert.NoError(err)
-	assert.Len(outputProducer.produced, 1)
+	assert.Len(outputProducer.produced, 2)
 	assert.Equal("first", outputProducer.produced[0][0].Value)
-	assert.Empty(errorProducer.produced)
+	assert.Equal("second", outputProducer.produced[1][0].Value)
+	assert.Len(errorProducer.produced, 1)
+	assert.Equal("explode-error", errorProducer.produced[0][0].Value)
 }
 
 func TestExploderHandleProducerErrorPropagates(t *testing.T) {
